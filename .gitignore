@@ -1,0 +1,8 @@
+# Java output files.
+*.class
+trading/bin
+
+# intellij files.
+trading/.idea
+
+

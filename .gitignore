@@ -4,5 +4,5 @@ trading/bin
 
 # intellij files.
 trading/.idea
-
-
+*.iml
+/.idea

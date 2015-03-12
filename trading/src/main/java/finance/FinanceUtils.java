@@ -1,5 +1,6 @@
 package finance;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -12,19 +13,30 @@ public class FinanceUtils {
         return (currPrice - prevPrice)/prevPrice;
     }
 
-    public static double calcSimpleMovingAverage(List<Double> prices, int n)
+    private static double calcSimpleMovingAvg(List<Double> prices, int n, int t)
     {
-        int t = prices.size();
-        //if we want the SMA at a particular t, there must be at least t elements
+        //if we want the SMA over n prices at a particular t, n <= t
         if (t < n) return -1;
 
         int start = t-n;
         int end = t;
         double returnsSum = 0;
-        for (int i = start+1; i < end; i++)
+        for (int i = start; i < end; i++)
         {
-            returnsSum += calcReturns(prices.get(i),prices.get(i-1));
+            if (i-1 >= 0) {
+                returnsSum += calcReturns(prices.get(i), prices.get(i - 1));
+            }
         }
         return returnsSum/n;
+    }
+
+    public static List<Double> calcAllSimpleMovingAvg(List<Double> prices, int n)
+    {
+        List<Double> simpleMovingAverages = new ArrayList<>();
+        for (int t = n; t <= prices.size(); t++)
+        {
+            simpleMovingAverages.add(calcSimpleMovingAvg(prices,n,t));
+        }
+        return simpleMovingAverages;
     }
 }

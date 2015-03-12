@@ -6,3 +6,6 @@ trading/bin
 trading/.idea
 *.iml
 /.idea
+
+# Maven target folder
+trading/target

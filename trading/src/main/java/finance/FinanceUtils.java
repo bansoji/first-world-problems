@@ -13,29 +13,35 @@ public class FinanceUtils {
         return (currPrice - prevPrice)/prevPrice;
     }
 
-    private static double calcSimpleMovingAvg(List<Double> prices, int n, int t)
+    private static List<Double> calcAllReturns (List<Double> prices)
     {
-        //if we want the SMA over n prices at a particular t, n <= t
-        if (t < n) return -1;
-
-        int start = t-n;
-        int end = t;
-        double returnsSum = 0;
-        for (int i = start; i < end; i++)
+        List<Double> returns = new ArrayList<>();
+        //return at t = 0 is always 0
+        returns.add(0.);
+        for (int i = 1; i < prices.size(); i++)
         {
-            if (i-1 >= 0) {
-                returnsSum += calcReturns(prices.get(i), prices.get(i - 1));
-            }
+            returns.add(calcReturns(prices.get(i),prices.get(i-1)));
         }
-        return returnsSum/n;
+        return returns;
+    }
+
+    private static double calcSimpleMovingAvg(List<Double> returns, int n, int t)
+    {
+        double returnSum = 0;
+        for (int i = t-n+1; i <= t; i++)
+        {
+            returnSum += returns.get(i);
+        }
+        return returnSum/n;
     }
 
     public static List<Double> calcAllSimpleMovingAvg(List<Double> prices, int n)
     {
         List<Double> simpleMovingAverages = new ArrayList<>();
-        for (int t = n; t <= prices.size(); t++)
+        List<Double> returns = calcAllReturns(prices);
+        for (int t = n-1; t < prices.size(); t++)
         {
-            simpleMovingAverages.add(calcSimpleMovingAvg(prices,n,t));
+            simpleMovingAverages.add(calcSimpleMovingAvg(returns,n,t));
         }
         return simpleMovingAverages;
     }

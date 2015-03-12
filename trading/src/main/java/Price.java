@@ -1,3 +1,5 @@
+package main.java;
+
 /**
  * This class represents the price, parsed from the input file.
  */

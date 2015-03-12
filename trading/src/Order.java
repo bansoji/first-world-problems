@@ -26,6 +26,14 @@ public class Order {
         this.date = date;
     }
 
+    /**
+     * Gets the company name. This is identical to the RIC from the input file.
+     * @return a String containing the Company Name.
+     */
+    public String getCompanyName(){
+        return this.companyName;
+    }
+
 
     /**
      * Gets the price of a single share.

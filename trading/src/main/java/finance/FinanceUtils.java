@@ -16,7 +16,7 @@ public class FinanceUtils {
     private static List<Double> calcAllReturns (List<Double> prices)
     {
         List<Double> returns = new ArrayList<Double>();
-        //return at t = 0 is always 0
+        // return at t = 0 is always 0.
         returns.add(0.);
         for (int i = 1; i < prices.size(); i++)
         {

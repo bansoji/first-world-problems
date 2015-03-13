@@ -14,6 +14,7 @@ public class MomentumStrategy implements TradingStrategy {
     private ArrayList<Order> ordersGenerated;
     private static final int MOVING_AVERAGE = 4;
     private static final double THRESHOLD = 0.001;
+    private static final int VOLUME = 100; // Set by MSM Spec.
 
     public MomentumStrategy(ArrayList<Price> historicalPrices){
         this.prices = historicalPrices;
@@ -28,7 +29,7 @@ public class MomentumStrategy implements TradingStrategy {
         // This will trigger the pipeline to generate orders.
         ArrayList<Double> priceInput = new ArrayList<Double>();
         for (Price p : prices){
-            priceInput.add(p.getValue());
+            priceInput.add(p.getValue());       // TODO: This could potentially be optimised.
         }
 
         List<Double> sma = FinanceUtils.calcAllSimpleMovingAvg(priceInput, MOVING_AVERAGE);
@@ -37,9 +38,18 @@ public class MomentumStrategy implements TradingStrategy {
         List<OrderType> tradeSignals = generateTradeSignals(sma, THRESHOLD);
 
         // Generate the orders.
-        OrderType currentStatus = OrderType.NOTHING;
+        OrderType nextStatus = OrderType.BUY; // The next status to look for.
         for (int i=0; i<tradeSignals.size(); i++){
+            if (tradeSignals.get(i).equals(nextStatus)){
+                // Create an order using this ith day.
+                Price tradePrice = prices.get(i + MOVING_AVERAGE); // Offset by moving average.
+                Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(), VOLUME,
+                                    tradePrice.getDate());
+                ordersGenerated.add(o);
 
+                // Toggle the nextStatus.
+                nextStatus = nextStatus.getOppositeOrderType();
+            }
         }
     }
 

@@ -75,9 +75,9 @@ public class MomentumStrategy implements TradingStrategy {
 
         for (int i=1; i<sma.size(); i++){
             Double difference = sma.get(i) - sma.get(i-1);
-            if (difference > THRESHOLD){
+            if (difference > threshold){
                 l.add(OrderType.BUY);
-            } else if (difference < THRESHOLD * -1) {
+            } else if (difference < threshold * -1) {
                 l.add(OrderType.SELL);
             } else {
                 l.add(OrderType.NOTHING);

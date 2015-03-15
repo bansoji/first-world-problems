@@ -1,7 +1,7 @@
 package main.java;
 
 /**
- * Created by addo on 10/03/15.
+ * This enum represents an Order type.
  */
 public enum OrderType {
     BUY, SELL, NOTHING;

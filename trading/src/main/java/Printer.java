@@ -14,7 +14,7 @@ public class Printer {
     public static void printOrders(ArrayList<Order> orders, FileWriter file){
         CSVWriter writer = new CSVWriter(f, '\t');
         for(Order o : orders){
-            o.toStringArray();
+            writer.writeAll(o.toStringArray());
         }
         System.out.println("\nFinished.  File written to " + file);
 

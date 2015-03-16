@@ -78,9 +78,9 @@ public class Order {
         String[] s = new String[6];
         s[0] = this.companyName;
         s[1] = df.format(this.date);
-        s[2] = this.price;
-        s[3] = this.volume;
-        s[4] = this.price;
+        s[2] = String.valueOf(this.price);
+        s[3] = String.valueOf(this.volume);
+        s[4] = String.valueOf(this.price);
         s[5] = this.signal.getSignal(this.signal);
         return s;
     }

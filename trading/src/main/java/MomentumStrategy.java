@@ -1,6 +1,4 @@
-package main.java;
-
-import main.java.finance.FinanceUtils;
+import finance.FinanceUtils;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,5 +1,3 @@
-package main.java;
-
 /**
  * This enum represents an Order type.
  */

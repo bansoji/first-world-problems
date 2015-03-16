@@ -1,3 +1,5 @@
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -71,4 +73,15 @@ public class Order {
         return this.date;
     }
 
+    public String[] toStringArray() {
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        String[] s = new String[6];
+        s[0] = this.companyName;
+        s[1] = df.format(this.date);
+        s[2] = this.price;
+        s[3] = this.volume;
+        s[4] = this.price;
+        s[5] = this.signal.getSignal(this.signal);
+        return s;
+    }
 }

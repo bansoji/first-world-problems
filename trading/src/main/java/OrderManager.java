@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class OrderManager {
     public static void main(String[] args) throws IOException {
-        String fileName = "/Users/jasonlim/Desktop/Projects/first-world-problems/trading/resources/sampleData";
+        String fileName = args[0];
 
         TransactionReader tReader = new TransactionReader(fileName);
         ArrayList<Price> allPrices = tReader.getAllPrices();

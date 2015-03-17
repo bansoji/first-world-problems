@@ -19,8 +19,6 @@ public class MomentumStrategy implements TradingStrategy {
         this.ordersGenerated = new ArrayList<Order>();
     }
 
-    //tesst
-
     /**
      * Generate orders using this strategy.
      */

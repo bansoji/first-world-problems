@@ -28,6 +28,7 @@ public class MomentumStrategy implements TradingStrategy {
         ArrayList<Double> priceInput = new ArrayList<Double>();
         for (Price p : prices){
             priceInput.add(p.getValue());       // TODO: This could potentially be optimised.
+            System.out.println(p.getValue());
         }
 
         List<Double> sma = FinanceUtils.calcAllSimpleMovingAvg(priceInput, MOVING_AVERAGE);
@@ -35,14 +36,24 @@ public class MomentumStrategy implements TradingStrategy {
         // Calculate Trade Signals.
         List<OrderType> tradeSignals = generateTradeSignals(sma, THRESHOLD);
 
+        for (Double d : sma){
+            System.out.println(d);
+        }
+
+        for (OrderType s : tradeSignals){
+            //System.out.println(s);
+        }
+
         // Generate the orders.
         OrderType nextStatus = OrderType.BUY; // The next status to look for.
         for (int i=0; i<tradeSignals.size(); i++){
             if (tradeSignals.get(i).equals(nextStatus)){
                 // Create an order using this ith day.
                 Price tradePrice = prices.get(i + MOVING_AVERAGE); // Offset by moving average.
+                // TODO(Addo): Account for missing dates in the line above.
                 Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(), VOLUME,
                                     tradePrice.getDate());
+                System.out.println("Out");
                 ordersGenerated.add(o);
 
                 // Toggle the nextStatus.

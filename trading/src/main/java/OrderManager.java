@@ -1,5 +1,8 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Main class
@@ -12,6 +15,18 @@ public class OrderManager {
         TransactionReader tReader = new TransactionReader(fileName);
         ArrayList<Price> allPrices = tReader.getAllPrices();
         ArrayList<String> columnContents = tReader.getColumnContents(1);
+
+
+        /*
+         * Under construction - Edwin
+         */
+        Logger logger = Logger.getLogger("log");
+        FileHandler handler = new FileHandler("text.log");
+        SimpleFormatter formatter = new SimpleFormatter();
+        handler.setFormatter(formatter);
+        logger.addHandler(handler);
+
+        logger.info("Testing 1st message");
 
         //prints allPrices
         /*

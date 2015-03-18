@@ -44,7 +44,9 @@ public class OrderManager {
         handler.setFormatter(formatter);
         logger.addHandler(handler);
 
-        logger.info("Testing 1st message");
+        logger.info("Developer Team: Group 1(?)");
+        logger.info("MODULE VERSION: " + VERSION);
+        logger.info("INPUT FILE: " + args[0]);
 
         //prints allPrices
         /*

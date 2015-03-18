@@ -2,6 +2,7 @@ import finance.FinanceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * An implementation of the Momentum Strategy.
@@ -13,6 +14,8 @@ public class MomentumStrategy implements TradingStrategy {
     private static final int MOVING_AVERAGE = 4;
     private static final double THRESHOLD = 0.001;
     private static final int VOLUME = 100; // Set by MSM Spec.
+
+    private static final Logger logger = Logger.getLogger("log");
 
     public MomentumStrategy(ArrayList<Price> historicalPrices){
         this.prices = historicalPrices;
@@ -28,6 +31,7 @@ public class MomentumStrategy implements TradingStrategy {
         ArrayList<Double> priceInput = new ArrayList<Double>();
         for (Price p : prices){
             priceInput.add(p.getValue());       // TODO: This could potentially be optimised.
+            System.out.println(p.getValue());
         }
 
         List<Double> sma = FinanceUtils.calcAllSimpleMovingAvg(priceInput, MOVING_AVERAGE);
@@ -35,14 +39,24 @@ public class MomentumStrategy implements TradingStrategy {
         // Calculate Trade Signals.
         List<OrderType> tradeSignals = generateTradeSignals(sma, THRESHOLD);
 
+        for (Double d : sma){
+            System.out.println(d);
+        }
+
+        for (OrderType s : tradeSignals){
+            System.out.println(s);
+        }
+
         // Generate the orders.
         OrderType nextStatus = OrderType.BUY; // The next status to look for.
         for (int i=0; i<tradeSignals.size(); i++){
             if (tradeSignals.get(i).equals(nextStatus)){
                 // Create an order using this ith day.
-                Price tradePrice = prices.get(i + MOVING_AVERAGE); // Offset by moving average.
+                Price tradePrice = prices.get(i + MOVING_AVERAGE-1); // Get the price for that day. Offset by moving average.
+                // TODO(Addo): Account for missing dates in the line above.
                 Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(), VOLUME,
                                     tradePrice.getDate());
+                //System.out.println("Out");
                 ordersGenerated.add(o);
 
                 // Toggle the nextStatus.
@@ -75,7 +89,7 @@ public class MomentumStrategy implements TradingStrategy {
             Double difference = sma.get(i) - sma.get(i-1);
             if (difference > threshold){
                 l.add(OrderType.BUY);
-            } else if (difference < threshold * -1) {
+            } else if (difference < (threshold * -1)) {
                 l.add(OrderType.SELL);
             } else {
                 l.add(OrderType.NOTHING);

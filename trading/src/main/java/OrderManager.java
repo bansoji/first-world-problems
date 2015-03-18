@@ -2,6 +2,9 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Main class
@@ -33,6 +36,20 @@ public class OrderManager {
             profit += oo.totalTransactionValue();
         }
         System.out.println("Profitability is " + profit);
+
+
+        /*
+         * Under construction - Edwin
+         */
+        Logger logger = Logger.getLogger("log");
+        FileHandler handler = new FileHandler("text.log");
+        SimpleFormatter formatter = new SimpleFormatter();
+        handler.setFormatter(formatter);
+        logger.addHandler(handler);
+
+        logger.info("Developer Team: Group 1(?)");
+        logger.info("MODULE VERSION: " + VERSION);
+        logger.info("INPUT FILE: " + args[0]);
 
         //prints allPrices
         /*

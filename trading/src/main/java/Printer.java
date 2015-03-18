@@ -4,6 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 //test
 
@@ -11,6 +12,8 @@ import java.util.Arrays;
  * This class is responsible for producing the output file.
  */
 public class Printer {
+
+    private static final Logger logger = Logger.getLogger("log");
 
     /**
      * Appends orders to a csv file.

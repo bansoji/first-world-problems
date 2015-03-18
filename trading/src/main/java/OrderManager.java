@@ -24,13 +24,16 @@ public class OrderManager {
         TradingStrategy strategy = new MomentumStrategy(allPrices);
         strategy.generateOrders();
         ArrayList<Order> ordersGenerated = strategy.getOrders();
-        // Printer.printOrders(ordersGenerated, new FileWriter("output.csv"));
+
+        FileWriter file = new FileWriter("output.csv");
+        Printer.printOrders(ordersGenerated, file);
+        file.close();
         // ArrayList<String> columnContents = tReader.getColumnContents(1);
 
         double profit = 0.0;
         for (Order oo : ordersGenerated){
-            System.out.println(oo.getValue());
-            profit += oo.getValue();
+            System.out.println(oo.totalTransactionValue());
+            profit += oo.totalTransactionValue();
         }
         System.out.println("Profitability is " + profit);
 

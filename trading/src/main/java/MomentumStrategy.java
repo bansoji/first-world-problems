@@ -52,7 +52,7 @@ public class MomentumStrategy implements TradingStrategy {
         for (int i=0; i<tradeSignals.size(); i++){
             if (tradeSignals.get(i).equals(nextStatus)){
                 // Create an order using this ith day.
-                Price tradePrice = prices.get(i + MOVING_AVERAGE-1); // Offset by moving average.
+                Price tradePrice = prices.get(i + MOVING_AVERAGE-1); // Get the price for that day. Offset by moving average.
                 // TODO(Addo): Account for missing dates in the line above.
                 Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(), VOLUME,
                                     tradePrice.getDate());

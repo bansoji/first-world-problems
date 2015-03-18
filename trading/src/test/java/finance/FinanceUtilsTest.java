@@ -11,7 +11,7 @@ public class FinanceUtilsTest {
 
     @Test
     public void testCalcSimpleMovingAverage() {
-        List<Double> prices = new ArrayList<>();
+        List<Double> prices = new ArrayList<Double>();
         prices.add(30.);
         prices.add(30.34);
         prices.add(30.71);

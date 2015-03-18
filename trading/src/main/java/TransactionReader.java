@@ -47,7 +47,8 @@ public class TransactionReader {
                 Date date = null;
 
                 if (nextLine[8].equals("")){
-                    value = 0;
+                    // value = 0;
+                    continue;
                 } else {
                     value = Double.parseDouble(nextLine[8]);
                 }

@@ -41,7 +41,7 @@ public class MomentumStrategy implements TradingStrategy {
         }
 
         for (OrderType s : tradeSignals){
-            //System.out.println(s);
+            System.out.println(s);
         }
 
         // Generate the orders.
@@ -53,7 +53,7 @@ public class MomentumStrategy implements TradingStrategy {
                 // TODO(Addo): Account for missing dates in the line above.
                 Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(), VOLUME,
                                     tradePrice.getDate());
-                System.out.println("Out");
+                //System.out.println("Out");
                 ordersGenerated.add(o);
 
                 // Toggle the nextStatus.
@@ -86,7 +86,7 @@ public class MomentumStrategy implements TradingStrategy {
             Double difference = sma.get(i) - sma.get(i-1);
             if (difference > threshold){
                 l.add(OrderType.BUY);
-            } else if (difference < threshold * -1) {
+            } else if (difference < (threshold * -1)) {
                 l.add(OrderType.SELL);
             } else {
                 l.add(OrderType.NOTHING);

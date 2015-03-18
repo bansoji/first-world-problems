@@ -17,7 +17,7 @@ public class Printer {
      * @param file The file to write to.
      */
     public static void printOrders(ArrayList<Order> orders, FileWriter file) throws IOException {
-        CSVWriter writer = new CSVWriter(file, '\t');
+        CSVWriter writer = new CSVWriter(file, ',');
         for(Order o : orders){
             System.out.print("Order");
             writer.writeNext(o.toStringArray());

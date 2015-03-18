@@ -1,5 +1,9 @@
+import com.opencsv.CSVWriter;
+
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 //test
 
@@ -13,10 +17,11 @@ public class Printer {
      * @param orders An ArrayList of Orders.
      * @param file The file to write to.
      */
-    public static void printOrders(ArrayList<Order> orders, FileWriter file){
-        CSVWriter writer = new CSVWriter(f, '\t');
+    public static void printOrders(ArrayList<Order> orders, FileWriter file) throws IOException {
+        CSVWriter writer = new CSVWriter(file, ',');
         for(Order o : orders){
-            writer.writeAll(o.toStringArray());
+            System.out.println(Arrays.toString(o.toStringArray())); // For debugging.
+            writer.writeNext(o.toStringArray());
         }
         System.out.println("\nFinished.  File written to " + file);
 

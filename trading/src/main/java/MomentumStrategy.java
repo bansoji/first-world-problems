@@ -2,6 +2,7 @@ import finance.FinanceUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * An implementation of the Momentum Strategy.
@@ -13,6 +14,8 @@ public class MomentumStrategy implements TradingStrategy {
     private int movingAverage = 4;
     private double threshold = 0.001;
     private int volume = 100; // Set by MSM Spec.
+
+    private static final Logger logger = Logger.getLogger("log");
 
     public MomentumStrategy(ArrayList<Price> historicalPrices){
         this.prices = historicalPrices;

@@ -7,7 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-
+import java.util.logging.Logger;
 
 
 /**
@@ -16,6 +16,8 @@ import java.util.Date;
 
 public class TransactionReader {
     private CSVReader reader;
+
+    private static final Logger logger = Logger.getLogger("log");
 
     public TransactionReader(String fileName){
         try {

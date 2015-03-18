@@ -13,7 +13,8 @@ public class OrderManager {
 
     public static void main(String[] args) throws IOException {
         String fileName = args[0];
-        String paramName = args[1];
+        String paramName = args[1]; // To use, go to "Edit Configurations" and add
+        // "trading/resources/sampleData trading/resources/config.properties" to program args
 
         // Load the csv file.
         TransactionReader tReader = new TransactionReader(fileName);
@@ -28,7 +29,7 @@ public class OrderManager {
         prop.load(input);
 
         // Configure the strategy.
-        String movingAvg = prop.getProperty("movingAverage", "4");
+        String movingAvg = prop.getProperty("movingAverage", "4"); // Sets tge default values.
         String threshold = prop.getProperty("threshold", "0.001");
         String volume = prop.getProperty("volume", "100");
 

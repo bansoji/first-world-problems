@@ -1,10 +1,9 @@
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import java.util.Properties;
 
 /**
  * Main class
@@ -17,11 +16,30 @@ public class OrderManager {
 
     public static void main(String[] args) throws IOException {
         String fileName = args[0];
+        String paramName = args[1]; // To use, go to "Edit Configurations" and add
+        // "trading/resources/sampleData trading/resources/config.properties" to program args
 
+        // Load the csv file.
         TransactionReader tReader = new TransactionReader(fileName);
         ArrayList<Price> allPrices = tReader.getAllPrices();
 
         TradingStrategy strategy = new MomentumStrategy(allPrices);
+
+        // Load the properties file.
+        Properties prop = new Properties();
+        InputStream input = null;
+        input = new FileInputStream(paramName);
+        prop.load(input);
+
+        // Configure the strategy.
+        String movingAvg = prop.getProperty("movingAverage", "4"); // Sets tge default values.
+        String threshold = prop.getProperty("threshold", "0.001");
+        String volume = prop.getProperty("volume", "100");
+
+        strategy.setMovingAverage(Integer.parseInt(movingAvg));
+        strategy.setThreshold(Double.parseDouble(threshold));
+        strategy.setVolume(Integer.parseInt(volume));
+
         strategy.generateOrders();
         ArrayList<Order> ordersGenerated = strategy.getOrders();
 
@@ -36,6 +54,7 @@ public class OrderManager {
             profit += oo.totalTransactionValue();
         }
         System.out.println("Profitability is " + profit);
+        System.out.println(movingAvg);
 
 
         /*

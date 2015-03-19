@@ -11,9 +11,9 @@ public class MomentumStrategy implements TradingStrategy {
 
     private ArrayList<Price> prices;
     private ArrayList<Order> ordersGenerated;
-    private static final int MOVING_AVERAGE = 4;
-    private static final double THRESHOLD = 0.001;
-    private static final int VOLUME = 100; // Set by MSM Spec.
+    private int movingAverage = 4;
+    private double threshold = 0.001;
+    private int volume = 100; // Set by MSM Spec.
 
     private static final Logger logger = Logger.getLogger("log");
 
@@ -34,10 +34,10 @@ public class MomentumStrategy implements TradingStrategy {
             System.out.println(p.getValue());
         }
 
-        List<Double> sma = FinanceUtils.calcAllSimpleMovingAvg(priceInput, MOVING_AVERAGE);
+        List<Double> sma = FinanceUtils.calcAllSimpleMovingAvg(priceInput, movingAverage);
 
         // Calculate Trade Signals.
-        List<OrderType> tradeSignals = generateTradeSignals(sma, THRESHOLD);
+        List<OrderType> tradeSignals = generateTradeSignals(sma, threshold);
 
         for (Double d : sma){
             System.out.println(d);
@@ -52,9 +52,9 @@ public class MomentumStrategy implements TradingStrategy {
         for (int i=0; i<tradeSignals.size(); i++){
             if (tradeSignals.get(i).equals(nextStatus)){
                 // Create an order using this ith day.
-                Price tradePrice = prices.get(i + MOVING_AVERAGE-1); // Get the price for that day. Offset by moving average.
+                Price tradePrice = prices.get(i + movingAverage -1); // Get the price for that day. Offset by moving average.
                 // TODO(Addo): Account for missing dates in the line above.
-                Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(), VOLUME,
+                Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(), volume,
                                     tradePrice.getDate());
                 //System.out.println("Out");
                 ordersGenerated.add(o);
@@ -97,5 +97,18 @@ public class MomentumStrategy implements TradingStrategy {
         }
 
         return l;
+    }
+
+    @Override
+    public void setMovingAverage(int movingAverage) {
+        this.movingAverage = movingAverage;
+    }
+
+    public void setVolume(int volume) {
+        this.volume = volume;
+    }
+
+    public void setThreshold(double threshold) {
+        this.threshold = threshold;
     }
 }

@@ -21,7 +21,7 @@ h3 {
 /* Custom page header */
 .header {
   text-align: right;
-  margin-top: -40px;
+  margin-top: -45px;
 }
 /* Make the masthead heading the same height as the navigation */
 .header h1 {
@@ -79,5 +79,12 @@ h3 {
 
 #about {
   border-radius: 20px;
+    background-color: white;
+    border-color: gray;
+    color: gray;
 }
 
+#myModalLabel {
+    font-weight: 500;
+    color: gray;
+}

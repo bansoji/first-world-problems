@@ -42,14 +42,15 @@ public class OrderManager {
          * Under construction - Edwin
          */
         Logger logger = Logger.getLogger("log");
-        FileHandler handler = new FileHandler("text.log");
+        FileHandler handler = new FileHandler("logfile.log");
         SimpleFormatter formatter = new SimpleFormatter();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
 
-        logger.info("Developer Team: Group 1(?)");
-        logger.info("MODULE VERSION: " + VERSION);
-        logger.info("INPUT FILE: " + args[0]);
+        logger.info("Developer Team: Group 1\n" +
+                    "MODULE VERSION: " + VERSION + "\n" +
+                    "INPUT FILE: " + fileName + "" + "\n" +
+                    "This is a test log file.");
 
         //prints allPrices
         /*

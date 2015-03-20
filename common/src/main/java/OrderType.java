@@ -1,5 +1,3 @@
-import com.sun.deploy.util.OrderedHashSet;
-
 /**
  * This enum represents an Order type.
  */

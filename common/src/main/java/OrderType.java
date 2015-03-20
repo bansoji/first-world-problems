@@ -5,6 +5,7 @@ public enum OrderType {
     BUY, SELL, NOTHING;
 
     private OrderType opposite;
+    private OrderType symbol;
 
     static {
         BUY.opposite = SELL;
@@ -13,5 +14,15 @@ public enum OrderType {
 
     public OrderType getOppositeOrderType(){
         return opposite;
+    }
+
+    public String getSignal(OrderType t){
+        if(t == OrderType.BUY) {
+            return "B";
+        } else if (t == OrderType.SELL){
+            return "S";
+        } else {
+            return "";
+        }
     }
 }

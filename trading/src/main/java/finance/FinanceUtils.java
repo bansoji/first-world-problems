@@ -45,4 +45,9 @@ public class FinanceUtils {
         }
         return simpleMovingAverages;
     }
+
+    public static double calcProfit (double prevPrice, double currPrice, long volume)
+    {
+        return (currPrice-prevPrice)*volume;
+    }
 }

@@ -9,4 +9,10 @@ public interface TradingStrategy {
 
     public List<Order> getOrders();
 
+    public void setMovingAverage(int movingAverage);
+
+    public void setVolume(int volume);
+
+    public void setThreshold(double threshold);
+
 }

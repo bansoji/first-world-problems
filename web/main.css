@@ -77,11 +77,14 @@ h3 {
 	font-size: 90%;
 }
 
-#about {
+#custom-buttons {
     border-radius: 20px;
-    background-color: white;
-    border-color: gray;
     color: gray;
+    outline: none;
+}
+
+.modal-content {
+    border-radius: 0;
 }
 
 #myModalLabel {

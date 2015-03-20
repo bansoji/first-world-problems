@@ -1,9 +1,12 @@
-import java.io.*;
-import java.util.ArrayList;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
-import java.util.Properties;
 
 /**
  * Main class
@@ -21,7 +24,7 @@ public class OrderManager {
 
         // Load the csv file.
         TransactionReader tReader = new TransactionReader(fileName);
-        ArrayList<Price> allPrices = tReader.getAllPrices();
+        List<Price> allPrices = tReader.getAllPrices();
 
         TradingStrategy strategy = new MomentumStrategy(allPrices);
 
@@ -41,7 +44,7 @@ public class OrderManager {
         strategy.setVolume(Integer.parseInt(volume));
 
         strategy.generateOrders();
-        ArrayList<Order> ordersGenerated = strategy.getOrders();
+        List<Order> ordersGenerated = strategy.getOrders();
 
         FileWriter file = new FileWriter("output.csv");
         Printer.printOrders(ordersGenerated, file);

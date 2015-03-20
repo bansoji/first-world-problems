@@ -1,0 +1,93 @@
+/* Space out content a bit */
+body {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    font-family: 'Open Sans', sans-serif;
+    background-color:#F0F0F0 ;
+}
+/* Everything but the jumbotron gets side spacing for mobile first views */
+.header,
+.marketing,
+.footer {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+h3 {
+    color: grey;
+    margin-top: -10px;
+}
+
+/* Custom page header */
+.header {
+    text-align: right;
+    margin-top: -45px;
+}
+/* Make the masthead heading the same height as the navigation */
+.header h1 {
+    padding-bottom: 20px;
+    padding-top: 20px;
+    margin-top: 0;
+    margin-bottom: 0;
+    line-height: 40px;
+    font-weight: bold;
+}
+
+/* Custom page footer */
+.footer {
+    padding-top: 19px;
+    color: #777;
+    border-top: 1px solid #e5e5e5;
+}
+
+/* Customize container */
+@media (min-width: 768px) {
+    .container {
+        max-width: 900px;
+        text-align: center;
+    }
+}
+.container-narrow > hr {
+    margin: 30px 0;
+}
+
+#latest-release { 
+	padding: 25px;
+	padding-left: 25%;
+	padding-right: 25%;
+    border-radius: 0;
+}
+
+#header-panel{
+	padding: 20px 0 30px 0;
+	margin-bottom: 10px;
+    border-radius: 0;
+}
+
+#internal-panel{
+	padding:5% 6% 3% 6%;
+	margin-bottom: 5px;
+    border-radius: 0;
+}
+
+#changelog{
+	height: 400px;
+	overflow-y:scroll;
+	font-family: 'Monaco', 'Consolas';
+	font-size: 90%;
+}
+
+#custom-buttons {
+    border-radius: 20px;
+    color: gray;
+    outline: none;
+}
+
+.modal-content {
+    border-radius: 0;
+}
+
+#myModalLabel {
+    font-weight: 500;
+    color: gray;
+}

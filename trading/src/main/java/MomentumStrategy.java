@@ -9,15 +9,15 @@ import java.util.logging.Logger;
  */
 public class MomentumStrategy implements TradingStrategy {
 
-    private ArrayList<Price> prices;
-    private ArrayList<Order> ordersGenerated;
+    private List<Price> prices;
+    private List<Order> ordersGenerated;
     private int movingAverage = 4;
     private double threshold = 0.001;
     private int volume = 100; // Set by MSM Spec.
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public MomentumStrategy(ArrayList<Price> historicalPrices){
+    public MomentumStrategy(List<Price> historicalPrices){
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
     }
@@ -28,7 +28,7 @@ public class MomentumStrategy implements TradingStrategy {
     @Override
     public void generateOrders() {
         // This will trigger the pipeline to generate orders.
-        ArrayList<Double> priceInput = new ArrayList<Double>();
+        List<Double> priceInput = new ArrayList<Double>();
         for (Price p : prices){
             priceInput.add(p.getValue());       // TODO: This could potentially be optimised.
             System.out.println(p.getValue());
@@ -70,7 +70,7 @@ public class MomentumStrategy implements TradingStrategy {
      * @return an ArrayList of Orders.
      */
     @Override
-    public ArrayList<Order> getOrders() {
+    public List<Order> getOrders() {
         return ordersGenerated;
     }
 

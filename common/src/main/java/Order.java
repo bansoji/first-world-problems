@@ -69,6 +69,11 @@ public class Order {
         }
     }
 
+    public OrderType getOrderType()
+    {
+        return signal;
+    }
+
     /**
      * Returns the Order date.
      * @return a Date object corresponding to the date of the file.
@@ -78,7 +83,7 @@ public class Order {
     }
 
     public String[] toStringArray() {
-        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+        DateFormat df = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss");
         String[] s = new String[6];
         s[0] = this.companyName;
         s[1] = df.format(this.date);

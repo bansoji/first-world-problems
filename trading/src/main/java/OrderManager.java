@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -19,11 +20,11 @@ public class OrderManager {
         String fileName = args[0];
 
         TransactionReader tReader = new TransactionReader(fileName);
-        ArrayList<Price> allPrices = tReader.getAllPrices();
+        List<Price> allPrices = tReader.getAllPrices();
 
         TradingStrategy strategy = new MomentumStrategy(allPrices);
         strategy.generateOrders();
-        ArrayList<Order> ordersGenerated = strategy.getOrders();
+        List<Order> ordersGenerated = strategy.getOrders();
 
         FileWriter file = new FileWriter("output.csv");
         Printer.printOrders(ordersGenerated, file);

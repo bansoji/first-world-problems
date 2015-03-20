@@ -1,6 +1,7 @@
 # Java output files.
 *.class
 trading/bin
+out
 
 # intellij files.
 trading/.idea
@@ -9,3 +10,7 @@ trading/.idea
 
 # Maven target folder
 trading/target
+
+# extra output files
+*.csv
+*.log

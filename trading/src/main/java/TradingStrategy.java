@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This file provides an interface for a Trading Strategy.
@@ -7,6 +7,6 @@ public interface TradingStrategy {
 
     public void generateOrders();
 
-    public ArrayList<Order> getOrders();
+    public List<Order> getOrders();
 
 }

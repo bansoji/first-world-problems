@@ -30,7 +30,7 @@ public class OrderManager {
         handler.setFormatter(formatter);
         logger.addHandler(handler);
 
-        logger.info("====== Project Name ========\n" +
+        logger.info("====== Project Name =========\n" +
                 "Developer Team: Group 1\n" +
                 "MODULE VERSION: " + VERSION + "\n" +
                 "INPUT FILE: " + fileName);

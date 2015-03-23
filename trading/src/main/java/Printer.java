@@ -23,7 +23,7 @@ public class Printer {
     public static void printOrders(List<Order> orders, FileWriter file) throws IOException {
         CSVWriter writer = new CSVWriter(file, ',');
         for(Order o : orders){
-            System.out.println(Arrays.toString(o.toStringArray())); // For debugging.
+            //System.out.println(Arrays.toString(o.toStringArray())); // For debugging.
             writer.writeNext(o.toStringArray());
         }
         System.out.println("\nFinished.  File written to " + file);

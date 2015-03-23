@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 /**
- * Main class
+ * Main class.
  */
 
 public class OrderManager {
@@ -21,6 +21,9 @@ public class OrderManager {
         String fileName = args[0];
         String paramName = args[1]; // To use, go to "Edit Configurations" and add
         // "trading/resources/sampleData trading/resources/config.properties" to program args
+
+        // Start the timer.
+        long startTime = System.currentTimeMillis();
 
         // Load the csv file.
         TransactionReader tReader = new TransactionReader(fileName);
@@ -43,21 +46,20 @@ public class OrderManager {
         strategy.setThreshold(Double.parseDouble(threshold));
         strategy.setVolume(Integer.parseInt(volume));
 
+        // Run the strategy module.
         strategy.generateOrders();
         List<Order> ordersGenerated = strategy.getOrders();
 
         FileWriter file = new FileWriter("output.csv");
         Printer.printOrders(ordersGenerated, file);
         file.close();
-        // ArrayList<String> columnContents = tReader.getColumnContents(1);
 
-        double profit = 0.0;
-        for (Order oo : ordersGenerated){
-            System.out.println(oo.totalTransactionValue());
-            profit += oo.totalTransactionValue();
-        }
-        System.out.println("Profitability is " + profit);
-        System.out.println(movingAvg);
+        long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+        System.out.println("Time passed = " + elapsedTime + "ms");
+
+
+        // ArrayList<String> columnContents = tReader.getColumnContents(1);
 
 
         /*
@@ -73,15 +75,29 @@ public class OrderManager {
                     "MODULE VERSION: " + VERSION + "\n" +
                     "INPUT FILE: " + fileName + "" + "\n" +
                     "This is a test log file.");
+        logger.info("Time Elapsed : " + elapsedTime + "ms");
 
+
+    }
+
+    private static void printProfitability(List<Order> ordersGenerated){
+        double profit = 0.0;
+        for (Order oo : ordersGenerated){
+            System.out.println(oo.totalTransactionValue());
+            profit += oo.totalTransactionValue();
+        }
+        System.out.println("Profitability is " + profit);
+    }
+
+    private static void printPrices(List<Price> allPrices){
         //prints allPrices
-        /*
+
         for (Price price: allPrices){
             System.out.print(price.getCompanyName() + " ");
             System.out.print(price.getValue() + " ");
             System.out.print(price.getDate() + "\n");
         }
-        */
+
 
         //prints columnContents
         /*
@@ -90,5 +106,4 @@ public class OrderManager {
         }
         */
     }
-
 }

@@ -24,7 +24,7 @@
 <body>
 <div class="container">
     <div class="panel panel-default" id="header-panel">
-        <h1 class="text-muted">First World Problems</h1>
+        <h1 class="text-muted">Buy Hard</h1>
         <div class="header">
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-default" id="custom-buttons" data-toggle="modal" data-target="#myModal">
@@ -80,12 +80,23 @@
             </div>
             <div class="panel-body" id="changelog">
                 <p>
-                    [dummy] is a black-box module that provides customers with orders that yield the highest profit.
+                    <b>Buy Hard</b> is a black-box module that provides customers with orders that yield the highest profit.
                     <br><br>
                     <h4>Getting Started</h4>
                     ----------------------------------
-                    <br><br>
+                    <h5>## Standalone ##</h5>
 
+                    Running in Standalone Mode
+                    <br>
+                    From Terminal, run using<br><br>
+                    <div class="well well-sm"> java -jar Trading.jar input.csv config.properties</div>
+                    <h5>## Config ##</h5>
+                    The config file is an optional file that can be used to configure the trading strategy.
+                    <br>
+                    It follows the conventional .properties file in java.<br><br>
+                    Format of:<br><br>
+                    <div class="well well-sm"> key=property</div>
+                    per line.
 
                 </p>
             </div>

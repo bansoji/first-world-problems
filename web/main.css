@@ -86,6 +86,10 @@ h3 {
 .modal-content {
     border-radius: 0;
 }
+.modal-content h4{
+    color: grey;
+    padding-bottom: 10px;
+}
 
 #myModalLabel {
     font-weight: 500;

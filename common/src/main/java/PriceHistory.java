@@ -15,19 +15,19 @@ public class PriceHistory {
 */
     public void pushPrice(String company, Price price){
         if (allPrices.containsKey(company)){
-            List current = allPrices.get(company);
+            List<Price> current = allPrices.get(company);
             current.add(price);
         } else {
-            List current = new ArrayList<Price>();
+            List<Price> current = new ArrayList<Price>();
             current.add(price);
             allPrices.put(company, current);
         }
-        List current = allPrices.get(company);
+        List<Price> current = allPrices.get(company);
         current.add(price);
     }
 
-    public List getCompanyHistory(String company){
-        List result = null;
+    public List<Price> getCompanyHistory(String company){
+        List<Price> result = null;
         if (allPrices.containsKey(company)){
             result = allPrices.get(company);
         }

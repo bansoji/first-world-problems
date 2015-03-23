@@ -12,19 +12,19 @@ import java.util.Date;
 import java.util.logging.Logger;
 
 /**
- * This class reads an input CSV file and outputs its contents as an ArrayList
+ * This class reads an input CSV file and outputs its contents as an ArrayList.
  */
 
 public class TransactionReader {
     private CSVReader reader;
     private PriceHistory allPrices;
 
-    //column numbers for input prices data file
+    //Column numbers for input prices data file.
     private static final int COMPANY_NAME = 0;
     private static final int DATE = 1;
     private static final int PRICE = 8;
 
-    //column numbers for output order prices data file
+    //Column numbers for output order prices data file.
     private static final int ORDER_COMPANY_NAME = 0;
     private static final int ORDER_DATE = 1;
     private static final int ORDER_PRICE = 2;
@@ -44,7 +44,7 @@ public class TransactionReader {
 
     public void readAllPrices() {
         try {
-            reader.readNext();     //Skip first line
+            reader.readNext();     //Skip first line.
             String[] nextLine;
             while ((nextLine = reader.readNext()) != null) {
                 String companyName = nextLine[COMPANY_NAME];
@@ -52,8 +52,7 @@ public class TransactionReader {
                 Date date = null;
 
                 if (nextLine[PRICE].equals("")) {
-                    // no value
-                    continue;
+                    continue;       //No value.
                 }
 
                 value = Double.parseDouble(nextLine[PRICE]);
@@ -74,8 +73,8 @@ public class TransactionReader {
         }
     }
 
-    public List getCompanyPrices(String company){
-        List companyHistory = allPrices.getCompanyHistory(company);
+    public List<Price> getCompanyPrices(String company){
+        List<Price> companyHistory = allPrices.getCompanyHistory(company);
         return companyHistory;
     }
 
@@ -83,7 +82,48 @@ public class TransactionReader {
         allPrices.printCompanyHistory(company);
     }
 
-    public HashMap<String, ArrayList> getAllPrices(){
+    public HashMap<String, List<Price>> getAllPrices(){
         return allPrices.getAllPrices();
+    }
+
+    public List<Order> getAllOrders() {
+        List<Order> allOrders = new ArrayList<Order>();
+
+        //Read the remaining lines and store data into ArrayList.
+        try {
+            String[] nextLine;
+            while ((nextLine = reader.readNext()) != null) {
+                String companyName = nextLine[ORDER_COMPANY_NAME];
+                double value;
+                Date date = null;
+
+                if (nextLine[ORDER_PRICE].equals("")) {
+                    continue;       // No value.
+                }
+                value = Double.parseDouble(nextLine[ORDER_PRICE]);
+
+                try {
+                    DateFormat df = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss");
+                    date = df.parse(nextLine[ORDER_DATE]);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                OrderType type;
+                if (nextLine[ORDER_SIGNAL].equals("B")) {
+                    type = OrderType.BUY;
+                } else {
+                    type = OrderType.SELL;
+                }
+
+                int volume = Integer.parseInt(nextLine[ORDER_VOLUME]);
+                Order order = new Order(type, companyName, value, volume, date);
+                allOrders.add(order);
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return allOrders;
     }
 }

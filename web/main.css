@@ -14,7 +14,12 @@ body {
     padding-right: 15px;
     padding-left: 15px;
 }
+h1 {
+    color: gray;
+    font-size: 60px;
+    margin: 0;
 
+}
 h3 {
     color: grey;
     margin-top: -10px;

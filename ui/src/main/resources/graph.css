@@ -2,15 +2,10 @@
     -fx-stroke: #3915AE;
 }
 
-.price {
+.info-box {
+    -fx-text-alignment: center;
+    -fx-background-insets: -8;
+    -fx-font-size: 12;
     -fx-background-color: #3915AE, white;
-}
-
-.buy {
-    -fx-background-color: #1CD822, white;
-}
-
-.sell {
-    -fx-background-color: #D8351C, white;
 }
 

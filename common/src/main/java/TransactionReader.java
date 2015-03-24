@@ -96,7 +96,7 @@ public class TransactionReader {
                 value = Double.parseDouble(nextLine[ORDER_PRICE]);
 
                 try {
-                    DateFormat df = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss");
+                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
                     date = df.parse(nextLine[ORDER_DATE]);
                 } catch (ParseException e) {
                     e.printStackTrace();

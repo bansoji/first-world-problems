@@ -41,11 +41,10 @@ public class InfoBox extends StackPane {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy");
         final Label label = new Label(dateFormat.format(date) + "\n" +
                                     "Price: $" + value);
-        label.getStyleClass().addAll("default-color0", "chart-line-symbol", "chart-series-line");
-        label.setStyle("-fx-font-size: 12;");
+        label.getStyleClass().addAll("info-box");
 
         if (type.equals(InfoBoxType.Price)) {
-            label.setTextFill(Color.DARKGRAY);
+            label.setTextFill(Color.BLACK);
         } else if (type.equals(InfoBoxType.BuyOrder)) {
             label.setTextFill(Color.FORESTGREEN);
         } else {

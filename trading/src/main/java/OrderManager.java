@@ -19,8 +19,8 @@ public class OrderManager {
 
     public static void main(String[] args) throws IOException {
         String fileName = args[0];
-        String paramName = args[1]; // To use, go to "Edit Configurations" and add
-        // "trading/resources/sampleData trading/resources/config.properties" to program args
+        String paramName = args[1]; // To use, go to "Run -> Edit Configurations" and add
+        // "common/src/main/resources/sampleData trading/resources/config.properties" to program args
 
         ///////////////////// Initialisation. ///////////////////////////////
         // Logger initialisation.

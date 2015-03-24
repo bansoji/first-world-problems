@@ -35,11 +35,11 @@ public class TransactionReader {
 
     public TransactionReader(String fileName) {
         try {
-            reader = new CSVReader(new FileReader(fileName));
+            this.reader = new CSVReader(new FileReader(fileName));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        PriceHistory allPrices = new PriceHistory();
+        this.allPrices = new PriceHistory();
     }
 
     public void readAllPrices() {
@@ -65,7 +65,7 @@ public class TransactionReader {
                 }
 
                 Price newPrice = new Price(companyName, value, date);
-                allPrices.pushPrice(companyName, newPrice);
+                allPrices.addPrice(companyName, newPrice);
             }
             reader.close();
         } catch (IOException e) {
@@ -74,12 +74,7 @@ public class TransactionReader {
     }
 
     public List<Price> getCompanyPrices(String company){
-        List<Price> companyHistory = allPrices.getCompanyHistory(company);
-        return companyHistory;
-    }
-
-    public void printCompanyPrices(String company){
-        allPrices.printCompanyHistory(company);
+        return allPrices.getCompanyHistory(company);
     }
 
     public HashMap<String, List<Price>> getAllPrices(){
@@ -126,4 +121,9 @@ public class TransactionReader {
         }
         return allOrders;
     }
+
+    public void printCompanyPrices(String company){
+        allPrices.printCompanyHistory(company);
+    }
+
 }

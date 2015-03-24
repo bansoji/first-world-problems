@@ -20,13 +20,15 @@ public class OrderManager {
     public static void main(String[] args) throws IOException {
         String fileName = args[0];
         String paramName = args[1]; // To use, go to "Edit Configurations" and add
-        // "trading/resources/sampleData trading/resources/config.properties" to program args
+        // "trading/resources/sampleData trading/resources/config.properties" to program args.
 
         // Load the csv file.
         TransactionReader tReader = new TransactionReader(fileName);
-        List<Price> allPrices = tReader.getAllPrices();
+        tReader.readAllPrices();
+        List companyHistory = tReader.getCompanyPrices("BHP.AX");
+        //tReader.printCompanyPrices("BHP.AX");
 
-        TradingStrategy strategy = new MomentumStrategy(allPrices);
+        TradingStrategy strategy = new MomentumStrategy(companyHistory);
 
         // Load the properties file.
         Properties prop = new Properties();
@@ -35,7 +37,7 @@ public class OrderManager {
         prop.load(input);
 
         // Configure the strategy.
-        String movingAvg = prop.getProperty("movingAverage", "4"); // Sets tge default values.
+        String movingAvg = prop.getProperty("movingAverage", "4"); // Sets the default values.
         String threshold = prop.getProperty("threshold", "0.001");
         String volume = prop.getProperty("volume", "100");
 
@@ -49,7 +51,6 @@ public class OrderManager {
         FileWriter file = new FileWriter("output.csv");
         Printer.printOrders(ordersGenerated, file);
         file.close();
-        // ArrayList<String> columnContents = tReader.getColumnContents(1);
 
         double profit = 0.0;
         for (Order oo : ordersGenerated){
@@ -58,7 +59,6 @@ public class OrderManager {
         }
         System.out.println("Profitability is " + profit);
         System.out.println(movingAvg);
-
 
         /*
          * Under construction - Edwin
@@ -73,22 +73,6 @@ public class OrderManager {
                     "MODULE VERSION: " + VERSION + "\n" +
                     "INPUT FILE: " + fileName + "" + "\n" +
                     "This is a test log file.");
-
-        //prints allPrices
-        /*
-        for (Price price: allPrices){
-            System.out.print(price.getCompanyName() + " ");
-            System.out.print(price.getValue() + " ");
-            System.out.print(price.getDate() + "\n");
-        }
-        */
-
-        //prints columnContents
-        /*
-        for (String line:columnContents){
-            System.out.println(line);
-        }
-        */
     }
 
 }

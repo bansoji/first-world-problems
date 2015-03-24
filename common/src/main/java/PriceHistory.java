@@ -3,6 +3,7 @@ import java.util.*;
 /**
  * This class records the price history for all companies.
  */
+
 public class PriceHistory {
     private HashMap<String, List<Price>> allPrices;
 
@@ -10,10 +11,10 @@ public class PriceHistory {
         this.allPrices = new HashMap<String, List<Price>>();
     }
 
-/*  Given a hashmap company key, this method appends a price to the end of its
+/*  Given a hashmap's company key, this method appends a price to the end of the hashmap's
 *   corresponding ArrayList value.
 */
-    public void pushPrice(String company, Price price){
+    public void addPrice(String company, Price price){
         if (allPrices.containsKey(company)){
             List<Price> current = allPrices.get(company);
             current.add(price);
@@ -22,8 +23,6 @@ public class PriceHistory {
             current.add(price);
             allPrices.put(company, current);
         }
-        List<Price> current = allPrices.get(company);
-        current.add(price);
     }
 
     public List<Price> getCompanyHistory(String company){
@@ -34,6 +33,10 @@ public class PriceHistory {
         return result;
     }
 
+    public HashMap<String, List<Price>> getAllPrices(){
+        return allPrices;
+    }
+
     public void printCompanyHistory(String company){
         List<Price> current = allPrices.get(company);
         if (current != null) {
@@ -41,14 +44,11 @@ public class PriceHistory {
                 String companyName = price.getCompanyName();
                 String companyDate = price.getDate().toString();
                 String companyValue = String.valueOf(price.getValue());
-                System.out.println(companyName + companyDate + companyValue);
+                System.out.println(companyName + " " + companyDate + " " + companyValue);
             }
         } else {
             System.out.println("There is no company to print.");
         }
     }
 
-    public HashMap<String, List<Price>> getAllPrices(){
-        return allPrices;
-    }
 }

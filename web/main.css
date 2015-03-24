@@ -3,7 +3,9 @@ body {
     padding-top: 20px;
     padding-bottom: 20px;
     font-family: 'Open Sans', sans-serif;
-    background-color:#F0F0F0 ;
+    background-image: url(http://www.stockmarketchartingprogramsanddataspecialists.info/images/slide1.jpg);
+    background-repeat: no-repeat;
+
 }
 /* Everything but the jumbotron gets side spacing for mobile first views */
 .header,

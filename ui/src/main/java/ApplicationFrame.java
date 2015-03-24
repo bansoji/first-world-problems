@@ -101,7 +101,8 @@ public class ApplicationFrame extends JFrame {
                         reader.readAllPrices();
                         List<Price> prices = reader.getCompanyPrices("BHP.AX");
                         reader = new TransactionReader(OUTPUT_FILE_PATH);
-                        List<Order> orders = reader.getAllOrders();
+                        reader.readAllOrders();
+                        List<Order> orders = reader.getCompanyOrders("BHP.AX");
                         loadGraph(prices,orders);
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null,

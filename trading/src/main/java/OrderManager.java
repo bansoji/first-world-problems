@@ -26,7 +26,6 @@ public class OrderManager {
         TransactionReader tReader = new TransactionReader(fileName);
         tReader.readAllPrices();
         List companyHistory = tReader.getCompanyPrices("BHP.AX");
-        //tReader.printCompanyPrices("BHP.AX");
 
         TradingStrategy strategy = new MomentumStrategy(companyHistory);
 

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Date;
@@ -18,6 +17,7 @@ import java.util.logging.Logger;
 public class TransactionReader {
     private CSVReader reader;
     private PriceHistory allPrices;
+    private OrderHistory allOrders;
 
     //Column numbers for input prices data file.
     private static final int COMPANY_NAME = 0;
@@ -40,6 +40,7 @@ public class TransactionReader {
             e.printStackTrace();
         }
         this.allPrices = new PriceHistory();
+        this.allOrders = new OrderHistory();
     }
 
     public void readAllPrices() {
@@ -65,7 +66,7 @@ public class TransactionReader {
                 }
 
                 Price newPrice = new Price(companyName, value, date);
-                allPrices.addPrice(companyName, newPrice);
+                allPrices.add(companyName, newPrice);
             }
             reader.close();
         } catch (IOException e) {
@@ -73,32 +74,22 @@ public class TransactionReader {
         }
     }
 
-    public List<Price> getCompanyPrices(String company){
-        return allPrices.getCompanyHistory(company);
-    }
-
-    public HashMap<String, List<Price>> getAllPrices(){
-        return allPrices.getAllPrices();
-    }
-
-    public List<Order> getAllOrders() {
-        List<Order> allOrders = new ArrayList<Order>();
-
+    public void readAllOrders(){
         //Read the remaining lines and store data into ArrayList.
         try {
             String[] nextLine;
-            while ((nextLine = reader.readNext()) != null) {
+            while ((nextLine = reader.readNext()) != null){
                 String companyName = nextLine[ORDER_COMPANY_NAME];
                 double value;
                 Date date = null;
 
-                if (nextLine[ORDER_PRICE].equals("")) {
-                    continue;       // No value.
+                if (nextLine[ORDER_PRICE].equals("")){
+                    continue;       //No value.
                 }
                 value = Double.parseDouble(nextLine[ORDER_PRICE]);
 
                 try {
-                    DateFormat df = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss");
+                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
                     date = df.parse(nextLine[ORDER_DATE]);
                 } catch (ParseException e) {
                     e.printStackTrace();
@@ -113,17 +104,36 @@ public class TransactionReader {
 
                 int volume = Integer.parseInt(nextLine[ORDER_VOLUME]);
                 Order order = new Order(type, companyName, value, volume, date);
-                allOrders.add(order);
+                allOrders.add(companyName, order);
             }
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return allOrders;
+
+    }
+
+    public List<Price> getCompanyPrices(String company){
+        return allPrices.getCompanyHistory(company);
+    }
+
+    public List<Order> getCompanyOrders(String company){
+        return allOrders.getCompanyHistory(company);
+    }
+
+    public HashMap<String, List<Price>> getAllPrices(){
+        return allPrices.getAll();
+    }
+
+    public HashMap<String, List<Order>> getAllOrders() {
+        return allOrders.getAll();
     }
 
     public void printCompanyPrices(String company){
         allPrices.printCompanyHistory(company);
     }
 
+    public void printCompanyOrders(String company){
+        allOrders.printCompanyHistory(company);
+    }
 }

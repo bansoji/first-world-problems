@@ -20,13 +20,6 @@ public class InfoBox extends StackPane {
     }
     public InfoBox(double value, Date date, InfoBoxType type) {
         setPrefSize(10, 10);
-        if (type.equals(InfoBoxType.BuyOrder)) {
-            getStyleClass().add("chart-line-symbol-buy");
-        } else if (type.equals(InfoBoxType.SellOrder)) {
-            getStyleClass().add("chart-line-symbol-sell");
-        } else {
-            getStyleClass().add("chart-line-symbol-price");
-        }
         final Label label = createDataThresholdLabel(value, date, type);
 
         setOnMouseEntered(new EventHandler<MouseEvent>() {

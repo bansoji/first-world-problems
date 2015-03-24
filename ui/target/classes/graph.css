@@ -2,6 +2,10 @@
     -fx-stroke: #3915AE;
 }
 
+.chart-line-symbol {
+    -fx-stroke: #3915AE;
+}
+
 .price {
     -fx-background-color: #3915AE, white;
 }

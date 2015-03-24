@@ -12,7 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -23,8 +22,8 @@ import java.util.List;
 public class ApplicationFrame extends JFrame {
 
     //TODO Remove values - only for TESTING
-    private String strategyFile = "/Users/calvin/Desktop/SENG Project/first-world-problems/out/artifacts/trading_jar/trading.jar";
-    private String dataFile = "/Users/calvin/Desktop/SENG Project/first-world-problems/common/src/main/resources/sampleDataSmall";
+    private String strategyFile = "out/artifacts/trading_jar/trading.jar";
+    private String dataFile = "common/src/main/resources/sampleDataSmall";
     private String paramFile = "";
 
     private JFXPanel graph;
@@ -37,8 +36,6 @@ public class ApplicationFrame extends JFrame {
     public ApplicationFrame()
     {
         super();
-        URL theURL = this.getClass().getResource("graph.css");
-        System.out.println(theURL.toString());
         setSize(Toolkit.getDefaultToolkit().getScreenSize());
         setMinimumSize(new Dimension (1024,768));
         setLayout(new BorderLayout());
@@ -198,12 +195,15 @@ public class ApplicationFrame extends JFrame {
                         if (currOrder.getOrderDate().equals(prices.get(i).getDate())) {
                             if (currOrder.getOrderType().equals(OrderType.BUY)) {
                                 data.setNode(new InfoBox(currOrder.getPrice(), currOrder.getOrderDate(), InfoBox.InfoBoxType.BuyOrder));
+                                data.getNode().setStyle("-fx-background-color: green, white");
                             } else {
                                 data.setNode(new InfoBox(currOrder.getPrice(), currOrder.getOrderDate(), InfoBox.InfoBoxType.SellOrder));
+                                data.getNode().setStyle("-fx-background-color: red, white");
                             }
                             //if no order is placed at this price
                         } else if (currOrder.getOrderDate().after(prices.get(i).getDate())) {
                             data.setNode(new InfoBox(prices.get(i).getValue(), prices.get(i).getDate(), InfoBox.InfoBoxType.Price));
+                            data.getNode().setStyle("-fx-background-color: #3915AE, white");
                         } else if (orderIterator.hasNext()) {
                             currOrder = orderIterator.next();
                             continue;

@@ -83,7 +83,7 @@ public class Order {
     }
 
     public String[] toStringArray() {
-        DateFormat df = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss");
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         String[] s = new String[6];
         s[0] = this.companyName;
         s[1] = df.format(this.date);

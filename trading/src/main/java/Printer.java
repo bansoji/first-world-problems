@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-//test
-
 /**
  * This class is responsible for producing the output file.
  */
@@ -20,10 +18,10 @@ public class Printer {
      * @param orders An ArrayList of Orders.
      * @param file The file to write to.
      */
-    public static void printOrders(List<Order> orders, FileWriter file) throws IOException {
+    public static void printOrders(List<Order> orders, FileWriter file) {
         CSVWriter writer = new CSVWriter(file, ',');
         for(Order o : orders){
-            System.out.println(Arrays.toString(o.toStringArray())); // For debugging.
+            //System.out.println(Arrays.toString(o.toStringArray())); // For debugging.
             writer.writeNext(o.toStringArray());
         }
         System.out.println("\nFinished.  File written to " + file);

@@ -19,7 +19,7 @@ public class Printer {
      * @param file The file to write to.
      */
     public static void printOrders(List<Order> orders, FileWriter file) {
-        CSVWriter writer = new CSVWriter(file, ',');
+        CSVWriter writer = new CSVWriter(file, ',', CSVWriter.NO_QUOTE_CHARACTER);
         for(Order o : orders){
             //System.out.println(Arrays.toString(o.toStringArray())); // For debugging.
             writer.writeNext(o.toStringArray());

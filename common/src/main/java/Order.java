@@ -89,7 +89,7 @@ public class Order {
         s[1] = df.format(this.date);
         s[2] = String.valueOf(this.price);
         s[3] = String.valueOf(this.volume);
-        s[4] = String.valueOf(this.price);
+        s[4] = String.valueOf(this.getValue());
         s[5] = this.signal.getSignal(this.signal);
         return s;
     }

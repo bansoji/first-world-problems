@@ -15,7 +15,7 @@ import java.util.logging.SimpleFormatter;
 public class OrderManager {
 
     // Some class constants.
-    public static final String VERSION = "0.6.0";
+    public static final String VERSION = "0.9.0";
 
     public static void main(String[] args) throws IOException {
         String fileName = args[0];
@@ -30,7 +30,7 @@ public class OrderManager {
         handler.setFormatter(formatter);
         logger.addHandler(handler);
 
-        logger.info("====== Project Name =========\n" +
+        logger.info("====== Buy Hard =========\n" +
                 "Developer Team: Group 1\n" +
                 "MODULE VERSION: " + VERSION + "\n" +
                 "INPUT FILE: " + fileName);

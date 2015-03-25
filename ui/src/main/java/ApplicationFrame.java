@@ -1,9 +1,5 @@
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.XYChart;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,8 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -28,7 +22,9 @@ public class ApplicationFrame extends JFrame {
 
     private JFXPanel graph;
 
-    private static String APPLICATION_TITLE = "Trading Platform by Group 1";
+    private static String APPLICATION_TITLE = "Trading Platform";
+    private static String VERSION_NUMBER = "1.0";
+    private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
     private static String FOOTER_MESSAGE = "Get the latest release at our website.";
 
     private static String OUTPUT_FILE_PATH = "output.csv";
@@ -36,6 +32,7 @@ public class ApplicationFrame extends JFrame {
     public ApplicationFrame()
     {
         super();
+        getContentPane().setBackground(Color.WHITE);
         setSize(Toolkit.getDefaultToolkit().getScreenSize());
         setMinimumSize(new Dimension (1024,768));
         setLayout(new BorderLayout());
@@ -48,13 +45,29 @@ public class ApplicationFrame extends JFrame {
     private void initHeader()
     {
         JPanel header = new JPanel();
+        header.setBackground(Color.WHITE);
         header.setLayout(new BoxLayout(header,BoxLayout.Y_AXIS));
 
+//        try {
+//            GraphicsEnvironment ge =
+//                    GraphicsEnvironment.getLocalGraphicsEnvironment();
+//            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("ui/src/main/resources/fonts.Open_Sans/OpenSans-Light.ttf")));
+//        } catch (IOException|FontFormatException e) {
+//            //Handle exception
+//            System.out.println(e.getMessage());
+//        }
         JLabel title = new JLabel(APPLICATION_TITLE);
-        title.setFont(header.getFont().deriveFont(28f));
+//        Font font = new Font("Open Sans Light", Font.PLAIN, 28);
+        title.setFont(title.getFont().deriveFont(28f));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        title.setBorder(new EmptyBorder(50,0,50,0));
+        title.setBorder(new EmptyBorder(50,0,5,0));
         header.add(title);
+
+        JLabel appInfo = new JLabel(APPLICATION_INFO);
+        appInfo.setFont(appInfo.getFont().deriveFont(10f));
+        appInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        appInfo.setBorder(new EmptyBorder(0,0,30,0));
+        header.add(appInfo);
 
         header.add(new JSeparator(SwingConstants.HORIZONTAL));
         add(header, BorderLayout.NORTH);
@@ -63,22 +76,24 @@ public class ApplicationFrame extends JFrame {
     private void initBody()
     {
         final JPanel body = new JPanel();
+        body.setBackground(Color.WHITE);
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
 
         JPanel fileChoosers = new JPanel();
+        fileChoosers.setBackground(Color.WHITE);
         fileChoosers.setLayout(new FlowLayout(FlowLayout.LEADING));
         //Choose csv file button
-        FileChooser dataFileChooser = new FileChooser("Choose CSV file");
+        FileChooser dataFileChooser = new FileChooser("Choose CSV");
         addFileChooserListener(dataFileChooser);
         fileChoosers.add(dataFileChooser);
 
         //Choose strategy module file button
-        FileChooser strategyFileChooser = new FileChooser("Choose strategy file");
+        FileChooser strategyFileChooser = new FileChooser("Choose strategy");
         addFileChooserListener(strategyFileChooser);
         fileChoosers.add(strategyFileChooser);
 
         //Choose parameters file button
-        FileChooser paramFileChooser = new FileChooser("Choose parameters file");
+        FileChooser paramFileChooser = new FileChooser("Choose parameters");
         addFileChooserListener(paramFileChooser);
         fileChoosers.add(paramFileChooser);
 
@@ -98,7 +113,7 @@ public class ApplicationFrame extends JFrame {
                         List<Price> prices = reader.getAllPrices();
                         reader = new TransactionReader(OUTPUT_FILE_PATH);
                         List<Order> orders = reader.getAllOrders();
-                        loadGraph(prices,orders);
+                        loadGraph(prices, orders);
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null,
                                 "An unexpected error has occurred when running the given files." +
@@ -164,61 +179,8 @@ public class ApplicationFrame extends JFrame {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                buildGraph(prices,orders);
+                GraphBuilder.buildGraph(graph,prices,orders);
             }
         });
-    }
-
-    private void buildGraph(List<Price> prices, List<Order> orders)
-    {
-        final DateAxis xAxis = new DateAxis();
-        final NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Date");
-        yAxis.setLabel("Price");
-        final LineChart<Date, Number> lineChart = new LineChart<>(
-                xAxis, yAxis);
-
-        if (prices.size() > 0) {
-            lineChart.setTitle("Price of " + prices.get(0).getCompanyName());
-            XYChart.Series<Date, Number> series = new XYChart.Series<>();
-            // populating the series with data
-
-            Iterator<Order> orderIterator = orders.iterator();
-            Order currOrder = orderIterator.hasNext() ? orderIterator.next() : null;
-            for (int i = 0; i < prices.size(); i++) {
-                XYChart.Data data = new XYChart.Data<Date, Number>(prices.get(i).getDate(), prices.get(i).getValue());
-                series.getData().add(data);
-                ORDER_SEARCH:
-                {
-                    while (true) {
-                        //if an order is placed at this price
-                        if (currOrder.getOrderDate().equals(prices.get(i).getDate())) {
-                            if (currOrder.getOrderType().equals(OrderType.BUY)) {
-                                data.setNode(new InfoBox(currOrder.getPrice(), currOrder.getOrderDate(), InfoBox.InfoBoxType.BuyOrder));
-                                data.getNode().setStyle("-fx-background-color: green, white");
-                            } else {
-                                data.setNode(new InfoBox(currOrder.getPrice(), currOrder.getOrderDate(), InfoBox.InfoBoxType.SellOrder));
-                                data.getNode().setStyle("-fx-background-color: red, white");
-                            }
-                            //if no order is placed at this price
-                        } else if (currOrder.getOrderDate().after(prices.get(i).getDate())) {
-                            data.setNode(new InfoBox(prices.get(i).getValue(), prices.get(i).getDate(), InfoBox.InfoBoxType.Price));
-                            data.getNode().setStyle("-fx-background-color: #3915AE, white");
-                        } else if (orderIterator.hasNext()) {
-                            currOrder = orderIterator.next();
-                            continue;
-                        }
-                        break ORDER_SEARCH;
-                    }
-                }
-            }
-            lineChart.getData().add(series);
-            lineChart.setLegendVisible(false);
-            yAxis.setForceZeroInRange(false);
-        }
-        Scene scene = new Scene(lineChart);
-        //NOTE: Remember to add .css to the compiler settings in Intellij
-        scene.getStylesheets().add("graph.css");
-        graph.setScene(scene);
     }
 }

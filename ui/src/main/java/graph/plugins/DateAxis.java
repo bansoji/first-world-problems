@@ -1,4 +1,4 @@
-/*
+package graph.plugins;/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2013, Christian Schudt
@@ -71,7 +71,7 @@ import java.util.*;
  * series.add(new XYChart.Series<>("Series2", series2Data));
  *
  * NumberAxis numberAxis = new NumberAxis();
- * DateAxis dateAxis = new DateAxis();
+ * Dagraph.plugins.DateAxisateAxis = new DateAxis();
  * LineChart<Date, Number> lineChart = new LineChart<>(dateAxis, numberAxis, series);
  * }
  * </pre>

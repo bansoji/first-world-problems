@@ -69,6 +69,10 @@ public class Order {
         }
     }
 
+    public int getVolume() {
+        return volume;
+    }
+
     public OrderType getOrderType()
     {
         return signal;

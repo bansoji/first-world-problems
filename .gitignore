@@ -13,6 +13,9 @@ trading/target
 common/target
 ui/target
 
+# fonts (for now)
+ui/src/main/resources/fonts
+
 # extra output files
 *.csv
 *.log

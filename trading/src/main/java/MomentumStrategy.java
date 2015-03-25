@@ -1,3 +1,4 @@
+import com.sun.javafx.tools.packager.Log;
 import finance.FinanceUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,10 +14,9 @@ public class MomentumStrategy implements TradingStrategy {
 
     private List<Price> prices;
     private List<Order> ordersGenerated;
-    private int movingAverage = 4;
-    private double threshold = 0.001;
-    private int volume = 100; // Set by MSM Spec.
-
+    private int movingAverage;
+    private double threshold;
+    private int volume;
 
     private static final Logger logger = Logger.getLogger("log");
 
@@ -34,10 +34,17 @@ public class MomentumStrategy implements TradingStrategy {
         }
 
         // Configure the strategy using parameters config properties file.
+        // Defaults are the same as in MSM spec.
         this.movingAverage = Integer.parseInt(prop.getProperty("movingAverage", "4"));
         this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.001"));
         this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
+
+        logger.info("Parameters Found:\n" +
+                "Moving Average: " + this.movingAverage + "\n" +
+                "Threshold: " + this.threshold + "\n" +
+                "Volume: " + this.volume + "\n");
     }
+
 
     /**
      * Generate orders using this strategy.
@@ -71,10 +78,10 @@ public class MomentumStrategy implements TradingStrategy {
         for (int i=0; i<tradeSignals.size(); i++){
             if (tradeSignals.get(i).equals(nextStatus)){
                 // Create an order using this ith day.
-                Price tradePrice = prices.get(i + movingAverage -1); // Get the price for that day. Offset by moving average.
-                // TODO(Addo): Account for missing dates in the line above.
-                Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(), volume,
-                                    tradePrice.getDate());
+                // Get the price for that day. Offset by moving average.
+                Price tradePrice = prices.get(i + movingAverage -1);
+                Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(),
+                        volume, tradePrice.getDate());
                 //System.out.println("Out");
                 ordersGenerated.add(o);
 

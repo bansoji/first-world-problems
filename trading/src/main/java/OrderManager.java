@@ -3,7 +3,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -43,8 +42,7 @@ public class OrderManager {
         List<Price> allPrices = tReader.getAllPrices();
 
         // Load the properties file.
-        InputStream input = null;
-        input = new FileInputStream(paramName);
+        InputStream input = new FileInputStream(paramName);
 
         // Initialise the trading strategy.
         TradingStrategy strategy = new MomentumStrategy(allPrices, input);

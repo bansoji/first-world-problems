@@ -1,3 +1,5 @@
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -51,10 +53,12 @@ public class Order {
 
     /**
      * Returns the total price of the Order.
-     * @return total price of the Order.
+     * @return total price of the Order, rounded to 2 decimal places.
      */
     public double getValue(){
-        return this.price * this.volume;
+        // Use BigDecimal for better rounding accuracy.
+        return new BigDecimal(this.price * this.volume).setScale(2,
+                                RoundingMode.HALF_UP).doubleValue();
     }
 
     /**

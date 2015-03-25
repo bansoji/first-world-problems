@@ -22,7 +22,10 @@ public class OrderManager {
         String paramName = args[1]; // To use, go to "Run -> Edit Configurations" and add
         // "common/src/main/resources/sampleData trading/resources/config.properties" to program args
 
-        ///////////////////// Initialisation. ///////////////////////////////
+        ///////////////////////////////
+        // INITIALISATION.
+        ///////////////////////////////
+
         // Logger initialisation.
         Logger logger = Logger.getLogger("log");
         FileHandler handler = new FileHandler("logfile.log");
@@ -39,28 +42,20 @@ public class OrderManager {
         TransactionReader tReader = new TransactionReader(fileName);
         List<Price> allPrices = tReader.getAllPrices();
 
-        // Initialise the trading strategy.
-        TradingStrategy strategy = new MomentumStrategy(allPrices);
-
-        // Initialise and Load the properties file.
-        Properties prop = new Properties();
+        // Load the properties file.
         InputStream input = null;
         input = new FileInputStream(paramName);
-        prop.load(input);
 
-        // Configure the strategy.
-        String movingAvg = prop.getProperty("movingAverage", "4"); // Sets tge default values.
-        String threshold = prop.getProperty("threshold", "0.001");
-        String volume = prop.getProperty("volume", "100");
-
-        strategy.setMovingAverage(Integer.parseInt(movingAvg));
-        strategy.setThreshold(Double.parseDouble(threshold));
-        strategy.setVolume(Integer.parseInt(volume));
+        // Initialise the trading strategy.
+        TradingStrategy strategy = new MomentumStrategy(allPrices, input);
 
         // Initialise the timer.
         long startTime = System.currentTimeMillis();
 
-        ///////////////////////////// Running. /////////////////////////////
+
+        ///////////////////////////////
+        // RUNNING.
+        ///////////////////////////////
 
         // Run the strategy module.
         strategy.generateOrders();
@@ -70,7 +65,11 @@ public class OrderManager {
         Printer.printOrders(ordersGenerated, file);
         file.close();
 
-        ///////////////////////////// Post running. /////////////////////////
+
+        ///////////////////////////////
+        // FINISHING.
+        ///////////////////////////////
+
         // Stop the timer.
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;

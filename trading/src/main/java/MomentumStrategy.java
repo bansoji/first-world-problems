@@ -1,8 +1,10 @@
 import finance.FinanceUtils;
-
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.Properties;
 
 /**
  * An implementation of the Momentum Strategy.
@@ -15,11 +17,26 @@ public class MomentumStrategy implements TradingStrategy {
     private double threshold = 0.001;
     private int volume = 100; // Set by MSM Spec.
 
+
     private static final Logger logger = Logger.getLogger("log");
 
-    public MomentumStrategy(List<Price> historicalPrices){
+    public MomentumStrategy(List<Price> historicalPrices, InputStream config) {
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
+
+        // Initialise the config according to the parameters.
+        Properties prop = new Properties();
+        try {
+            prop.load(config);
+        } catch (IOException e) {
+            logger.severe("Invalid Parameters File.");
+            e.printStackTrace();
+        }
+
+        // Configure the strategy using parameters config properties file.
+        this.movingAverage = Integer.parseInt(prop.getProperty("movingAverage", "4"));
+        this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.001"));
+        this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
     }
 
     /**

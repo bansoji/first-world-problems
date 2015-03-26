@@ -9,27 +9,41 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 /**
- * Main class
+ * Main class.
  */
 
 public class OrderManager {
 
     // Some class constants.
-    public static final String VERSION = "0.4.0";
+    public static final String VERSION = "0.6.0";
 
     public static void main(String[] args) throws IOException {
         String fileName = args[0];
-        String paramName = args[1]; // To use, go to "Edit Configurations" and add
-        // "trading/resources/sampleData trading/resources/config.properties" to program args.
+        String paramName = args[1]; // To use, go to "Run -> Edit Configurations" and add
+        // "common/src/main/resources/sampleData trading/resources/config.properties" to program args
+
+        ///////////////////// Initialisation. ///////////////////////////////
+        // Logger initialisation.
+        Logger logger = Logger.getLogger("log");
+        FileHandler handler = new FileHandler("logfile.log");
+        SimpleFormatter formatter = new SimpleFormatter();
+        handler.setFormatter(formatter);
+        logger.addHandler(handler);
+
+        logger.info("====== Project Name =========\n" +
+                "Developer Team: Group 1\n" +
+                "MODULE VERSION: " + VERSION + "\n" +
+                "INPUT FILE: " + fileName);
 
         // Load the csv file.
         TransactionReader tReader = new TransactionReader(fileName);
         tReader.readAllPrices();
         List companyHistory = tReader.getCompanyPrices("BHP.AX");
 
+        // Initialise the trading strategy.
         TradingStrategy strategy = new MomentumStrategy(companyHistory);
 
-        // Load the properties file.
+        // Initialise and Load the properties file.
         Properties prop = new Properties();
         InputStream input = null;
         input = new FileInputStream(paramName);
@@ -44,6 +58,12 @@ public class OrderManager {
         strategy.setThreshold(Double.parseDouble(threshold));
         strategy.setVolume(Integer.parseInt(volume));
 
+        // Initialise the timer.
+        long startTime = System.currentTimeMillis();
+
+        ///////////////////////////// Running. /////////////////////////////
+
+        // Run the strategy module.
         strategy.generateOrders();
         List<Order> ordersGenerated = strategy.getOrders();
 
@@ -51,27 +71,32 @@ public class OrderManager {
         Printer.printOrders(ordersGenerated, file);
         file.close();
 
+        ///////////////////////////// Post running. /////////////////////////
+        // Stop the timer.
+        long stopTime = System.currentTimeMillis();
+        long elapsedTime = stopTime - startTime;
+        System.out.println("Time passed = " + elapsedTime + "ms");
+        logger.info("Time Elapsed : " + elapsedTime + "ms");
+
+        // Log successful.
+        logger.info("Module successful. No errors encountered.");
+    }
+
+    private static void printProfitability(List<Order> ordersGenerated){
         double profit = 0.0;
         for (Order oo : ordersGenerated){
             System.out.println(oo.totalTransactionValue());
             profit += oo.totalTransactionValue();
         }
         System.out.println("Profitability is " + profit);
-        System.out.println(movingAvg);
-
-        /*
-         * Under construction - Edwin
-         */
-        Logger logger = Logger.getLogger("log");
-        FileHandler handler = new FileHandler("logfile.log");
-        SimpleFormatter formatter = new SimpleFormatter();
-        handler.setFormatter(formatter);
-        logger.addHandler(handler);
-
-        logger.info("Developer Team: Group 1\n" +
-                    "MODULE VERSION: " + VERSION + "\n" +
-                    "INPUT FILE: " + fileName + "" + "\n" +
-                    "This is a test log file.");
     }
 
+    private static void printPrices(List<Price> allPrices){
+        //prints allPrices.
+        for (Price price: allPrices){
+            System.out.print(price.getCompanyName() + " ");
+            System.out.print(price.getValue() + " ");
+            System.out.print(price.getDate() + "\n");
+        }
+    }
 }

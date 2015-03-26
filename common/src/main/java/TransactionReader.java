@@ -38,6 +38,7 @@ public class TransactionReader {
             this.reader = new CSVReader(new FileReader(fileName));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            logger.warning("Input file cannot be opened.");
         }
         this.allPrices = new PriceHistory();
         this.allOrders = new OrderHistory();
@@ -71,6 +72,7 @@ public class TransactionReader {
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
+            logger.severe("Cannot find the reader. " + e);
         }
     }
 
@@ -93,6 +95,7 @@ public class TransactionReader {
                     date = df.parse(nextLine[ORDER_DATE]);
                 } catch (ParseException e) {
                     e.printStackTrace();
+                    logger.severe("Incorrect date format in the input file.");
                 }
 
                 OrderType type;

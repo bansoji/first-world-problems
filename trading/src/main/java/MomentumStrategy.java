@@ -31,7 +31,7 @@ public class MomentumStrategy implements TradingStrategy {
         List<Double> priceInput = new ArrayList<Double>();
         for (Price p : prices){
             priceInput.add(p.getValue());       // TODO: This could potentially be optimised.
-            System.out.println(p.getValue());
+            //System.out.println(p.getValue());
         }
 
         List<Double> sma = FinanceUtils.calcAllSimpleMovingAvg(priceInput, movingAverage);
@@ -39,6 +39,7 @@ public class MomentumStrategy implements TradingStrategy {
         // Calculate Trade Signals.
         List<OrderType> tradeSignals = generateTradeSignals(sma, threshold);
 
+        /*
         for (Double d : sma){
             System.out.println(d);
         }
@@ -46,6 +47,7 @@ public class MomentumStrategy implements TradingStrategy {
         for (OrderType s : tradeSignals){
             System.out.println(s);
         }
+        */
 
         // Generate the orders.
         OrderType nextStatus = OrderType.BUY; // The next status to look for.

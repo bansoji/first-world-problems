@@ -53,11 +53,11 @@ public class Order {
 
     /**
      * Returns the total price of the Order.
-     * @return total price of the Order, rounded to 2 decimal places.
+     * @return total price of the Order, rounded to 3 decimal places.
      */
     public double getValue(){
         // Round to 3dp, since that is the lowest decimal value in the input file.
-        return Math.round((this.price * this.volume) * 1000.0) / 1000.0;
+        return Math.round((this.price * this.volume) * 100.0) / 100.0;
     }
 
     /**

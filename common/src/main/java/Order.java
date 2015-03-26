@@ -56,9 +56,8 @@ public class Order {
      * @return total price of the Order, rounded to 2 decimal places.
      */
     public double getValue(){
-        // Use BigDecimal for better rounding accuracy.
-        return new BigDecimal(this.price * this.volume).setScale(2,
-                                RoundingMode.HALF_UP).doubleValue();
+        // Round to 3dp, since that is the lowest decimal value in the input file.
+        return Math.round((this.price * this.volume) * 1000.0) / 1000.0;
     }
 
     /**

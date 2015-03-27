@@ -6,15 +6,15 @@ import java.util.Date;
  * Created by Edwin on 27/03/2015.
  */
 public class Asset {
-    private String companyName; // RIC (Name) of the Order.
-    //private double price; // The price of the Order to place.
-    private int volume; // The number of items to trade.
-    //private Date date; // The date of the Order.]
+    private String companyName; // The name of the company.
+    private double buyPrice; // The price (per unit) that the asset was bought at.
+    private int volume; // The number of units bought for this asset bundle.
+    //private Date date; // The date the asset was bought at
 
-    public Asset(String companyName, double price, int volume, Date date)
+    public Asset(String companyName, double buyPrice, int volume/*, Date date*/)
     {
         this.companyName = companyName;
-        //this.price = price;
+        this.buyPrice = buyPrice;
         this.volume = volume;
         //this.date = date;
     }
@@ -24,10 +24,10 @@ public class Asset {
         return this.companyName;
     }
 
-    /*public double getPrice ()
+    public double getPrice ()
     {
-        return this.price;
-    }*/
+        return this.buyPrice;
+    }
 
     public int getVolume ()
     {

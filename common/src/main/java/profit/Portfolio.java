@@ -11,7 +11,6 @@ import java.util.*;
 public class Portfolio {
 
     private static List<Asset> assetsHolder = new ArrayList<Asset>(); //Contains all assets currently in possession.
-    // private static List<Asset> boughtAssets = new ArrayList<Asset>(); //A history of all the assets bought.
     private static Map<Asset, Double> soldAssets = new HashMap<Asset, Double>(); // A history of all the assets sold
                                                                                     // with their selling prices attached.
 
@@ -32,7 +31,6 @@ public class Portfolio {
      */
     public static void sellAsset (Asset soldAsset, double sellPrice)
     {
-        // Asset soldAsset = new Asset(asset.getCompanyName(), sellPrice, asset.getVolume(), sellDate);
         soldAssets.put(soldAsset, sellPrice);
         assetsHolder.remove(soldAsset);
     }

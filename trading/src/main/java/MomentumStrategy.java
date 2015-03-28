@@ -1,5 +1,5 @@
-import com.sun.javafx.tools.packager.Log;
 import finance.FinanceUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
@@ -40,6 +40,29 @@ public class MomentumStrategy implements TradingStrategy {
             e.printStackTrace();
         }
 
+        configureStrategy(prop);
+
+        String parameters = "Parameters Used:\n" +
+                "Moving Average: " + this.movingAverage + "\n" +
+                "Threshold: " + this.threshold + "\n" +
+                "Volume: " + this.volume;
+
+        if (startDate != null){
+            parameters = parameters + "\nStart Date: " + this.startDate;
+        }
+        if (endDate != null){
+            parameters = parameters + "\nEnd Date: " + this.endDate;
+        }
+
+        logger.info(parameters);
+    }
+
+    /**
+     * Configure the strategy given a Properties file.
+     * @param prop a Properties object, containing the configuration parameters of
+     *             the strategy module.
+     */
+    private void configureStrategy(Properties prop) {
         DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         // Configure the strategy using parameters config properties file.
         // Defaults are the same as in MSM spec.
@@ -47,26 +70,27 @@ public class MomentumStrategy implements TradingStrategy {
         this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.001"));
         this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
 
+        // Get the start and end dates.
         System.out.println(prop.getProperty("startDate"));
         try {
             this.startDate = df.parse(prop.getProperty("startDate"));
         } catch (ParseException e) {
-            logger.warning("Incorrect Date format used for Start Date of simulations.");
+            logger.warning("Incorrect Date format used for Start Date of simulations. " +
+                    "Please make sure it is in the correct format of dd-MM-yyyy.");
+            startDate = null;
+        } catch (NullPointerException e){
             startDate = null;
         }
         try {
             this.endDate = df.parse(prop.getProperty("endDate"));
         } catch (ParseException e) {
-            logger.warning("Incorrect Date format used for End Date of simulations.");
+            logger.warning("Incorrect Date format used for End Date of simulations. " +
+                    "Please make sure it is in the correct format of dd-MM-yyyy.");
             endDate = null;
+        }catch (NullPointerException e){
+            startDate = null;
         }
-
-        logger.info("Parameters Found:\n" +
-                "Moving Average: " + this.movingAverage + "\n" +
-                "Threshold: " + this.threshold + "\n" +
-                "Volume: " + this.volume + "\n");
     }
-
 
     /**
      * Generate orders using this strategy.
@@ -153,7 +177,6 @@ public class MomentumStrategy implements TradingStrategy {
         return l;
     }
 
-    @Override
     public void setMovingAverage(int movingAverage) {
         this.movingAverage = movingAverage;
     }
@@ -165,4 +188,6 @@ public class MomentumStrategy implements TradingStrategy {
     public void setThreshold(double threshold) {
         this.threshold = threshold;
     }
+
+
 }

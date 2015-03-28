@@ -1,9 +1,14 @@
 package profit;
+import com.sun.xml.internal.bind.v2.TODO;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
  * Created by Edwin on 24/03/2015.
+ *
+ * This class represents the Portfolio of assets and buy/sell history.
  */
 public class Portfolio {
 
@@ -11,25 +16,42 @@ public class Portfolio {
     private static List<Asset> boughtAssets = new ArrayList<Asset>(); //A history of all the assets bought.
     private static List<Asset> soldAssets = new ArrayList<Asset>(); // A history of all the assets sold.
 
-
+    /**
+     * This method will "Buy" the asset (store it in portfolio, add to history)
+     * @param asset     The specified asset to be bought.
+     */
     public static void buyAsset (Asset asset)
     {
         assetsHolder.add(asset);
         boughtAssets.add(asset);
     }
 
-    public static void sellAsset (Asset asset, double sellPrice)
+    /**
+     * This method will "Sell" the asset (create the updated asset to add to history, and
+     * remove the old one from the portfolio).
+     * @param asset         The specified asset to sell.
+     * @param sellPrice     The specified price to sell the asset at.
+     * @param sellDate      The date the asset will be sold at.
+     */
+    public static void sellAsset (Asset asset, double sellPrice, Date sellDate)
     {
-        Asset soldAsset = new Asset(asset.getCompanyName(), sellPrice, asset.getVolume());
+        Asset soldAsset = new Asset(asset.getCompanyName(), sellPrice, asset.getVolume(), sellDate);
         soldAssets.add(soldAsset);
         assetsHolder.remove(asset);
     }
 
+    /**
+     * This method will clear the buy and sell history of the portfolio.
+     */
     public static void clearHistory() {
         boughtAssets.clear();
         soldAssets.clear();
     }
 
+    /**
+     * This method calculates the total value of all the assets currently in possession.
+     * @return  The total value of all the assets in possession.
+     */
     public static double calcAssetValue ()
     {
         double totalValue = 0;
@@ -41,7 +63,10 @@ public class Portfolio {
         return totalValue;
     }
 
-
+    /**
+     * This method calculates the total profit made off selling assets according to the history.
+     * @return  The profit/loss of sold assets in comparison to their buy prices.
+     */
     public static double calcProfit ()
     {
         double expenditure = 0;
@@ -59,6 +84,12 @@ public class Portfolio {
         return revenue - expenditure;
     }
 
+    /**
+     * This method calculates the individual value of an asset in the portfolio.
+     * @param volume    The number of units bought.
+     * @param price     The price per unit.
+     * @return          The value of the asset.
+     */
     private static double getValue (int volume, double price)
     {
         return volume * price;

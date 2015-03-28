@@ -7,14 +7,15 @@ import java.util.List;
 
 /**
  * Created by Edwin on 24/03/2015.
- *
+ * Modified by Banson on 28/03/2015.
  * This class represents the Portfolio of assets and buy/sell history.
  */
 public class Portfolio {
 
     private static List<Asset> assetsHolder = new ArrayList<Asset>(); //Contains all assets currently in possession.
-    private static List<Asset> boughtAssets = new ArrayList<Asset>(); //A history of all the assets bought.
-    private static List<Asset> soldAssets = new ArrayList<Asset>(); // A history of all the assets sold.
+    // private static List<Asset> boughtAssets = new ArrayList<Asset>(); //A history of all the assets bought.
+    private static Map<Asset, Double> soldAssets = new HashMap<Asset, Double>(); // A history of all the assets sold
+                                                                                    // with their selling prices attached.
 
     /**
      * This method will "Buy" the asset (store it in portfolio, add to history)
@@ -23,7 +24,7 @@ public class Portfolio {
     public static void buyAsset (Asset asset)
     {
         assetsHolder.add(asset);
-        boughtAssets.add(asset);
+        // boughtAssets.add(asset);
     }
 
     /**
@@ -33,18 +34,18 @@ public class Portfolio {
      * @param sellPrice     The specified price to sell the asset at.
      * @param sellDate      The date the asset will be sold at.
      */
-    public static void sellAsset (Asset asset, double sellPrice, Date sellDate)
+    public static void sellAsset (Asset soldAsset, double sellPrice, Date sellDate)
     {
-        Asset soldAsset = new Asset(asset.getCompanyName(), sellPrice, asset.getVolume(), sellDate);
-        soldAssets.add(soldAsset);
-        assetsHolder.remove(asset);
+        // Asset soldAsset = new Asset(asset.getCompanyName(), sellPrice, asset.getVolume(), sellDate);
+        soldAssets.add(soldAsset, sellPrice);
+        assetsHolder.remove(soldAsset);
     }
 
     /**
      * This method will clear the buy and sell history of the portfolio.
      */
     public static void clearHistory() {
-        boughtAssets.clear();
+        // boughtAssets.clear();
         soldAssets.clear();
     }
 
@@ -69,19 +70,27 @@ public class Portfolio {
      */
     public static double calcProfit ()
     {
-        double expenditure = 0;
-        double revenue = 0;
-        for (Asset boughtAsset : boughtAssets)
+//        double expenditure = 0;
+//        double revenue = 0;
+//        for (Asset boughtAsset : boughtAssets)
+//        {
+//            expenditure += getValue(boughtAsset.getVolume(), boughtAsset.getPrice());
+//        }
+//
+//        for (Asset soldAsset : soldAssets)
+//        {
+//            revenue += getValue(soldAsset.getVolume(), soldAsset.getPrice());
+//        }
+//
+//        return revenue - expenditure;
+
+        double profit = 0;
+        for (Asset asset : soldAssets.keymap())
         {
-            expenditure += getValue(boughtAsset.getVolume(), boughtAsset.getPrice());
+            profit += soldAssets.get(asset) - asset.getPrice();
         }
 
-        for (Asset soldAsset : soldAssets)
-        {
-            revenue += getValue(soldAsset.getVolume(), soldAsset.getPrice());
-        }
-
-        return revenue - expenditure;
+        return profit;
     }
 
     /**

@@ -1,9 +1,7 @@
 package profit;
 import com.sun.xml.internal.bind.v2.TODO;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Edwin on 24/03/2015.
@@ -18,26 +16,24 @@ public class Portfolio {
                                                                                     // with their selling prices attached.
 
     /**
-     * This method will "Buy" the asset (store it in portfolio, add to history)
+     * This method will "Buy" the asset and store it in assetsHolder.
      * @param asset     The specified asset to be bought.
      */
     public static void buyAsset (Asset asset)
     {
         assetsHolder.add(asset);
-        // boughtAssets.add(asset);
     }
 
     /**
      * This method will "Sell" the asset (create the updated asset to add to history, and
      * remove the old one from the portfolio).
-     * @param asset         The specified asset to sell.
+     * @param soldAsset         The specified asset to sell.
      * @param sellPrice     The specified price to sell the asset at.
-     * @param sellDate      The date the asset will be sold at.
      */
-    public static void sellAsset (Asset soldAsset, double sellPrice, Date sellDate)
+    public static void sellAsset (Asset soldAsset, double sellPrice)
     {
         // Asset soldAsset = new Asset(asset.getCompanyName(), sellPrice, asset.getVolume(), sellDate);
-        soldAssets.add(soldAsset, sellPrice);
+        soldAssets.put(soldAsset, sellPrice);
         assetsHolder.remove(soldAsset);
     }
 
@@ -45,12 +41,12 @@ public class Portfolio {
      * This method will clear the buy and sell history of the portfolio.
      */
     public static void clearHistory() {
-        // boughtAssets.clear();
         soldAssets.clear();
     }
 
     /**
      * This method calculates the total value of all the assets currently in possession.
+     * Note that this uses the price at the time that they were bought.
      * @return  The total value of all the assets in possession.
      */
     public static double calcAssetValue ()
@@ -58,7 +54,7 @@ public class Portfolio {
         double totalValue = 0;
         for (Asset asset : assetsHolder)
         {
-            totalValue += getValue(asset.getVolume(), asset.getPrice());
+            totalValue += getValue(asset.getVolume(), asset.getBuyPrice());
         }
 
         return totalValue;
@@ -66,28 +62,15 @@ public class Portfolio {
 
     /**
      * This method calculates the total profit made off selling assets according to the history.
+     * Note that this does NOT include Assets that are bought but not sold at the time of call.
      * @return  The profit/loss of sold assets in comparison to their buy prices.
      */
     public static double calcProfit ()
     {
-//        double expenditure = 0;
-//        double revenue = 0;
-//        for (Asset boughtAsset : boughtAssets)
-//        {
-//            expenditure += getValue(boughtAsset.getVolume(), boughtAsset.getPrice());
-//        }
-//
-//        for (Asset soldAsset : soldAssets)
-//        {
-//            revenue += getValue(soldAsset.getVolume(), soldAsset.getPrice());
-//        }
-//
-//        return revenue - expenditure;
-
         double profit = 0;
-        for (Asset asset : soldAssets.keymap())
+        for (Asset soldAsset : soldAssets.keySet())
         {
-            profit += soldAssets.get(asset) - asset.getPrice();
+            profit += getValue(soldAsset.getVolume(), soldAssets.get(soldAsset) - soldAsset.getBuyPrice());
         }
 
         return profit;
@@ -104,14 +87,4 @@ public class Portfolio {
         return volume * price;
     }
 
-    /*public static double calcAssets (double currPrice, long volume)
-    {
-        return currPrice*volume;
-    }
-
-    public static double calcPortfolio (double profit, double assets)
-    {
-        return profit + assets;
-    }
-    */
 }

@@ -9,21 +9,21 @@ import java.util.Date;
  */
 public class Asset {
     private String companyName; // The name of the company.
-    private double price; // The price (per unit) that the asset was traded at.
+    private double buyPrice; // The price (per unit) that the asset was bought at.
     private int volume; // The number of units traded for this asset bundle.
-    private Date date; // The date the asset was traded at
+    private Date date; // The date the asset was bought at
 
     /**
      * This constructor creates a new Asset.
      * @param companyName       The name of the company this asset is under.
-     * @param price             The price per unit.
+     * @param buyPrice          The price per unit.
      * @param volume            The number of units traded.
      * @param date              The date this asset is traded at.
      */
-    public Asset(String companyName, double price, int volume, Date date)
+    public Asset(String companyName, double buyPrice, int volume, Date date)
     {
         this.companyName = companyName;
-        this.price = price;
+        this.buyPrice = buyPrice;
         this.volume = volume;
         this.date = date;
     }
@@ -38,12 +38,12 @@ public class Asset {
     }
 
     /**
-     * This method returns the price per unit this asset is traded at.
+     * This method returns the price per unit this asset is bought at.
      * @return      The price per unit.
      */
-    public double getPrice ()
+    public double getBuyPrice ()
     {
-        return this.price;
+        return this.buyPrice;
     }
 
     /**
@@ -56,7 +56,7 @@ public class Asset {
     }
 
     /**
-     * This method returns the date that the asset was traded at.
+     * This method returns the date that the asset was bought at.
      * @return      The date of trade.
      */
     public Date getDate ()

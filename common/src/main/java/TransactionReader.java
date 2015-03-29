@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.logging.Logger;
 
 /**
- * This class reads an input CSV file and outputs its contents as an ArrayList
+ * This class reads an input CSV file and outputs its contents as an ArrayList.
  */
 
 public class TransactionReader {

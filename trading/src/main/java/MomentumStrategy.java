@@ -1,8 +1,12 @@
-import com.sun.javafx.tools.packager.Log;
 import finance.FinanceUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.Properties;
@@ -17,6 +21,9 @@ public class MomentumStrategy implements TradingStrategy {
     private int movingAverage;
     private double threshold;
     private int volume;
+    private Date startDate;
+    private Date endDate;
+
 
     private static final Logger logger = Logger.getLogger("log");
 
@@ -33,18 +40,57 @@ public class MomentumStrategy implements TradingStrategy {
             e.printStackTrace();
         }
 
+        configureStrategy(prop);
+
+        String parameters = "Parameters Used:\n" +
+                "Moving Average: " + this.movingAverage + "\n" +
+                "Threshold: " + this.threshold + "\n" +
+                "Volume: " + this.volume;
+
+        if (startDate != null){
+            parameters = parameters + "\nStart Date: " + this.startDate;
+        }
+        if (endDate != null){
+            parameters = parameters + "\nEnd Date: " + this.endDate;
+        }
+
+        logger.info(parameters);
+    }
+
+    /**
+     * Configure the strategy given a Properties file.
+     * @param prop a Properties object, containing the configuration parameters of
+     *             the strategy module.
+     */
+    private void configureStrategy(Properties prop) {
+        DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         // Configure the strategy using parameters config properties file.
         // Defaults are the same as in MSM spec.
         this.movingAverage = Integer.parseInt(prop.getProperty("movingAverage", "4"));
         this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.001"));
         this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
 
-        logger.info("Parameters Found:\n" +
-                "Moving Average: " + this.movingAverage + "\n" +
-                "Threshold: " + this.threshold + "\n" +
-                "Volume: " + this.volume + "\n");
+        // Get the start and end dates.
+        System.out.println(prop.getProperty("startDate"));
+        try {
+            this.startDate = df.parse(prop.getProperty("startDate"));
+        } catch (ParseException e) {
+            logger.warning("Incorrect Date format used for Start Date of simulations. " +
+                    "Please make sure it is in the correct format of dd-MM-yyyy.");
+            startDate = null;
+        } catch (NullPointerException e){
+            startDate = null;
+        }
+        try {
+            this.endDate = df.parse(prop.getProperty("endDate"));
+        } catch (ParseException e) {
+            logger.warning("Incorrect Date format used for End Date of simulations. " +
+                    "Please make sure it is in the correct format of dd-MM-yyyy.");
+            endDate = null;
+        }catch (NullPointerException e){
+            startDate = null;
+        }
     }
-
 
     /**
      * Generate orders using this strategy.
@@ -80,6 +126,12 @@ public class MomentumStrategy implements TradingStrategy {
                 // Create an order using this ith day.
                 // Get the price for that day. Offset by moving average.
                 Price tradePrice = prices.get(i + movingAverage -1);
+
+                // Skip if the date given is out of the simulation date range.
+                if (startDate != null && tradePrice.getDate().before(startDate)) continue;
+                if (endDate != null && tradePrice.getDate().after(endDate)) continue;
+
+                // Create a new Order.
                 Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(),
                         volume, tradePrice.getDate());
                 //System.out.println("Out");
@@ -125,7 +177,6 @@ public class MomentumStrategy implements TradingStrategy {
         return l;
     }
 
-    @Override
     public void setMovingAverage(int movingAverage) {
         this.movingAverage = movingAverage;
     }
@@ -137,4 +188,6 @@ public class MomentumStrategy implements TradingStrategy {
     public void setThreshold(double threshold) {
         this.threshold = threshold;
     }
+
+
 }

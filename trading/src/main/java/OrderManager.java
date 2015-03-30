@@ -16,6 +16,7 @@ public class OrderManager {
     public static final String VERSION = "0.9.0";
     public static final String OUTPUT_FILE = "orders.csv";
     public static final String LOG_FILE = "logfile.log";
+    public static final String LOG_NAME = "log";
 
     public static void main(String[] args) throws IOException {
         if (args.length != 2){

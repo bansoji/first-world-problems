@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  */
 public class Printer {
 
-    private static final Logger logger = Logger.getLogger(OrderManager.LOG_FILE);
+    private static final Logger logger = Logger.getLogger(OrderManager.LOG_NAME);
     private static final String OUTPUT_FILE_NAME = OrderManager.OUTPUT_FILE;
 
     /**

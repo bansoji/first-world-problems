@@ -97,10 +97,10 @@ public class ApplicationFrame extends JFrame {
                     try {
                         Runtime rt = Runtime.getRuntime();
                         rt.exec("java -jar " + strategyFile + " " + dataFile + " " + paramFile);
-                        TransactionReader reader = new TransactionReader(dataFile);
+                        Reader reader = new Reader(dataFile);
                         reader.readAllPrices();
                         List<Price> prices = reader.getCompanyPrices("BHP.AX");
-                        reader = new TransactionReader(OUTPUT_FILE_PATH);
+                        reader = new Reader(OUTPUT_FILE_PATH);
                         reader.readAllOrders();
                         List<Order> orders = reader.getCompanyOrders("BHP.AX");
                         loadGraph(prices,orders);
@@ -182,6 +182,7 @@ public class ApplicationFrame extends JFrame {
         yAxis.setLabel("Price");
         final LineChart<Date, Number> lineChart = new LineChart<>(
                 xAxis, yAxis);
+
         if (prices.size() > 0) {
             lineChart.setTitle("Price of " + prices.get(0).getCompanyName());
             XYChart.Series<Date, Number> series = new XYChart.Series<>();

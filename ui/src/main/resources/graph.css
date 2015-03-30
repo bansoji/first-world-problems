@@ -9,3 +9,10 @@
     -fx-background-color: #3915AE, white;
 }
 
+.chart-content {
+    -fx-padding: 0px 20px 0px 20px;
+}
+
+.chart {
+    -fx-padding: 10px 20px 10px 0px;
+}

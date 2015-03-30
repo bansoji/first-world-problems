@@ -1,13 +1,31 @@
 import javafx.application.Platform;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.util.Callback;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -18,16 +36,17 @@ public class ApplicationFrame extends JFrame {
     //TODO Remove values - only for TESTING
     private String strategyFile = "out/artifacts/trading_jar/trading.jar";
     private String dataFile = "common/src/main/resources/sampleDataSmall";
-    private String paramFile = "";
+    private String paramFile = "trading/resources/config.properties";
 
     private JFXPanel graph;
+    private JFXPanel table;
 
     private static String APPLICATION_TITLE = "Trading Platform";
     private static String VERSION_NUMBER = "1.0";
     private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
     private static String FOOTER_MESSAGE = "Get the latest release at our website.";
 
-    private static String OUTPUT_FILE_PATH = "output.csv";
+    private static String OUTPUT_FILE_PATH = "orders.csv";
 
     public ApplicationFrame()
     {
@@ -107,13 +126,19 @@ public class ApplicationFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 if (strategyFile != null && dataFile != null && paramFile != null) {
                     try {
-                        Runtime rt = Runtime.getRuntime();
-                        rt.exec("java -jar " + strategyFile + " " + dataFile + " " + paramFile);
+                        ProcessBuilder pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
+                        pb.start();
                         TransactionReader reader = new TransactionReader(dataFile);
                         List<Price> prices = reader.getAllPrices();
                         reader = new TransactionReader(OUTPUT_FILE_PATH);
                         List<Order> orders = reader.getAllOrders();
                         loadGraph(prices, orders);
+                        Map<Date,OrderType> orderRecord = new HashMap<>();
+                        for (Order order: orders)
+                        {
+                            orderRecord.put(order.getOrderDate(),order.getOrderType());
+                        }
+                        constructTable(prices,orderRecord);
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null,
                                 "An unexpected error has occurred when running the given files." +
@@ -128,10 +153,19 @@ public class ApplicationFrame extends JFrame {
             }
         });
         body.add(new JSeparator(SwingConstants.HORIZONTAL));
+
+        JPanel content = new JPanel();
+        content.setBackground(Color.WHITE);
+        content.setLayout(new BorderLayout());
         graph = new JFXPanel();
         graph.setPreferredSize(getSize());
-        body.add(graph);
-        body.add(new JSeparator(SwingConstants.HORIZONTAL));
+        content.add(graph, BorderLayout.CENTER);
+        content.add(new JSeparator(SwingConstants.HORIZONTAL), BorderLayout.SOUTH);
+
+        table = new JFXPanel();
+        content.add(table, BorderLayout.EAST);
+        body.add(content);
+
         add(body, BorderLayout.CENTER);
     }
 
@@ -154,11 +188,11 @@ public class ApplicationFrame extends JFrame {
                 if (val == JFileChooser.APPROVE_OPTION)
                 {
                     try {
-                        if (fileChooser.getButtonText().equals("Choose CSV file")) {
+                        if (fileChooser.getButtonText().equals("Choose CSV")) {
                             dataFile = fc.getSelectedFile().getAbsolutePath();
-                        } else if (fileChooser.getButtonText().equals("Choose strategy file")) {
+                        } else if (fileChooser.getButtonText().equals("Choose strategy")) {
                             strategyFile = fc.getSelectedFile().getAbsolutePath();
-                        } else if (fileChooser.getButtonText().equals("Choose parameters file")) {
+                        } else if (fileChooser.getButtonText().equals("Choose parameters")) {
                             paramFile = fc.getSelectedFile().getAbsolutePath();
                         } else {
                             return;
@@ -174,12 +208,22 @@ public class ApplicationFrame extends JFrame {
         });
     }
 
-    private void loadGraph(final List<Price> prices, final List<Order> orders)
+    private void loadGraph(List<Price> prices, List<Order> orders)
     {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 GraphBuilder.buildGraph(graph,prices,orders);
+            }
+        });
+    }
+
+    private void constructTable(List<Price> prices, Map<Date,OrderType> orders)
+    {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                TableBuilder.buildTable(table,prices,orders);
             }
         });
     }

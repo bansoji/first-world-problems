@@ -25,6 +25,11 @@ public class Printer {
             writer.writeNext(o.toStringArray());
         }
         System.out.println("\nFinished.  File written to " + file);
-
+        try {
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.severe("Cannot close the order writer. " + e);
+        }
     }
 }

@@ -3,20 +3,20 @@ import graph.plugins.XYBarChart;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.JFXPanel;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import org.gillius.jfxutils.chart.JFXChartUtil;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.List;
 
@@ -61,24 +61,21 @@ public class GraphBuilder {
                         //if an order is placed at this price
                         if (currOrder.getOrderDate().equals(prices.get(i).getDate())) {
                             XYChart.Data volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getTime(), currOrder.getVolume());
-                            volumeChart.getData().add(volume);
                             if (currOrder.getOrderType().equals(OrderType.BUY)) {
-                                price.setNode(new InfoBox(currOrder.getPrice(), currOrder.getOrderDate(), InfoBox.InfoBoxType.BuyOrder));
+                                price.setNode(new PriceInfoBox(currOrder.getPrice(), currOrder.getOrderDate(), InfoBox.InfoBoxType.BuyOrder));
                                 price.getNode().setStyle("-fx-background-color: green, white");
                                 changeBarColour(volume, "green");
+                                volume.setNode(new VolumeInfoBox(currOrder.getVolume(), currOrder.getOrderDate(), InfoBox.InfoBoxType.BuyOrder));
                             } else {
-                                price.setNode(new InfoBox(currOrder.getPrice(), currOrder.getOrderDate(), InfoBox.InfoBoxType.SellOrder));
+                                price.setNode(new PriceInfoBox(currOrder.getPrice(), currOrder.getOrderDate(), InfoBox.InfoBoxType.SellOrder));
                                 price.getNode().setStyle("-fx-background-color: red, white");
                                 changeBarColour(volume, "red");
+                                volume.setNode(new VolumeInfoBox(currOrder.getVolume(), currOrder.getOrderDate(), InfoBox.InfoBoxType.SellOrder));
                             }
-                            Tooltip tooltip = new Tooltip();
-                            DateFormat df = new SimpleDateFormat("dd MMM yyyy");
-                            tooltip.setText(df.format(currOrder.getOrderDate()) + " " + "\n" +
-                                    "Volume: " + currOrder.getVolume());
-                            Tooltip.install(volume.getNode(), tooltip);
+                            volumeChart.getData().add(volume);
                             //if no order is placed at this price
                         } else if (currOrder.getOrderDate().after(prices.get(i).getDate())) {
-                            price.setNode(new InfoBox(prices.get(i).getValue(), prices.get(i).getDate(), InfoBox.InfoBoxType.Price));
+                            price.setNode(new PriceInfoBox(prices.get(i).getValue(), prices.get(i).getDate(), InfoBox.InfoBoxType.Price));
                             price.getNode().setStyle("-fx-background-color: #3915AE, white");
                             if (i == 0 || i == prices.size()-1) {
                                 XYChart.Data volume = new XYChart.Data<Long, Number>(prices.get(i).getDate().getTime(), 0);
@@ -113,6 +110,7 @@ public class GraphBuilder {
                 }
             }
         });
+        syncGraphZooming(lineChart,barChart);
         pane.setCenter(JFXChartUtil.setupZooming(lineChart));
         pane.setBottom(JFXChartUtil.setupZooming(barChart));
         Scene scene = new Scene(pane);
@@ -131,5 +129,17 @@ public class GraphBuilder {
                 }
             }
         });
+    }
+
+    private static void syncGraphZooming(LineChart<Long,Number> lineChart, XYBarChart<Long,Number> barChart)
+    {
+//        ((ValueAxis)lineChart.getXAxis()).property.addListener(new ChangeListener<Number>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+//                barChart.getXAxis().setAutoRanging(false);
+//                ((ValueAxis) barChart.getXAxis()).setLowerBound(((ValueAxis) lineChart.getXAxis()).getLowerBound());
+//                ((ValueAxis) barChart.getXAxis()).setUpperBound(((ValueAxis) lineChart.getXAxis()).getUpperBound());
+//            }
+//        });
     }
 }

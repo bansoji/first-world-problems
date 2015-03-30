@@ -1,3 +1,5 @@
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -66,7 +68,7 @@ public class OrderManager {
         strategy.generateOrders();
         List<Order> ordersGenerated = strategy.getOrders();
 
-        FileWriter file = new FileWriter("output.csv");
+        FileWriter file = new FileWriter("orders.csv");
         Printer.printOrders(ordersGenerated, file);
         file.close();
 
@@ -79,6 +81,7 @@ public class OrderManager {
 
         // Log successful.
         logger.info("Module successful. No errors encountered.");
+        handler.close();
     }
 
     private static void printProfitability(List<Order> ordersGenerated){

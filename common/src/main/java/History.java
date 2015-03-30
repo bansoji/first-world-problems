@@ -1,13 +1,13 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class records the price history for all companies.
  */
-
-public abstract class History<T> {
-    private HashMap<String, List<T>> history;
+public class History<T> {
+    private Map<String, List<T>> history;
 
     public History(){
         this.history = new HashMap<String, List<T>>();
@@ -34,11 +34,5 @@ public abstract class History<T> {
         }
         return result;
     }
-
-    public HashMap<String, List<T>> getAll(){
-        return history;
-    }
-
-    public abstract void printCompanyHistory(String company);
 
 }

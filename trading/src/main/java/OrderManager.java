@@ -1,5 +1,4 @@
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -36,17 +35,17 @@ public class OrderManager {
                 "INPUT FILE: " + fileName);
 
         // Load the csv file.
-        TransactionReader tReader = new TransactionReader(fileName);
-        tReader.readAllPrices();
-        List companyHistory = tReader.getCompanyPrices("BHP.AX");
+        Reader tReader = new PriceReader(fileName);
+        tReader.readAll();
+        List<Price> companyHistory = tReader.getCompanyHistory("BHP.AX");
+        PrintUtils.printPrices(companyHistory);
 
         // Initialise the trading strategy.
         TradingStrategy strategy = new MomentumStrategy(companyHistory);
 
         // Initialise and Load the properties file.
         Properties prop = new Properties();
-        InputStream input = null;
-        input = new FileInputStream(paramName);
+        InputStream input = new FileInputStream(paramName);
         prop.load(input);
 
         // Configure the strategy.
@@ -67,9 +66,7 @@ public class OrderManager {
         strategy.generateOrders();
         List<Order> ordersGenerated = strategy.getOrders();
 
-        FileWriter file = new FileWriter("output.csv");
-        Printer.printOrders(ordersGenerated, file);
-        file.close();
+        Printer.printOrders(ordersGenerated);
 
         ///////////////////////////// Post running. /////////////////////////
         // Stop the timer.

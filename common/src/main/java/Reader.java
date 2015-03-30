@@ -18,4 +18,8 @@ public abstract class Reader<T> {
         while (readNext());
         parser.close();
     }
+
+    public History<T> getHistory() {
+        return history;
+    }
 }

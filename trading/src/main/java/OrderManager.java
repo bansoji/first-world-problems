@@ -2,7 +2,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Properties;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -14,25 +13,32 @@ import java.util.logging.SimpleFormatter;
 public class OrderManager {
 
     // Some class constants.
-    public static final String VERSION = "0.6.0";
+    public static final String VERSION = "0.9.0";
+    public static final String OUTPUT_FILE = "orders.csv";
+    public static final String LOG_FILE = "logfile.log";
 
     public static void main(String[] args) throws IOException {
         String fileName = args[0];
         String paramName = args[1]; // To use, go to "Run -> Edit Configurations" and add
         // "common/src/main/resources/sampleData trading/resources/config.properties" to program args
 
-        ///////////////////// Initialisation. ///////////////////////////////
+        ///////////////////////////////
+        // INITIALISATION.
+        ///////////////////////////////
+
         // Logger initialisation.
         Logger logger = Logger.getLogger("log");
-        FileHandler handler = new FileHandler("logfile.log");
+        FileHandler handler = new FileHandler(LOG_FILE);
         SimpleFormatter formatter = new SimpleFormatter();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
 
-        logger.info("====== Project Name =========\n" +
+        logger.info("====== Buy Hard =========\n" +
                 "Developer Team: Group 1\n" +
                 "MODULE VERSION: " + VERSION + "\n" +
-                "INPUT FILE: " + fileName);
+                "INPUT FILE: " + fileName + "\n" +
+                "OUTPUT FILE: " + OUTPUT_FILE + "\n" +
+                "LOG FILE: " + LOG_FILE);
 
         // Load the csv file.
         Reader tReader = new PriceReader(fileName);
@@ -49,7 +55,10 @@ public class OrderManager {
         // Initialise the timer.
         long startTime = System.currentTimeMillis();
 
-        ///////////////////////////// Running. /////////////////////////////
+
+        ///////////////////////////////
+        // RUNNING.
+        ///////////////////////////////
 
         // Run the strategy module.
         strategy.generateOrders();
@@ -57,7 +66,11 @@ public class OrderManager {
 
         Printer.printOrders(ordersGenerated);
 
-        ///////////////////////////// Post running. /////////////////////////
+
+        ///////////////////////////////
+        // FINISHING.
+        ///////////////////////////////
+
         // Stop the timer.
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;

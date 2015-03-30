@@ -48,8 +48,10 @@ public class OrderManager {
         // Load the csv file.
         Reader tReader = new PriceReader(fileName);
         tReader.readAll();
+
+
         List<Price> companyHistory = tReader.getCompanyHistory("BHP.AX");
-        PrintUtils.printPrices(companyHistory);
+        // PrintUtils.printPrices(companyHistory);
 
         // Load the properties file.
         InputStream input = new FileInputStream(paramName);

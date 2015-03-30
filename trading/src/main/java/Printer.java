@@ -11,8 +11,8 @@ import java.util.logging.Logger;
  */
 public class Printer {
 
-    private static final Logger logger = Logger.getLogger("log");
-    private static final String OUTPUT_FILE_NAME = "orders.csv";
+    private static final Logger logger = Logger.getLogger(OrderManager.LOG_FILE);
+    private static final String OUTPUT_FILE_NAME = OrderManager.OUTPUT_FILE;
 
     /**
      * Appends orders to a csv file.
@@ -41,8 +41,8 @@ public class Printer {
         } catch (IOException e) {
             logger.severe(e.getMessage());
         }
-        // System.out.println("\nFinished.  File written to " + file);
 
+        // System.out.println("\nFinished.  File written to " + file);
         logger.info(orders.size() + " orders generated.");
     }
 }

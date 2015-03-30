@@ -19,5 +19,6 @@ ui/src/main/resources/fonts
 # extra output files
 *.csv
 *.log
+*.csv#
 
 .DS_Store

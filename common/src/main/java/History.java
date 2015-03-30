@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class records the price history for all companies.
@@ -33,6 +30,10 @@ public class History<T> {
             result = history.get(company);
         }
         return result;
+    }
+
+    public Set<String> getAllCompanies(){
+        return history.keySet();
     }
 
 }

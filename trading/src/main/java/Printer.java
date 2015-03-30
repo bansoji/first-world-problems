@@ -17,7 +17,10 @@ public class Printer {
      * @param file The file to write to.
      */
     public static void printOrders(List<Order> orders, FileWriter file) {
+        String[] header = new String[] {"#RIC", "Date", "Price", "Volume", "Value", "Signal"};
         CSVWriter writer = new CSVWriter(file, ',', CSVWriter.NO_QUOTE_CHARACTER);
+        // Print the header.
+        writer.writeNext(header );
         for(Order o : orders){
             //System.out.println(Arrays.toString(o.toStringArray())); // For debugging.
             writer.writeNext(o.toStringArray());

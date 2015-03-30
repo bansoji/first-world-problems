@@ -8,8 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * An implementation of the Momentum Strategy.
@@ -87,7 +87,7 @@ public class MomentumStrategy implements TradingStrategy {
                     "Please make sure it is in the correct format of dd-MM-yyyy.");
             endDate = null;
         }catch (NullPointerException e){
-            startDate = null;
+            endDate = null;
         }
     }
 

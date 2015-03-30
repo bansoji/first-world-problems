@@ -2,8 +2,8 @@ import com.opencsv.CSVWriter;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -12,24 +12,34 @@ import java.util.logging.Logger;
 public class Printer {
 
     private static final Logger logger = Logger.getLogger("log");
+    private static final String OUTPUT_FILE_NAME = "output.csv";
 
     /**
      * Appends orders to a csv file.
      * @param orders An ArrayList of Orders.
-     * @param file The file to write to.
      */
-    public static void printOrders(List<Order> orders, FileWriter file) {
+    public static void printOrders(List<Order> orders) {
+        FileWriter file;
+        try {
+            file = new FileWriter(OUTPUT_FILE_NAME);
+        } catch (IOException e) {
+            logger.severe(e.getMessage());
+            return;
+        }
         CSVWriter writer = new CSVWriter(file, ',');
-        for(Order o : orders){
-            //System.out.println(Arrays.toString(o.toStringArray())); // For debugging.
+        for (Order o : orders){
             writer.writeNext(o.toStringArray());
         }
-        System.out.println("\nFinished.  File written to " + file);
+        logger.log(Level.INFO, "\nFinished.  File written to " + OUTPUT_FILE_NAME);
         try {
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
-            logger.severe("Cannot close the order writer. " + e);
+            logger.severe(e.getMessage());
+        }
+        try {
+            file.close();
+        } catch (IOException e) {
+            logger.severe(e.getMessage());
         }
     }
 }

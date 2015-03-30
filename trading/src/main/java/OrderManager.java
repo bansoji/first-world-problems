@@ -50,7 +50,6 @@ public class OrderManager {
         Reader tReader = new PriceReader(fileName);
         tReader.readAll();
 
-
         List<Price> companyHistory = tReader.getCompanyHistory("BHP.AX");
         // PrintUtils.printPrices(companyHistory);
 

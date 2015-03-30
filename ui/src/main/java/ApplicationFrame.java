@@ -97,10 +97,12 @@ public class ApplicationFrame extends JFrame {
                     try {
                         Runtime rt = Runtime.getRuntime();
                         rt.exec("java -jar " + strategyFile + " " + dataFile + " " + paramFile);
-                        TransactionReader reader = new TransactionReader(dataFile);
-                        List<Price> prices = reader.getAllPrices();
-                        reader = new TransactionReader(OUTPUT_FILE_PATH);
-                        List<Order> orders = reader.getAllOrders();
+                        Reader reader = new Reader(dataFile);
+                        reader.readAllPrices();
+                        List<Price> prices = reader.getCompanyPrices("BHP.AX");
+                        reader = new Reader(OUTPUT_FILE_PATH);
+                        reader.readAllOrders();
+                        List<Order> orders = reader.getCompanyOrders("BHP.AX");
                         loadGraph(prices,orders);
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null,

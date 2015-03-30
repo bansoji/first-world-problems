@@ -1,5 +1,4 @@
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -42,14 +41,16 @@ public class OrderManager {
                 "LOG FILE: " + LOG_FILE);
 
         // Load the csv file.
-        TransactionReader tReader = new TransactionReader(fileName);
-        List<Price> allPrices = tReader.getAllPrices();
+        Reader tReader = new PriceReader(fileName);
+        tReader.readAll();
+        List<Price> companyHistory = tReader.getCompanyHistory("BHP.AX");
+        PrintUtils.printPrices(companyHistory);
 
         // Load the properties file.
         InputStream input = new FileInputStream(paramName);
 
         // Initialise the trading strategy.
-        TradingStrategy strategy = new MomentumStrategy(allPrices, input);
+        TradingStrategy strategy = new MomentumStrategy(companyHistory,input);
 
         // Initialise the timer.
         long startTime = System.currentTimeMillis();
@@ -63,9 +64,7 @@ public class OrderManager {
         strategy.generateOrders();
         List<Order> ordersGenerated = strategy.getOrders();
 
-        FileWriter file = new FileWriter(OUTPUT_FILE);
-        Printer.printOrders(ordersGenerated, file);
-        file.close();
+        Printer.printOrders(ordersGenerated);
 
 
         ///////////////////////////////
@@ -92,20 +91,11 @@ public class OrderManager {
     }
 
     private static void printPrices(List<Price> allPrices){
-        //prints allPrices
-
+        //prints allPrices.
         for (Price price: allPrices){
             System.out.print(price.getCompanyName() + " ");
             System.out.print(price.getValue() + " ");
             System.out.print(price.getDate() + "\n");
         }
-
-
-        //prints columnContents
-        /*
-        for (String line:columnContents){
-            System.out.println(line);
-        }
-        */
     }
 }

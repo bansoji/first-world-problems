@@ -10,6 +10,8 @@ trading/.idea
 
 # Maven target folder
 trading/target
+common/target
+ui/target
 
 # extra output files
 *.csv

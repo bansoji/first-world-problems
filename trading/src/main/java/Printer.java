@@ -25,7 +25,8 @@ public class Printer {
             //System.out.println(Arrays.toString(o.toStringArray())); // For debugging.
             writer.writeNext(o.toStringArray());
         }
-        System.out.println("\nFinished.  File written to " + file);
+        // System.out.println("\nFinished.  File written to " + file);
 
+        logger.info(orders.size() + " orders generated.");
     }
 }

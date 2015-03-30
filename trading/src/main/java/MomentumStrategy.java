@@ -71,7 +71,6 @@ public class MomentumStrategy implements TradingStrategy {
         this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
 
         // Get the start and end dates.
-        System.out.println(prop.getProperty("startDate"));
         try {
             this.startDate = df.parse(prop.getProperty("startDate"));
         } catch (ParseException e) {

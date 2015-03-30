@@ -19,6 +19,11 @@ public class OrderManager {
     public static final String LOG_FILE = "logfile.log";
 
     public static void main(String[] args) throws IOException {
+        if (args.length != 2){
+            System.out.println("Error: Incorrect program usage.");
+            System.out.println("Usage: java -jar BuyHard inputFile paramsFile");
+            return;
+        }
         String fileName = args[0];
         String paramName = args[1]; // To use, go to "Run -> Edit Configurations" and add
         // "common/src/main/resources/sampleData trading/resources/config.properties" to program args
@@ -75,7 +80,7 @@ public class OrderManager {
         // Stop the timer.
         long stopTime = System.currentTimeMillis();
         long elapsedTime = stopTime - startTime;
-        System.out.println("Time passed = " + elapsedTime + "ms");
+        // System.out.println("Time passed = " + elapsedTime + "ms");
         logger.info("Time Elapsed : " + elapsedTime + "ms");
 
         // Log successful.

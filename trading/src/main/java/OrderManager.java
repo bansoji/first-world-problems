@@ -40,22 +40,11 @@ public class OrderManager {
         List<Price> companyHistory = tReader.getCompanyHistory("BHP.AX");
         PrintUtils.printPrices(companyHistory);
 
-        // Initialise the trading strategy.
-        TradingStrategy strategy = new MomentumStrategy(companyHistory);
-
-        // Initialise and Load the properties file.
-        Properties prop = new Properties();
+        // Load the properties file.
         InputStream input = new FileInputStream(paramName);
-        prop.load(input);
 
-        // Configure the strategy.
-        String movingAvg = prop.getProperty("movingAverage", "4"); // Sets the default values.
-        String threshold = prop.getProperty("threshold", "0.001");
-        String volume = prop.getProperty("volume", "100");
-
-        strategy.setMovingAverage(Integer.parseInt(movingAvg));
-        strategy.setThreshold(Double.parseDouble(threshold));
-        strategy.setVolume(Integer.parseInt(volume));
+        // Initialise the trading strategy.
+        TradingStrategy strategy = new MomentumStrategy(companyHistory,input);
 
         // Initialise the timer.
         long startTime = System.currentTimeMillis();

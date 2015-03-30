@@ -8,17 +8,25 @@ import java.util.*;
  */
 public class Portfolio {
 
-    private static List<Asset> assetsHolder = new ArrayList<Asset>(); //Contains all assets currently in possession.
-    private static Map<Asset, Double> soldAssets = new HashMap<Asset, Double>(); // A history of all the assets sold
-                                                                                    // with their selling prices attached.
+    private List<Asset> assetsHolder; //Contains all assets currently in possession.
+    private Map<Asset, Double> soldAssets; // A history of all the assets sold with their selling prices attached.
 
+    /**
+     * This is the constructor for Portfolio.
+     */
+    public Portfolio ()
+    {
+        this.assetsHolder = new ArrayList<Asset>();
+        this.soldAssets = new HashMap<Asset, Double>();
+    }
+    
     /**
      * This method will "Buy" the asset and store it in assetsHolder.
      * @param asset     The specified asset to be bought.
      */
-    public static void buyAsset (Asset asset)
+    public void buyAsset (Asset asset)
     {
-        assetsHolder.add(asset);
+        this.assetsHolder.add(asset);
     }
 
     /**
@@ -27,17 +35,17 @@ public class Portfolio {
      * @param soldAsset         The specified asset to sell.
      * @param sellPrice     The specified price to sell the asset at.
      */
-    public static void sellAsset (Asset soldAsset, double sellPrice)
+    public void sellAsset (Asset soldAsset, double sellPrice)
     {
-        soldAssets.put(soldAsset, sellPrice);
-        assetsHolder.remove(soldAsset);
+        this.soldAssets.put(soldAsset, sellPrice);
+        this.assetsHolder.remove(soldAsset);
     }
 
     /**
      * This method will clear the buy and sell history of the portfolio.
      */
-    public static void clearHistory() {
-        soldAssets.clear();
+    public void clearHistory() {
+        this.soldAssets.clear();
     }
 
     /**
@@ -45,10 +53,10 @@ public class Portfolio {
      * Note that this uses the price at the time that they were bought.
      * @return  The total value of all the assets in possession.
      */
-    public static double calcAssetValue ()
+    public double calcAssetValue ()
     {
         double totalValue = 0;
-        for (Asset asset : assetsHolder)
+        for (Asset asset : this.assetsHolder)
         {
             totalValue += getValue(asset.getVolume(), asset.getBuyPrice());
         }
@@ -61,12 +69,12 @@ public class Portfolio {
      * Note that this does NOT include Assets that are bought but not sold at the time of call.
      * @return  The profit/loss of sold assets in comparison to their buy prices.
      */
-    public static double calcProfit ()
+    public double calcProfit ()
     {
         double profit = 0;
-        for (Asset soldAsset : soldAssets.keySet())
+        for (Asset soldAsset : this.soldAssets.keySet())
         {
-            profit += getValue(soldAsset.getVolume(), soldAssets.get(soldAsset) - soldAsset.getBuyPrice());
+            profit += getValue(soldAsset.getVolume(), this.soldAssets.get(soldAsset) - soldAsset.getBuyPrice());
         }
 
         return profit;

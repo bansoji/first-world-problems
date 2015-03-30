@@ -114,8 +114,10 @@ public class ApplicationFrame extends JFrame {
                         ProcessBuilder pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
                         pb.start();
                         Reader reader = new PriceReader(dataFile);
+                        reader.readAll();
                         List<Price> prices = reader.getCompanyHistory("BHP.AX");
-                        reader = new PriceReader(OUTPUT_FILE_PATH);
+                        reader = new OrderReader(OUTPUT_FILE_PATH);
+                        reader.readAll();
                         List<Order> orders = reader.getCompanyHistory("BHP.AX");
                         loadGraph(prices, orders);
                         Map<Date,OrderType> orderRecord = new HashMap<>();

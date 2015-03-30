@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 public class Printer {
 
     private static final Logger logger = Logger.getLogger("log");
-    private static final String OUTPUT_FILE_NAME = "output.csv";
+    private static final String OUTPUT_FILE_NAME = "orders.csv";
 
     /**
      * Appends orders to a csv file.

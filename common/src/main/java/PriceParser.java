@@ -30,6 +30,12 @@ public class PriceParser extends Parser<Price> {
                 //get the next line with a price
                 while (nextLine[PRICE].equals("")) {
                     nextLine = reader.readNext();
+                    if (nextLine.length < PRICE) {
+                        for (int i = 0; i < nextLine.length; i++)
+                        {
+                            System.out.println(nextLine[i]);
+                        }
+                    }
                     if (nextLine == null) return null;
                 }
 

@@ -25,34 +25,36 @@ public class OrderParser extends Parser<Order> {
         //Read the remaining lines and store data into ArrayList.
         try {
             String[] nextLine = reader.readNext();
-            String companyName = nextLine[ORDER_COMPANY_NAME];
-            double value;
-            Date date = null;
+            if (nextLine != null) {
+                String companyName = nextLine[ORDER_COMPANY_NAME];
+                double value;
+                Date date = null;
 
-            //get the next line with a price
-            while (nextLine[ORDER_PRICE].equals("")){
-                nextLine = reader.readNext();       //No value.
-                if (nextLine == null) return null;
+                //get the next line with a price
+                while (nextLine[ORDER_PRICE].equals("")) {
+                    nextLine = reader.readNext();       //No value.
+                    if (nextLine == null) return null;
+                }
+                value = Double.parseDouble(nextLine[ORDER_PRICE]);
+
+                try {
+                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+                    date = df.parse(nextLine[ORDER_DATE]);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    logger.severe("Incorrect date format in the input file.");
+                }
+
+                OrderType type;
+                if (nextLine[ORDER_SIGNAL].equals("B")) {
+                    type = OrderType.BUY;
+                } else {
+                    type = OrderType.SELL;
+                }
+
+                int volume = Integer.parseInt(nextLine[ORDER_VOLUME]);
+                return new Order(type, companyName, value, volume, date);
             }
-            value = Double.parseDouble(nextLine[ORDER_PRICE]);
-
-            try {
-                DateFormat df = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
-                date = df.parse(nextLine[ORDER_DATE]);
-            } catch (ParseException e) {
-                e.printStackTrace();
-                logger.severe("Incorrect date format in the input file.");
-            }
-
-            OrderType type;
-            if (nextLine[ORDER_SIGNAL].equals("B")) {
-                type = OrderType.BUY;
-            } else {
-                type = OrderType.SELL;
-            }
-
-            int volume = Integer.parseInt(nextLine[ORDER_VOLUME]);
-            return new Order(type, companyName, value, volume, date);
 
         } catch (IOException e) {
             e.printStackTrace();

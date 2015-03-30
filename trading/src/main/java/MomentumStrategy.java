@@ -88,7 +88,7 @@ public class MomentumStrategy implements TradingStrategy {
                     "Please make sure it is in the correct format of dd-MM-yyyy.");
             endDate = null;
         }catch (NullPointerException e){
-            startDate = null;
+            endDate = null;
         }
     }
 

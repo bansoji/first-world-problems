@@ -1,32 +1,17 @@
 import javafx.application.Platform;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.util.Callback;
-import org.apache.commons.lang3.StringEscapeUtils;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Gavin Tam on 17/03/15.
@@ -128,10 +113,10 @@ public class ApplicationFrame extends JFrame {
                     try {
                         ProcessBuilder pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
                         pb.start();
-                        TransactionReader reader = new TransactionReader(dataFile);
-                        List<Price> prices = reader.getAllPrices();
-                        reader = new TransactionReader(OUTPUT_FILE_PATH);
-                        List<Order> orders = reader.getAllOrders();
+                        Reader reader = new PriceReader(dataFile);
+                        List<Price> prices = reader.getCompanyHistory("BHP.AX");
+                        reader = new PriceReader(OUTPUT_FILE_PATH);
+                        List<Order> orders = reader.getCompanyHistory("BHP.AX");
                         loadGraph(prices, orders);
                         Map<Date,OrderType> orderRecord = new HashMap<>();
                         for (Order order: orders)
@@ -213,7 +198,7 @@ public class ApplicationFrame extends JFrame {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                GraphBuilder.buildGraph(graph,prices,orders);
+                GraphBuilder.buildGraph(graph, prices, orders);
             }
         });
     }
@@ -223,7 +208,7 @@ public class ApplicationFrame extends JFrame {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                TableBuilder.buildTable(table,prices,orders);
+                TableBuilder.buildTable(table, prices, orders);
             }
         });
     }

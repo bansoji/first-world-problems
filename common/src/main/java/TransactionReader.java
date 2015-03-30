@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.logging.Logger;
 
 /**
- * This class reads an input CSV file and outputs its contents as an ArrayList
+ * This class reads an input CSV file and outputs its contents as an ArrayList.
  */
 
 public class TransactionReader {
@@ -36,6 +36,7 @@ public class TransactionReader {
             reader = new CSVReader(new FileReader(fileName));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+            logger.warning("Input file cannot be opened.");
         }
     }
 
@@ -72,6 +73,7 @@ public class TransactionReader {
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
+            logger.severe("Cannot find the reader. " + e);
         }
         return allPrices;
     }
@@ -98,6 +100,7 @@ public class TransactionReader {
                     date = df.parse(nextLine[ORDER_DATE]);
                 } catch (ParseException e) {
                     e.printStackTrace();
+                    logger.severe("Incorrect date format in the input file.");
                 }
 
                 OrderType type;

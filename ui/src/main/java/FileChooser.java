@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionListener;
 
 /**
@@ -11,6 +12,7 @@ public class FileChooser extends JPanel {
 
     public FileChooser (String buttonName)
     {
+        setBackground(Color.WHITE);
         button = new JButton(buttonName);
         label = new JLabel("No file selected");
         add(button);

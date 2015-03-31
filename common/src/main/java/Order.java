@@ -51,10 +51,11 @@ public class Order {
 
     /**
      * Returns the total price of the Order.
-     * @return total price of the Order.
+     * @return total price of the Order, rounded to 3 decimal places.
      */
     public double getValue(){
-        return this.price * this.volume;
+        // Round to 3dp, since that is the lowest decimal value in the input file.
+        return Math.round((this.price * this.volume) * 100.0) / 100.0;
     }
 
     /**
@@ -67,6 +68,10 @@ public class Order {
         } else {
             return this.getValue();
         }
+    }
+
+    public int getVolume() {
+        return volume;
     }
 
     public OrderType getOrderType()
@@ -83,13 +88,13 @@ public class Order {
     }
 
     public String[] toStringArray() {
-        DateFormat df = new SimpleDateFormat("dd/mm/yyyy hh:mm:ss");
+        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         String[] s = new String[6];
         s[0] = this.companyName;
         s[1] = df.format(this.date);
         s[2] = String.valueOf(this.price);
         s[3] = String.valueOf(this.volume);
-        s[4] = String.valueOf(this.price);
+        s[4] = String.valueOf(this.getValue());
         s[5] = this.signal.getSignal(this.signal);
         return s;
     }

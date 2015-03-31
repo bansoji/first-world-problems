@@ -69,11 +69,16 @@ public class MomentumStrategy implements TradingStrategy {
         this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.001"));
         this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
 
+        String startDateInput = prop.getProperty("startDate");
+        String endDateInput = prop.getProperty("endDate");
+
         // Get the start and end dates.
-        this.startDate = DateUtils.parse(prop.getProperty("startDate"),
+        if (startDateInput != null)
+            this.startDate = DateUtils.parse(startDateInput,
                 "Incorrect Date format used for start date of simulations. " +
                 "Please make sure it is in the correct format of dd-MM-yyyy.");
-        this.endDate = DateUtils.parse(prop.getProperty("endDate"),
+        if (endDateInput != null)
+            this.endDate = DateUtils.parse(endDateInput,
                 "Incorrect Date format used for end date of simulations. " +
                 "Please make sure it is in the correct format of dd-MM-yyyy.");
     }

@@ -105,8 +105,9 @@ public class OrderManager {
             }
         }
 
-        for (TradingStrategy s : strategies)
-            csvOrderWriter.writeOrders(s.getOrders());
+        for (TradingStrategy s : strategies) {
+            //csvOrderWriter.writeOrders(s.getOrders());
+        }
 
         // Stop the timer.
         long stopTime = System.currentTimeMillis();

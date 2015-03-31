@@ -2,6 +2,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.FileHandler;
@@ -62,10 +63,14 @@ public class OrderManager {
         }
 
         OrderWriter csvOrderWriter = new OrderWriter(orderFile);
+        List<Order> ordersGenerated = new ArrayList<Order>();
+        Thread[] threads = new Thread[(tReader.getHistory().getAllCompanies()).size()];
+        TradingStrategy[] strategies = new TradingStrategy[(tReader.getHistory().getAllCompanies()).size()];
 
         // Initialise the timer.
         long startTime = System.currentTimeMillis();
 
+        int i = 0;
         for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
             List<Price> companyHistory = tReader.getCompanyHistory(company);
             // PrintUtils.printPrices(companyHistory);
@@ -81,16 +86,27 @@ public class OrderManager {
             ///////////////////////////////
 
             // Run the strategy module.
-            strategy.generateOrders();
-            List<Order> ordersGenerated = strategy.getOrders();
-
-            csvOrderWriter.writeOrders(ordersGenerated);
-
+            // strategy.generateOrders();
+            strategies[i] = strategy;
+            Thread t = new Thread(strategy);
+            threads[i] = t;
+            t.run();
+            i++;
         }
 
         ///////////////////////////////
         // FINISHING.
         ///////////////////////////////
+        for(i = 0; i < threads.length; i++) {
+            try {
+                threads[i].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (TradingStrategy s : strategies)
+            csvOrderWriter.writeOrders(s.getOrders());
 
         // Stop the timer.
         long stopTime = System.currentTimeMillis();

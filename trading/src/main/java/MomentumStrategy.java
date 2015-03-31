@@ -23,6 +23,7 @@ public class MomentumStrategy implements TradingStrategy {
     private int volume;
     private Date startDate;
     private Date endDate;
+    private Thread t;
 
 
     private static final Logger logger = Logger.getLogger("log");
@@ -55,6 +56,9 @@ public class MomentumStrategy implements TradingStrategy {
         }
 
         logger.info(parameters);
+
+        this.t = new Thread();
+        t.start();
     }
 
     /**
@@ -166,6 +170,11 @@ public class MomentumStrategy implements TradingStrategy {
         }
 
         return l;
+    }
+
+    @Override
+    public void run(){
+        generateOrders();
     }
 
     public void setMovingAverage(int movingAverage) {

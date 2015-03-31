@@ -2,6 +2,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -50,29 +51,31 @@ public class OrderManager {
         Reader tReader = new PriceReader(fileName);
         tReader.readAll();
 
-        List<Price> companyHistory = tReader.getCompanyHistory("BHP.AX");
-        // PrintUtils.printPrices(companyHistory);
-
-        // Load the properties file.
-        InputStream input = new FileInputStream(paramName);
-
-        // Initialise the trading strategy.
-        TradingStrategy strategy = new MomentumStrategy(companyHistory,input);
 
         // Initialise the timer.
         long startTime = System.currentTimeMillis();
 
+        for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
+            List<Price> companyHistory = tReader.getCompanyHistory(company);
+            // PrintUtils.printPrices(companyHistory);
 
-        ///////////////////////////////
-        // RUNNING.
-        ///////////////////////////////
+            // Load the properties file.
+            InputStream input = new FileInputStream(paramName);
 
-        // Run the strategy module.
-        strategy.generateOrders();
-        List<Order> ordersGenerated = strategy.getOrders();
+            // Initialise the trading strategy.
+            TradingStrategy strategy = new MomentumStrategy(companyHistory, input);
 
-        Printer.printOrders(ordersGenerated);
+            ///////////////////////////////
+            // RUNNING.
+            ///////////////////////////////
 
+            // Run the strategy module.
+            strategy.generateOrders();
+            List<Order> ordersGenerated = strategy.getOrders();
+
+            Printer.printOrders(ordersGenerated);
+
+        }
 
         ///////////////////////////////
         // FINISHING.

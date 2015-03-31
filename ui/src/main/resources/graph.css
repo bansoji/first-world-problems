@@ -2,15 +2,17 @@
     -fx-stroke: #3915AE;
 }
 
-.chart-line-symbol-price {
-    -fx-background-color: #3915AE;
+.info-box {
+    -fx-text-alignment: center;
+    -fx-background-insets: -8;
+    -fx-font-size: 12;
+    -fx-background-color: #3915AE, white;
 }
 
-.chart-line-symbol-buy {
-    -fx-background-color: #1CD822;
+.chart-content {
+    -fx-padding: 0px 20px 0px 20px;
 }
 
-.chart-line-symbol-sell {
-    -fx-background-color: #D8351C;
+.chart {
+    -fx-padding: 10px 20px 10px 0px;
 }
-

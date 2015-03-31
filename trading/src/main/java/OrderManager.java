@@ -1,4 +1,5 @@
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -51,6 +52,16 @@ public class OrderManager {
         Reader tReader = new PriceReader(fileName);
         tReader.readAll();
 
+        // Initialise the File and CSV Writer.
+        FileWriter orderFile;
+        try {
+            orderFile = new FileWriter(OUTPUT_FILE);
+        } catch (IOException e) {
+            logger.severe(e.getMessage());
+            return;
+        }
+
+        Printer csvPrinter = new Printer(orderFile);
 
         // Initialise the timer.
         long startTime = System.currentTimeMillis();
@@ -73,7 +84,7 @@ public class OrderManager {
             strategy.generateOrders();
             List<Order> ordersGenerated = strategy.getOrders();
 
-            Printer.printOrders(ordersGenerated);
+            csvPrinter.printOrders(ordersGenerated);
 
         }
 
@@ -86,6 +97,14 @@ public class OrderManager {
         long elapsedTime = stopTime - startTime;
         // System.out.println("Time passed = " + elapsedTime + "ms");
         logger.info("Time Elapsed : " + elapsedTime + "ms");
+
+        // Close the orders file and CSV Writer.
+        csvPrinter.closePrinter();
+        try {
+            orderFile.close();
+        } catch (IOException e) {
+            logger.severe(e.getMessage());
+        }
 
         // Log successful.
         logger.info("Module successful. No errors encountered.");

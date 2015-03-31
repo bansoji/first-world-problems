@@ -13,36 +13,42 @@ public class Printer {
 
     private static final Logger logger = Logger.getLogger(OrderManager.LOG_NAME);
     private static final String OUTPUT_FILE_NAME = OrderManager.OUTPUT_FILE;
+    private CSVWriter writer;
+    private int numOrdersGenerated;
 
-    /**
-     * Appends orders to a csv file.
-     * @param orders An ArrayList of Orders.
-     */
-    public static void printOrders(List<Order> orders) {
-        FileWriter file;
-        try {
-            file = new FileWriter(OUTPUT_FILE_NAME);
-        } catch (IOException e) {
-            logger.severe(e.getMessage());
-            return;
-        }
-        CSVWriter writer = new CSVWriter(file, ',');
-        for (Order o : orders){
-            writer.writeNext(o.toStringArray());
-        }
+    public Printer(FileWriter file){
+        this.writer = new CSVWriter(file, ',', CSVWriter.NO_QUOTE_CHARACTER);
+        String[] header = new String[] {"#RIC", "Date", "Price", "Volume", "Value", "Signal"};
+        // Print the header.
+        writer.writeNext(header);
+
+        this.numOrdersGenerated = 0;
+    }
+
+    public void closePrinter(){
         logger.log(Level.INFO, "\nFinished.  File written to " + OUTPUT_FILE_NAME);
+
+        // System.out.println("\nFinished.  File written to " + file);
+        logger.info(this.numOrdersGenerated + " orders generated.");
+
         try {
             writer.close();
         } catch (IOException e) {
             logger.severe(e.getMessage());
         }
-        try {
-            file.close();
-        } catch (IOException e) {
-            logger.severe(e.getMessage());
+
+    }
+
+    /**
+     * Appends orders to a csv file.
+     * @param orders An ArrayList of Orders.
+     */
+    public void printOrders(List<Order> orders) {
+
+        for (Order o : orders){
+            this.writer.writeNext(o.toStringArray());
+            this.numOrdersGenerated += 1;
         }
 
-        // System.out.println("\nFinished.  File written to " + file);
-        logger.info(orders.size() + " orders generated.");
     }
 }

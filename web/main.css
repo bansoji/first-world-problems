@@ -25,6 +25,10 @@ h3 {
     margin-top: -10px;
 }
 
+h5 {
+    font-weight: bold;
+}
+
 /* Custom page header */
 .header {
     text-align: right;

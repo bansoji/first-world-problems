@@ -24,6 +24,14 @@ public class MomentumStrategyTest {
         Price price04 = new Price("CompanyA", 17.35, testDates.parse("05/01/2013"));
         Price price05 = new Price("CompanyA", 9.01, testDates.parse("06/01/2013"));
         Price price06 = new Price("CompanyA", 9.00, testDates.parse("07/01/2013"));
+        Price price07 = new Price("CompanyA", 9.05, testDates.parse("08/01/2013"));
+        Price price08 = new Price("CompanyA", 9.06, testDates.parse("09/01/2013"));
+        Price price09 = new Price("CompanyA", 12.13, testDates.parse("10/01/2013"));
+        Price price10 = new Price("CompanyA", 14.15, testDates.parse("11/01/2013"));
+        Price price11 = new Price("CompanyA", 17.00, testDates.parse("12/01/2013"));
+        Price price12 = new Price("CompanyA", 16.59, testDates.parse("13/01/2013"));
+        Price price13 = new Price("CompanyA", 14.27, testDates.parse("14/01/2013"));
+
         List<Price> priceList = new ArrayList<>();
         priceList.add(price00);
         priceList.add(price01);
@@ -36,6 +44,7 @@ public class MomentumStrategyTest {
         TradingStrategy testStrategy = new MomentumStrategy(priceList, input);
         testStrategy.generateOrders();
         List<Order> testOutput = testStrategy.getOrders();
+        assert(testOutput.size() != 0);
         for (Order i : testOutput)
         {
             for (String field : i.toStringArray())

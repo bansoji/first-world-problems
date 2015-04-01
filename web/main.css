@@ -107,3 +107,7 @@ h5 {
     font-weight: 500;
     color: gray;
 }
+
+#release-list {
+    text-align: left;
+}

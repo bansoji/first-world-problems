@@ -22,11 +22,18 @@ h1 {
 }
 h3 {
     color: grey;
-    margin-top: -10px;
 }
 
 h5 {
     font-weight: bold;
+}
+
+hr {
+	padding-bottom: 10px;
+}
+
+ul {
+	text-align: left;
 }
 
 /* Custom page header */
@@ -86,7 +93,10 @@ h5 {
 	overflow-y:scroll;
 	font-family: 'Monaco', 'Consolas';
 	font-size: 90%;
+}
 
+#changelog-modal {
+	text-align: left;
 }
 
 #custom-buttons {
@@ -98,7 +108,7 @@ h5 {
 .modal-content {
     border-radius: 0;
 }
-.modal-content h4{
+.modal-content h3{
     color: grey;
     padding-bottom: 10px;
 }
@@ -110,4 +120,20 @@ h5 {
 
 #release-list {
     text-align: left;
+}
+
+.submit-link {
+	display: inline-block;
+}
+
+.subheading-content {
+	padding-bottom: 20px;
+}
+
+.subheading-content > .well {
+	margin-top: 20px;
+}
+
+.heading {
+	font-size: 30pt;
 }

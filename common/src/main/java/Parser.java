@@ -12,6 +12,9 @@ public abstract class Parser<T> {
     protected CSVReader reader;
     protected static final Logger logger = Logger.getLogger("log");
 
+    // /Records the number of file lines
+    protected int numberOfFileLines;
+
     public Parser (String fileName) {
         try {
             this.reader = new CSVReader(new FileReader(fileName));
@@ -23,9 +26,11 @@ public abstract class Parser<T> {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        numberOfFileLines = 0;
     }
 
     public abstract T parseNextLine();
+
     public void close()
     {
         try {
@@ -33,5 +38,9 @@ public abstract class Parser<T> {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public int getNumberOfFileLines() {
+        return numberOfFileLines;
     }
 }

@@ -82,8 +82,7 @@ public class OrderManager {
 
             // Run the strategy module.
             strategy.generateOrders();
-            List<Order> ordersGenerated = strategy.getOrders();
-
+i
             csvPrinter.printOrders(ordersGenerated);
 
         }

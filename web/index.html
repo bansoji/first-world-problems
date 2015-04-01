@@ -57,7 +57,7 @@
         </div>
     </div>
     <div class="panel panel-default" id="internal-panel">
-        <form method="get" action="BuyHard-1.0.0.jar">
+        <form method="get" action="BuyHard-Momentum-1.0.0.jar">
             <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">Latest Release</button></p>
         </form>
         <p>
@@ -76,32 +76,34 @@
         <h2 class="heading">Getting Started</h2>
         <hr>
 		  <div class="subheading-content">
-        <h2>Running in Standalone Mode</h2>
+        <h2><span>Running in Standalone Mode</span></h2>
            Run the following command in a terminal:
-           <div class="well well-sm"> java -jar BuyHard.jar pricesFile paramFile</div>
+           <div class="well well-sm"> java -jar BuyHardModule pricesFile paramFile</div>
 			  Minimum requirement is <b>Java 7</b>, but we recommend Java 8.
         </div>
 
         <div class="subheading-content">
-		  <h3>Input File</h3>
-           The first input file must be a valid Sicra file from TRTH. Try using the sample data set
-           <form id="inputData" class="submit-link" method="get" action="data.csv"> 
-			   <a href="javascript:submitLink('inputData')">here.</a>
-		     </form>
+		  <h3>Input Files</h3>
+				There are 3 input files required:
+				<ul>
+		        <li><i>Buy Hard</i> strategy module, downloadable from the Releases section.</li>
+
+				  <li>Prices data file: must be a valid Sicra file from TRTH. Try using the sample data set
+		        <form id="inputData" class="submit-link" method="get" action="samples/prices.csv"> 
+					<a href="javascript:submitLink('inputData')">here.</a>
+				  </form></li>
+
+				  <li>Parameters file: configures the strategy module used.
+		        A sample parameters file can be downloaded 
+		        <form id="params" class="submit-link" method="get" action="samples/config.properties"> 
+					<a href="javascript:submitLink('params')">here.</a>
+				  </form></li>
+				</ul>
         </div>
 
         <div class="subheading-content">
-		  <h3>Parameters File</h3>
-           The parameters file passed in can be used to configure the strategy module used.
-           A sample parameters file can be downloaded 
-           <form id="params" class="submit-link" method="get" action="config.properties"> 
-			   <a href="javascript:submitLink('params')">here.</a>
-		     </form>
-		  </div>
-
-        <div class="subheading-content">
         <h3>Output Files</h3>
-           <i>Buy Hard </i> will produce two output files:
+           <i>Buy Hard </i> will produce 2 output files:
 		     <ul>
 			   <li><i>orders.csv</i>, which contains the orders generated from the trading module. </li>
 		      <li><i>logfile.log</i>, which contains the logs from the module, and any warnings or errors encountered. </li>
@@ -109,12 +111,12 @@
 		  </div>
 
         <div class="subheading-content">
-		  <h2>Integrating with trading systems</h2>
-           <i>Buy Hard</i> modules can be easilt integrated to existing trading systems using the command provided for the standalone mode.
+		  <h2><span>Integrating with trading systems</span></h2>
+           <i>Buy Hard</i> modules can be easily integrated to existing trading systems using the command provided for the standalone mode.
 			  This will produce the same output files, whereby the <i>orders.csv</i> file can then be processed.
 			  For example, to run in a Java application, you can use the following code:
            <div class="well well-sm"> 
-				   ProcessBuilder pb = new ProcessBuilder("java", "-jar", "BuyHard.jar", pricesFile, paramFile);<br>
+				   ProcessBuilder pb = new ProcessBuilder("java", "-jar", BuyHardModule, pricesFile, paramFile);<br>
                pb.start();
 			  </div>
 		  </div>

@@ -19,8 +19,8 @@ h1 {
     color: gray;
     font-size: 60px;
     margin: 0;
-
 }
+
 h3 {
     color: grey;
 }
@@ -137,6 +137,31 @@ ul {
 
 .heading {
 	font-size: 30pt;
+}
+
+.subheading-content h2 {
+   position: relative;
+   text-align: center;
+	padding-bottom: 10px;
+	padding-top: 10px;
+}
+
+.subheading-content h2 span {
+  background: #fff;
+  padding: 0 15px;
+  position: relative;
+  z-index: 1;
+}
+
+.subheading-content h2:before {
+  background: #ddd;
+  content: "";
+  display: block;
+  height: 1px;
+  position: absolute;
+    top: 50%;
+	left: 10%;
+  width: 80%;
 }
 
 .logo {

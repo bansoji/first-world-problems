@@ -17,12 +17,12 @@ public class MomentumStrategyTest {
         InputStream input = new FileInputStream(paramName);
         SimpleDateFormat testDates = new SimpleDateFormat("dd/MM/yyyy");
 
-        Price price00 = new Price("CompanyA", 8.00, testDates.parse("01/01/2013"));
-        Price price01 = new Price("CompanyA", 13.25, testDates.parse("02/01/2013"));
-        Price price02 = new Price("CompanyA", 16.00, testDates.parse("03/01/2013"));
+        Price price00 = new Price("CompanyA", 5.00, testDates.parse("01/01/2013"));
+        Price price01 = new Price("CompanyA", 7.25, testDates.parse("02/01/2013"));
+        Price price02 = new Price("CompanyA", 12.00, testDates.parse("03/01/2013"));
         Price price03 = new Price("CompanyA", 17.35, testDates.parse("04/01/2013"));
         Price price04 = new Price("CompanyA", 17.35, testDates.parse("05/01/2013"));
-        Price price05 = new Price("CompanyA", 9.01, testDates.parse("06/01/2013"));
+        Price price05 = new Price("CompanyA", 13.32, testDates.parse("06/01/2013"));
         Price price06 = new Price("CompanyA", 9.00, testDates.parse("07/01/2013"));
         Price price07 = new Price("CompanyA", 9.05, testDates.parse("08/01/2013"));
         Price price08 = new Price("CompanyA", 9.06, testDates.parse("09/01/2013"));

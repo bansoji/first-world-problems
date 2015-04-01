@@ -3,7 +3,9 @@ body {
     padding-top: 20px;
     padding-bottom: 20px;
     font-family: 'Open Sans', sans-serif;
-    background-color:#F0F0F0 ;
+    background-image: url(http://www.stockmarketchartingprogramsanddataspecialists.info/images/slide1.jpg);
+    background-repeat: no-repeat;
+
 }
 /* Everything but the jumbotron gets side spacing for mobile first views */
 .header,
@@ -12,10 +14,19 @@ body {
     padding-right: 15px;
     padding-left: 15px;
 }
+h1 {
+    color: gray;
+    font-size: 60px;
+    margin: 0;
 
+}
 h3 {
     color: grey;
     margin-top: -10px;
+}
+
+h5 {
+    font-weight: bold;
 }
 
 /* Custom page header */
@@ -95,4 +106,8 @@ h3 {
 #myModalLabel {
     font-weight: 500;
     color: gray;
+}
+
+#release-list {
+    text-align: left;
 }

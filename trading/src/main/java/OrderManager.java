@@ -23,7 +23,7 @@ public class OrderManager {
     public static void main(String[] args) throws IOException {
         if (args.length != 2){
             System.out.println("Error: Incorrect program usage.");
-            System.out.println("Usage: java -jar BuyHardModule pricesFile paramFile");
+            System.out.println("Usage: java -jar <BuyHardModule> <pricesFile> <paramFile>");
             return;
         }
         String fileName = args[0];

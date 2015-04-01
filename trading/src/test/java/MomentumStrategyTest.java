@@ -40,6 +40,13 @@ public class MomentumStrategyTest {
         priceList.add(price04);
         priceList.add(price05);
         priceList.add(price06);
+        priceList.add(price07);
+        priceList.add(price08);
+        priceList.add(price09);
+        priceList.add(price10);
+        priceList.add(price11);
+        priceList.add(price12);
+        priceList.add(price13);
 
         TradingStrategy testStrategy = new MomentumStrategy(priceList, input);
         testStrategy.generateOrders();

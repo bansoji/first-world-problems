@@ -9,14 +9,14 @@ import java.util.logging.Logger;
 /**
  * This class is responsible for producing the output file.
  */
-public class Printer {
+public class OrderWriter {
 
     private static final Logger logger = Logger.getLogger(OrderManager.LOG_NAME);
     private static final String OUTPUT_FILE_NAME = OrderManager.OUTPUT_FILE;
     private CSVWriter writer;
     private int numOrdersGenerated;
 
-    public Printer(FileWriter file){
+    public OrderWriter(FileWriter file){
         this.writer = new CSVWriter(file, ',', CSVWriter.NO_QUOTE_CHARACTER);
         String[] header = new String[] {"#RIC", "Date", "Price", "Volume", "Value", "Signal"};
         // Print the header.
@@ -25,7 +25,7 @@ public class Printer {
         this.numOrdersGenerated = 0;
     }
 
-    public void closePrinter(){
+    public void closeWriter(){
         logger.log(Level.INFO, "\nFinished.  File written to " + OUTPUT_FILE_NAME);
 
         // System.out.println("\nFinished.  File written to " + file);
@@ -43,7 +43,7 @@ public class Printer {
      * Appends orders to a csv file.
      * @param orders An ArrayList of Orders.
      */
-    public void printOrders(List<Order> orders) {
+    public void writeOrders(List<Order> orders) {
 
         for (Order o : orders){
             this.writer.writeNext(o.toStringArray());

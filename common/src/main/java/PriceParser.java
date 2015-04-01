@@ -44,13 +44,7 @@ public class PriceParser extends Parser<Price> {
 
 
                 value = Double.parseDouble(nextLine[PRICE]);
-
-                try {
-                    DateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
-                    date = df.parse(nextLine[DATE]);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
+                date = DateUtils.parseMonthAbbr(nextLine[DATE], "Error parsing price date");
 
                 return new Price(companyName, value, date);
             }

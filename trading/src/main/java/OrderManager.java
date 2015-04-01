@@ -61,7 +61,7 @@ public class OrderManager {
             return;
         }
 
-        Printer csvPrinter = new Printer(orderFile);
+        OrderWriter csvOrderWriter = new OrderWriter(orderFile);
 
         // Initialise the timer.
         long startTime = System.currentTimeMillis();
@@ -82,8 +82,9 @@ public class OrderManager {
 
             // Run the strategy module.
             strategy.generateOrders();
-i
-            csvPrinter.printOrders(ordersGenerated);
+            List<Order> ordersGenerated = strategy.getOrders();
+
+            csvOrderWriter.writeOrders(ordersGenerated);
 
         }
 
@@ -98,7 +99,7 @@ i
         logger.info("Time Elapsed : " + elapsedTime + "ms");
 
         // Close the orders file and CSV Writer.
-        csvPrinter.closePrinter();
+        csvOrderWriter.closeWriter();
         try {
             orderFile.close();
         } catch (IOException e) {

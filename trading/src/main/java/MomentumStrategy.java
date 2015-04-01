@@ -62,32 +62,24 @@ public class MomentumStrategy implements TradingStrategy {
      *             the strategy module.
      */
     private void configureStrategy(Properties prop) {
-        DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         // Configure the strategy using parameters config properties file.
         // Defaults are the same as in MSM spec.
         this.movingAverage = Integer.parseInt(prop.getProperty("movingAverage", "4"));
         this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.001"));
         this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
 
+        String startDateInput = prop.getProperty("startDate");
+        String endDateInput = prop.getProperty("endDate");
+
         // Get the start and end dates.
-        try {
-            this.startDate = df.parse(prop.getProperty("startDate"));
-        } catch (ParseException e) {
-            logger.warning("Incorrect Date format used for Start Date of simulations. " +
-                    "Please make sure it is in the correct format of dd-MM-yyyy.");
-            startDate = null;
-        } catch (NullPointerException e){
-            startDate = null;
-        }
-        try {
-            this.endDate = df.parse(prop.getProperty("endDate"));
-        } catch (ParseException e) {
-            logger.warning("Incorrect Date format used for End Date of simulations. " +
-                    "Please make sure it is in the correct format of dd-MM-yyyy.");
-            endDate = null;
-        }catch (NullPointerException e){
-            endDate = null;
-        }
+        if (startDateInput != null)
+            this.startDate = DateUtils.parse(startDateInput,
+                "Incorrect Date format used for start date of simulations. " +
+                "Please make sure it is in the correct format of dd-MM-yyyy.");
+        if (endDateInput != null)
+            this.endDate = DateUtils.parse(endDateInput,
+                "Incorrect Date format used for end date of simulations. " +
+                "Please make sure it is in the correct format of dd-MM-yyyy.");
     }
 
     /**

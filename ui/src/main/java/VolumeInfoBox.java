@@ -18,8 +18,7 @@ public class VolumeInfoBox extends InfoBox {
     {
         //price is not valid
         if (type.equals(InfoBoxType.Price)) return new Label();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy");
-        final Label label = new Label(dateFormat.format(date) + "\n" +
+        final Label label = new Label(DateUtils.formatMonthAbbr(date) + "\n" +
                 "Volume: " + value);
         label.getStyleClass().addAll("info-box");
 

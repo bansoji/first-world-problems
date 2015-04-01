@@ -20,7 +20,7 @@ public class PrintUtils {
             double orderValue = order.getValue();
             OrderType orderType = order.getOrderType();
             String orderSignal = orderType.getSignal(orderType);
-            String orderDate = formatDate(order.getOrderDate());
+            String orderDate = DateUtils.format(order.getOrderDate());
             System.out.println(orderCompany + " " + orderPrice + " " + orderValue + " " + orderSignal + " " + orderDate);
         }
     }
@@ -33,15 +33,9 @@ public class PrintUtils {
         }
         for (Price price: prices) {
             String priceCompany = price.getCompanyName();
-            String priceDate = formatDate(price.getDate());
+            String priceDate = DateUtils.format(price.getDate());
             double priceValue = price.getValue();
             System.out.println(priceCompany + " " + priceDate + " " + priceValue);
         }
-    }
-
-    private static String formatDate(Date date)
-    {
-        DateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
-        return df.format(date);
     }
 }

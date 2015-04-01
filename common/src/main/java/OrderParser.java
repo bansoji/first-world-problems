@@ -39,13 +39,7 @@ public class OrderParser extends Parser<Order> {
                 numberOfFileLines += 1;
                 value = Double.parseDouble(nextLine[ORDER_PRICE]);
 
-                try {
-                    DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-                    date = df.parse(nextLine[ORDER_DATE]);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    logger.severe("Incorrect date format in the input file.");
-                }
+                date = DateUtils.parse(nextLine[ORDER_DATE],"Incorrect date format in the input file.");
 
                 OrderType type;
                 if (nextLine[ORDER_SIGNAL].equals("B")) {

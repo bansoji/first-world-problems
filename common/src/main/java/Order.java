@@ -88,10 +88,9 @@ public class Order {
     }
 
     public String[] toStringArray() {
-        DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
         String[] s = new String[6];
         s[0] = this.companyName;
-        s[1] = df.format(this.date);
+        s[1] = DateUtils.format(this.date);
         s[2] = String.valueOf(this.price);
         s[3] = String.valueOf(this.volume);
         s[4] = String.valueOf(this.getValue());

@@ -16,8 +16,7 @@ public class PriceInfoBox extends InfoBox {
 
     protected Label makeInfoLabel(double value, Date date, InfoBoxType type)
     {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy");
-        final Label label = new Label(dateFormat.format(date) + "\n" +
+        final Label label = new Label(DateUtils.formatMonthAbbr(date) + "\n" +
                 "Price: $" + value);
         label.getStyleClass().addAll("info-box");
 

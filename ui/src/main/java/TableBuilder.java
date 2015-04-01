@@ -32,24 +32,18 @@ public class TableBuilder {
         dateCol.setComparator(new Comparator<String>(){
             @Override
             public int compare(String t1, String t2) {
-                try{
-                    SimpleDateFormat format =new SimpleDateFormat("dd MMM yyyy");
-                    Date d1 = format.parse(t1);
-                    Date d2 = format.parse(t2);
-                    return Long.compare(d1.getTime(),d2.getTime());
-                } catch (ParseException p){
-                    p.printStackTrace();
-                }
-                return -1;
+                Date d1 = DateUtils.parseMonthAbbr(t1);
+                Date d2 = DateUtils.parseMonthAbbr(t2);
+                if (d1 == null || d2 == null) return -1;
+                return Long.compare(d1.getTime(),d2.getTime());
             }
         });
-        DateFormat df = new SimpleDateFormat("dd MMM yyyy");
         dateCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Price, String>, ObservableValue<String>>() {
 
             @Override
             public ObservableValue<String> call(TableColumn.CellDataFeatures<Price, String> p) {
                 if (p.getValue() != null) {
-                    return new SimpleStringProperty(df.format(p.getValue().getDate()));
+                    return new SimpleStringProperty(DateUtils.formatMonthAbbr(p.getValue().getDate()));
                 } else {
                     return new SimpleStringProperty("-");
                 }

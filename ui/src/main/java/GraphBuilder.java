@@ -44,7 +44,7 @@ public class GraphBuilder {
         final XYBarChart<Long, Number> barChart = new XYBarChart<>(xAxisVolume, yAxisVolume);
 
         if (prices.size() > 0) {
-            lineChart.setTitle("Price of " + prices.get(0).getCompanyName());
+            //lineChart.setTitle("Price of " + prices.get(0).getCompanyName());
             XYChart.Series<Long, Number> priceChart = new XYChart.Series<>();
             // populating the series with data
 

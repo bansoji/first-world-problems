@@ -24,7 +24,6 @@ public class MomentumStrategy implements TradingStrategy {
     private Date startDate;
     private Date endDate;
 
-
     private static final Logger logger = Logger.getLogger("log");
 
     public MomentumStrategy(List<Price> historicalPrices, InputStream config) {
@@ -47,11 +46,11 @@ public class MomentumStrategy implements TradingStrategy {
                 "Threshold: " + this.threshold + "\n" +
                 "Volume: " + this.volume;
 
-        if (startDate != null){
-            parameters = parameters + "\nStart Date: " + this.startDate;
+        if (startDate != null) {
+            parameters += "\nStart Date: " + this.startDate;
         }
-        if (endDate != null){
-            parameters = parameters + "\nEnd Date: " + this.endDate;
+        if (endDate != null) {
+            parameters += "\nEnd Date: " + this.endDate;
         }
 
         logger.info(parameters);

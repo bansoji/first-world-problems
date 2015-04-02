@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 public class FinanceUtilsTest {
 
     @Test
-    public void testCalcSimpleMovingAverage() {
+    public void testCalcSimpleMovingAvg() {
         List<Double> prices = new ArrayList<Double>();
         prices.add(30.);
         prices.add(30.34);
@@ -24,4 +24,6 @@ public class FinanceUtilsTest {
         assertEquals(simpleMovingAverages.get(0), 0.00784, 0.00001);
         assertEquals(simpleMovingAverages.get(1), 0.01197, 0.00001);
     }
+
+
 }

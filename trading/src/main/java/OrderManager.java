@@ -15,7 +15,7 @@ import java.util.logging.SimpleFormatter;
 public class OrderManager {
 
     // Some class constants.
-    public static final String VERSION = "0.9.0";
+    public static final String VERSION = "1.0.0";
     public static final String OUTPUT_FILE = "orders.csv";
     public static final String LOG_FILE = "logfile.log";
     public static final String LOG_NAME = "log";
@@ -23,7 +23,7 @@ public class OrderManager {
     public static void main(String[] args) throws IOException {
         if (args.length != 2){
             System.out.println("Error: Incorrect program usage.");
-            System.out.println("Usage: java -jar BuyHard inputFile paramsFile");
+            System.out.println("Usage: java -jar <BuyHardModule> <pricesFile> <paramFile>");
             return;
         }
         String fileName = args[0];
@@ -43,6 +43,7 @@ public class OrderManager {
 
         logger.info("====== Buy Hard =========\n" +
                 "Developer Team: Group 1\n" +
+                "MODULE NAME: BuyHard-Momentum-" + VERSION + ".jar\n" +
                 "MODULE VERSION: " + VERSION + "\n" +
                 "INPUT FILE: " + fileName + "\n" +
                 "OUTPUT FILE: " + OUTPUT_FILE + "\n" +

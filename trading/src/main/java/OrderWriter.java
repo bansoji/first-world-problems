@@ -26,7 +26,7 @@ public class OrderWriter {
     }
 
     public void closeWriter(){
-        logger.log(Level.INFO, "\nFinished.  File written to " + OUTPUT_FILE_NAME);
+        logger.log(Level.INFO, "Finished. File written to " + OUTPUT_FILE_NAME);
 
         // System.out.println("\nFinished.  File written to " + file);
         logger.info(this.numOrdersGenerated + " orders generated.");

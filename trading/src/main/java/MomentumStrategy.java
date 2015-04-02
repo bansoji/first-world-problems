@@ -48,7 +48,6 @@ public class MomentumStrategy implements TradingStrategy {
         if (endDate != null) {
             parameters += "\nEnd Date: " + this.endDate;
         }
-
         logger.info(parameters);
     }
 
@@ -95,7 +94,7 @@ public class MomentumStrategy implements TradingStrategy {
         // Calculate Trade Signals.
         List<OrderType> tradeSignals = generateTradeSignals(sma, threshold);
 
-
+        /*
         for (Double d : sma){
             System.out.println(d);
         }
@@ -103,7 +102,7 @@ public class MomentumStrategy implements TradingStrategy {
         for (OrderType s : tradeSignals){
             System.out.println(s);
         }
-
+        */
 
 
         // Generate the orders.

@@ -20,7 +20,7 @@ public abstract class Reader<T> {
     {
         while (readNext());
         parser.close();
-        logger.info(String.valueOf("Number of file lines are " + parser.getNumberOfFileLines()));
+        logger.info(String.valueOf("Number of file lines read is " + parser.getNumberOfFileLines()));
     }
 
     public History<T> getHistory() {

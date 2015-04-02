@@ -71,6 +71,7 @@ public class OrderManager {
         InputStream input = new FileInputStream(paramName);
 
         for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
+            logger.info("Analysing prices for " + company);
             List<Price> companyHistory = tReader.getCompanyHistory(company);
             // PrintUtils.printPrices(companyHistory);
 

@@ -38,7 +38,6 @@ public class OrderParser extends Parser<Order> {
                 }
                 numberOfFileLines += 1;
                 value = Double.parseDouble(nextLine[ORDER_PRICE]);
-
                 date = DateUtils.parse(nextLine[ORDER_DATE],"Incorrect date format in the input file.");
 
                 OrderType type;

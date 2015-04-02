@@ -19,6 +19,7 @@ public abstract class Parser<T> {
         try {
             this.reader = new CSVReader(new FileReader(fileName));
             try {
+                //skip first line
                 reader.readNext();
             } catch (IOException e) {
                 e.printStackTrace();

@@ -27,7 +27,7 @@ public class DateUtils {
     {
         try {
             return df.parse(string);
-        } catch (ParseException e) {
+        } catch (NullPointerException | ParseException e) {
             logger.warning(parseErrorMessage);
             return null;
         }
@@ -42,7 +42,7 @@ public class DateUtils {
     {
         try {
             return monthAbbrFormat.parse(string);
-        } catch (ParseException e) {
+        } catch (NullPointerException | ParseException e) {
             logger.warning(parseErrorMessage);
             return null;
         }

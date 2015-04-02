@@ -9,12 +9,12 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>SENG3011: G1</title>
+    <title>Buy Hard</title>
 
     <!-- Bootstrap core CSS -->
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,300' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,300bold,300' rel='stylesheet' type='text/css'>
 
     <!-- Custom styles for this template -->
     <link href="main.css" rel="stylesheet">
@@ -24,7 +24,7 @@
 <body>
 <div class="container">
     <div class="panel panel-default" id="header-panel">
-        <h1 class="text-muted">Buy Hard</h1>
+        <img src="BuyHardLogo.png" class="logo">
         <div class="header">
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-default" id="custom-buttons" data-toggle="modal" data-target="#myModal">
@@ -41,7 +41,7 @@
                     </div>
                     <div class="modal-body">
                         <h4>The Team</h4>
-                        <table class="table table-striped">
+                        <table class="table">
                             <tr><td>Addo Wondo</td></tr>
                             <tr><td>Banson Tong</td></tr>
                             <tr><td>Edwin Li</td></tr>
@@ -57,48 +57,106 @@
         </div>
     </div>
     <div class="panel panel-default" id="internal-panel">
-        <h3>Progress</h3>
-        <div class="progress">
-            <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: 70%">
-                <span class="sr-only">45% Complete</span>
-            </div>
-        </div>
-        <form method="get" action="trading.jar">
+        <form method="get" action="BuyHard-Momentum-1.0.0.jar">
             <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">Latest Release</button></p>
-            <p>
         </form>
-        File Name: ???.jar<br>
-        Version: ???<br>
-        Date Released: ??/??/????<br>
-        Size: ???KB<br>
+        <p>
+        File Name: <i>BuyHard-Momentum-1.0.0.jar</i><br>
+        Version: 1.0.0<br>
+        Date Released: 01/04/2015<br>
+        Size: 890KB<br>
         </p>
     </div>
     <div class="panel panel-default" id="internal-panel">
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title">README</h3>
-            </div>
-            <div class="panel-body" id="changelog">
-                <p>
-                    <b>Buy Hard</b> is a financial trading module that provides customers with orders that yield the highest profit.
-                    <br><br>
-                    <h4>Getting Started</h4>
-                    ----------------------------------
-                    <h5>## Standalone ##</h5>
+        <p>
+            <i>Buy Hard</i> is an algorithmic trading module that provides customers with orders that yield the highest amount of profit. Our range of strategies are designed to cater for individual investors of different economic statuses based on risk-taking ability and amount of investment principal.
+            <br><br>
+		  </p>
+		  <hr>
+        <h2 class="heading">Getting Started</h2>
+        <hr>
+		  <div class="subheading-content">
+        <h2><span>Running in Standalone Mode</span></h2>
+           Run the following command in a terminal:
+           <div class="well well-sm"> java -jar &lt;BuyHardModule&gt; &lt;pricesFile&gt; &lt;paramFile&gt;</div>
+			  Minimum requirement is <b>Java 7</b>, but we recommend Java 8.
+        </div>
 
-                    Running in Standalone Mode
-                    <br>
-                    From Terminal, run using<br><br>
-                    <div class="well well-sm"> java -jar Trading.jar input.csv config.properties</div>
-                    <h5>## Config ##</h5>
-                    The config file is an optional file that can be used to configure the trading strategy.
-                    <br>
-                    It follows the conventional .properties file in java.<br><br>
-                    Format of:<br><br>
-                    <div class="well well-sm"> key=property</div>
-                    per line.
+        <div class="subheading-content">
+		  <h3>Input Files</h3>
+				There are 3 input files required:
+				<ul>
+		        <li><i>Buy Hard</i> strategy module, downloadable from the Releases section.</li>
 
-                </p>
+				  <li>Prices data file: must be a valid Sicra file from TRTH. Try using the sample data set
+		        <form id="inputData" class="submit-link" method="get" action="samples/prices.csv"> 
+					<a href="javascript:submitLink('inputData')">here.</a>
+				  </form></li>
+
+				  <li>Parameters file: configures the strategy module used.
+		        A sample parameters file can be obtained 
+		        <form id="params" class="submit-link" method="get" action="samples/config.properties"> 
+					<a href="javascript:submitLink('params')">here.</a>
+				  </form></li>
+				</ul>
+        </div>
+
+        <div class="subheading-content">
+        <h3>Output Files</h3>
+           <i>Buy Hard </i> will produce 2 output files:
+		     <ul>
+			   <li><i>orders.csv</i>, which contains the orders generated from the trading module. </li>
+		      <li><i>logfile.log</i>, which contains the logs from the module, and any warnings or errors encountered. </li>
+		     </ul>
+		  </div>
+
+        <div class="subheading-content">
+		  <h2><span>Integrating with trading systems</span></h2>
+           <i>Buy Hard</i> modules can be easily integrated to existing trading systems using the command provided for the standalone mode.
+			  This will produce the same output files, whereby the <i>orders.csv</i> file can then be processed.
+			  For example, to run in a Java application, you can use the following code:
+           <div class="well well-sm"> 
+				   ProcessBuilder pb = new ProcessBuilder("java", "-jar", <i>BuyHardModule</i>, <i>pricesFile</i>, <i>paramFile</i>);<br>
+               pb.start();
+			  </div>
+		  </div>
+
+        <hr>
+        <h3>Releases</h3>
+        <table class="table table-striped" id="release-list">
+            <tr><th>Version</th><th>Date</th><th>Changelog</th></tr>
+
+            <tr><td>v1.0.0</td><td>01/04/2015</td><td>
+
+                <button type="button" class="btn btn-default" id="release-button" data-toggle="modal" data-target="#release-modal">
+                        <!--onclick="changeChangelog('1.0.0 changelog');"-->
+                    View
+                </button>
+
+            </td></tr>
+        </table>
+        <!-- Modal -->
+        <div class="modal fade" id="release-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h3 class="modal-title" id="myModalLabel">Changelog</h3>
+                    </div>
+                    <div class="modal-body" id="changelog-modal">
+							Initial release with:
+							<ul>
+								<li>Reading Sicra file from TRTH.</li>
+								<li>Loading parameters to configure the strategy.</li>
+								<li>Implementation of momentum strategy including calculating simple moving averages.</li>
+								<li>Outputting orders using the strategy.</li>
+							    <li>Generating a log report with details of input files and execution time.</li>
+							</ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
             </div>
         </div>
         <footer class="footer">
@@ -106,6 +164,19 @@
         </footer>
     </div>
 </div> <!-- /container -->
+
+<script type="text/javascript">
+    function changeChangelog(i) {
+        document.getElementById("changelog-modal").innerHTML = i;
+    }
+
+	 function submitLink(formName) {
+	 	if (document.getElementById(formName)) {
+	 		document.getElementById(formName).submit();
+	 	}
+	 }
+</script>
+
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>

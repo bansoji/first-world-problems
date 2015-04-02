@@ -15,7 +15,7 @@ public class MomentumStrategy implements TradingStrategy {
 
     private List<Price> prices;
     private List<Order> ordersGenerated;
-    private int movingAverage;
+    private int movingAvgTimeWindow;
     private double threshold;
     private int volume;
     private Date startDate;
@@ -39,7 +39,7 @@ public class MomentumStrategy implements TradingStrategy {
         configureStrategy(prop);
 
         String parameters = "Parameters Used:\n" +
-                "Moving Average: " + this.movingAverage + "\n" +
+                "Moving Average Time Window: " + this.movingAvgTimeWindow + "\n" +
                 "Threshold: " + this.threshold + "\n" +
                 "Volume: " + this.volume;
 
@@ -61,7 +61,7 @@ public class MomentumStrategy implements TradingStrategy {
     private void configureStrategy(Properties prop) {
         // Configure the strategy using parameters config properties file.
         // Defaults are the same as in MSM spec.
-        this.movingAverage = Integer.parseInt(prop.getProperty("movingAverage", "4"));
+        this.movingAvgTimeWindow = Integer.parseInt(prop.getProperty("movingAvgTimeWindow", "4"));
         this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.001"));
         this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
 
@@ -91,7 +91,7 @@ public class MomentumStrategy implements TradingStrategy {
             //System.out.println(p.getValue());
         }
 
-        List<Double> sma = FinanceUtils.calcAllSimpleMovingAvg(priceInput, movingAverage);
+        List<Double> sma = FinanceUtils.calcAllSimpleMovingAvg(priceInput, movingAvgTimeWindow);
 
         // Calculate Trade Signals.
         List<OrderType> tradeSignals = generateTradeSignals(sma, threshold);
@@ -113,7 +113,7 @@ public class MomentumStrategy implements TradingStrategy {
             if (tradeSignals.get(i).equals(nextStatus)){
                 // Create an order using this ith day.
                 // Get the price for that day. Offset by moving average.
-                Price tradePrice = prices.get(i + movingAverage - 1);
+                Price tradePrice = prices.get(i + movingAvgTimeWindow - 1);
 
                 // Skip if the date given is out of the simulation date range.
                 if (startDate != null && tradePrice.getDate().before(startDate)) continue;
@@ -165,8 +165,8 @@ public class MomentumStrategy implements TradingStrategy {
         return l;
     }
 
-    public void setMovingAverage(int movingAverage) {
-        this.movingAverage = movingAverage;
+    public void setMovingAvgTimeWindow(int movingAvgTimeWindow) {
+        this.movingAvgTimeWindow = movingAvgTimeWindow;
     }
 
     public void setVolume(int volume) {

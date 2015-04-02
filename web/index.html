@@ -78,7 +78,7 @@
 		  <div class="subheading-content">
         <h2><span>Running in Standalone Mode</span></h2>
            Run the following command in a terminal:
-           <div class="well well-sm"> java -jar BuyHardModule pricesFile paramFile</div>
+           <div class="well well-sm"> java -jar &lt;BuyHardModule&gt; &lt;pricesFile&gt; &lt;paramFile&gt;</div>
 			  Minimum requirement is <b>Java 7</b>, but we recommend Java 8.
         </div>
 
@@ -94,7 +94,7 @@
 				  </form></li>
 
 				  <li>Parameters file: configures the strategy module used.
-		        A sample parameters file can be downloaded 
+		        A sample parameters file can be obtained 
 		        <form id="params" class="submit-link" method="get" action="samples/config.properties"> 
 					<a href="javascript:submitLink('params')">here.</a>
 				  </form></li>
@@ -116,7 +116,7 @@
 			  This will produce the same output files, whereby the <i>orders.csv</i> file can then be processed.
 			  For example, to run in a Java application, you can use the following code:
            <div class="well well-sm"> 
-				   ProcessBuilder pb = new ProcessBuilder("java", "-jar", BuyHardModule, pricesFile, paramFile);<br>
+				   ProcessBuilder pb = new ProcessBuilder("java", "-jar", <i>BuyHardModule</i>, <i>pricesFile</i>, <i>paramFile</i>);<br>
                pb.start();
 			  </div>
 		  </div>

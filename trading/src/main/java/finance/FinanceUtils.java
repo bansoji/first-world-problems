@@ -39,7 +39,7 @@ public class FinanceUtils {
     {
         List<Double> simpleMovingAverages = new ArrayList<Double>();
         List<Double> returns = calcAllReturns(prices);
-        for (int t = n; t < prices.size(); t++)
+        for (int t = n-1; t < prices.size(); t++)
         {
             simpleMovingAverages.add(calcSimpleMovingAvg(returns,n,t));
         }

@@ -2,9 +2,6 @@ import finance.FinanceUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -109,13 +106,14 @@ public class MomentumStrategy implements TradingStrategy {
         }
         */
 
+
         // Generate the orders.
         OrderType nextStatus = OrderType.BUY; // The next status to look for.
         for (int i=0; i<tradeSignals.size(); i++){
             if (tradeSignals.get(i).equals(nextStatus)){
                 // Create an order using this ith day.
                 // Get the price for that day. Offset by moving average.
-                Price tradePrice = prices.get(i + movingAverage -1);
+                Price tradePrice = prices.get(i + movingAverage - 1);
 
                 // Skip if the date given is out of the simulation date range.
                 if (startDate != null && tradePrice.getDate().before(startDate)) continue;

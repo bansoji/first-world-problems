@@ -111,7 +111,7 @@ public class MomentumStrategy implements TradingStrategy {
             if (tradeSignals.get(i).equals(nextStatus)){
                 // Create an order using this ith day.
                 // Get the price for that day. Offset by moving average.
-                Price tradePrice = prices.get(i + movingAvgTimeWindow - 1);
+                Price tradePrice = prices.get(i + movingAvgTimeWindow);
 
                 // Skip if the date given is out of the simulation date range.
                 if (startDate != null && tradePrice.getDate().before(startDate)) continue;

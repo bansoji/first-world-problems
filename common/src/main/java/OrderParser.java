@@ -33,8 +33,10 @@ public class OrderParser extends Parser<Order> {
                 //get the next line with a price
                 while (nextLine[ORDER_PRICE].equals("")) {
                     nextLine = reader.readNext();       //No value.
+                    numberOfFileLines += 1;
                     if (nextLine == null) return null;
                 }
+                numberOfFileLines += 1;
                 value = Double.parseDouble(nextLine[ORDER_PRICE]);
                 date = DateUtils.parse(nextLine[ORDER_DATE],"Incorrect date format in the input file.");
 

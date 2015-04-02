@@ -27,8 +27,10 @@ public class PriceParser extends Parser<Price> {
                 double value;
                 Date date = null;
 
+
                 //get the next line with a price
                 while (nextLine[PRICE].equals("")) {
+                    numberOfFileLines += 1;
                     nextLine = reader.readNext();
                     if (nextLine.length < PRICE) {
                         for (int i = 0; i < nextLine.length; i++)
@@ -38,6 +40,8 @@ public class PriceParser extends Parser<Price> {
                     }
                     if (nextLine == null) return null;
                 }
+                numberOfFileLines += 1;
+
 
                 value = Double.parseDouble(nextLine[PRICE]);
                 date = DateUtils.parseMonthAbbr(nextLine[DATE], "Error parsing price date");
@@ -50,4 +54,5 @@ public class PriceParser extends Parser<Price> {
         }
         return null;
     }
+
 }

@@ -1,5 +1,4 @@
 import finance.FinanceUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -96,7 +95,7 @@ public class MomentumStrategy implements TradingStrategy {
         // Calculate Trade Signals.
         List<OrderType> tradeSignals = generateTradeSignals(sma, threshold);
 
-        /*
+
         for (Double d : sma){
             System.out.println(d);
         }
@@ -104,7 +103,7 @@ public class MomentumStrategy implements TradingStrategy {
         for (OrderType s : tradeSignals){
             System.out.println(s);
         }
-        */
+
 
 
         // Generate the orders.

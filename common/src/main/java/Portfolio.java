@@ -3,44 +3,67 @@ import java.util.*;
 /**
  * Created by Edwin on 24/03/2015.
  * Modified by Banson on 28/03/2015.
- * This class represents the Portfolio of assets and buy/sell history.
+ * This class represents the Portfolio of orders and buy/sell history.
  */
 public class Portfolio {
 
     private History<Order> orderHistory; //Contains the history of Orders to work with
 
-    private List<Order> ordersHolder; //Contains all orders currently in possession.
-    private Map<Order, Double> soldOrders; // A history of all the orders sold with their selling prices attached.
+    private Map<String, List<Order>> boughtOrders; //Contains all orders bought.
+    private Map<String, List<Order>> soldOrders; //Contains all orders sold.
 
     /**
-     * This is the constructor for Portfolio.
+     * This is the constructor for Portfolio. This also calls "Fill Portfolio".
      */
     public Portfolio (History<Order> orderHistory)
     {
         this.orderHistory = orderHistory;
-        this.ordersHolder = new ArrayList<Order>();
-        this.soldOrders = new HashMap<Order, Double>();
-    }
-    
-    /**
-     * This method will "Buy" the order and store it in ordersHolder.
-     * @param order     The specified order to be bought.
-     */
-    private void buyOrder (Order order)
-    {
-        this.ordersHolder.add(order);
+        this.boughtOrders = new HashMap<String, List<Order>>();
+        this.soldOrders = new HashMap<String, List<Order>>();
+        this.FillPortfolio();
     }
 
     /**
-     * This method will "Sell" the order (create the updated order to add to history, and
-     * remove the old one from the portfolio).
-     * @param soldOrder         The specified order to sell.
-     * @param sellPrice     The specified price to sell the order at.
+     * This method will analyse the orderHistory and fill out the list in boughtOrders and soldOrders.
      */
-    private void sellOrder (Order soldOrder, double sellPrice)
+    private void FillPortfolio ()
     {
-        this.soldOrders.put(soldOrder, sellPrice);
-        this.ordersHolder.remove(soldOrder);
+        Set<String> names = orderHistory.getAllCompanies();
+        for (String name : names)
+        {
+            boughtOrders.put(name, new ArrayList<Order>());
+            soldOrders.put(name, new ArrayList<Order>());
+            List<Order> companyHistory = orderHistory.getCompanyHistory(name);
+            for (Order order : companyHistory)
+            {
+                if (order.getOrderType().equals(OrderType.BUY))
+                {
+                    buyOrder(name, order);
+                } else {
+                    sellOrder(name, order);
+                }
+            }
+        }
+    }
+    
+    /**
+     * This method will store the order in boughtOrders.
+     * @param company   The specified company the order is bought under.
+     * @param order     The specified order to be bought.
+     */
+    private void buyOrder (String company, Order order)
+    {
+        boughtOrders.get(company).add(order);
+    }
+
+    /**
+     * This method will store the order in soldOrders.
+     * @param company   The specified company the order is sold under.
+     * @param order     The specified order to be sold.
+     */
+    private void sellOrder (String company, Order order)
+    {
+        soldOrders.get(company).add(order);
     }
 
     /**
@@ -55,7 +78,7 @@ public class Portfolio {
      * Note that this uses the price at the time that they were bought.
      * @return  The total value of all the orders in possession.
      */
-    public double calcOrderValue ()
+    /*public double calcOrderValue ()
     {
         double totalValue = 0;
         for (Order order : this.ordersHolder)
@@ -64,14 +87,15 @@ public class Portfolio {
         }
 
         return totalValue;
-    }
+    }*/
 
     /**
-     * This method calculates the total profit made off selling orders according to the history.
-     * Note that this does NOT include orders that are bought but not sold at the time of call.
-     * @return  The profit/loss of sold orders in comparison to their buy prices.
+     * This method will calculate the returns off the buy/sell history in percent, actual value, as well as
+     * short-sells/assets in possession. If there is selling of a non-existant asset, the asset value
+     * should be negative.
+     * @return  A list of values pertaining to financial returns.
      */
-    public double calcProfit ()
+    /*public double calcReturns ()
     {
         double profit = 0;
         for (Order soldOrder : this.soldOrders.keySet())
@@ -80,7 +104,7 @@ public class Portfolio {
         }
 
         return profit;
-    }
+    }*/
 
     /**
      * This method calculates the individual value of an order in the portfolio.

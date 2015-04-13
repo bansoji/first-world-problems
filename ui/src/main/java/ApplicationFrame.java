@@ -8,10 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Gavin Tam on 17/03/15.
@@ -25,6 +23,7 @@ public class ApplicationFrame extends JFrame {
 
     private JFXPanel graph;
     private JFXPanel table;
+    private JComboBox<String> companySelector;
 
     private static String APPLICATION_TITLE = "Trading Platform";
     private static String VERSION_NUMBER = "1.0";
@@ -106,6 +105,8 @@ public class ApplicationFrame extends JFrame {
         //Run button
         JButton runButton = new JButton("Run");
         body.add(runButton);
+        companySelector = new JComboBox<>();
+        companySelector.setVisible(false);
         runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -113,12 +114,22 @@ public class ApplicationFrame extends JFrame {
                     try {
                         ProcessBuilder pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
                         pb.start();
+
                         Reader reader = new PriceReader(dataFile);
                         reader.readAll();
-                        List<Price> prices = reader.getCompanyHistory("BHP.AX");
+                        Set<String> priceCompaniesSet = reader.getHistory().getAllCompanies();
+                        List<String> priceCompanies = new ArrayList<>();
+                        companySelector.removeAllItems();
+                        for (String company: priceCompaniesSet) {
+                            priceCompanies.add(company);
+                            companySelector.addItem(company);
+                        }
+                        List<Price> prices = reader.getCompanyHistory(priceCompanies.get(0));
+                        companySelector.setVisible(true);
+
                         reader = new OrderReader(OUTPUT_FILE_PATH);
                         reader.readAll();
-                        List<Order> orders = reader.getCompanyHistory("BHP.AX");
+                        List<Order> orders = reader.getCompanyHistory(priceCompanies.get(0));
                         loadGraph(prices, orders);
                         Map<Date,OrderType> orderRecord = new HashMap<>();
                         for (Order order: orders)
@@ -140,6 +151,7 @@ public class ApplicationFrame extends JFrame {
             }
         });
         body.add(new JSeparator(SwingConstants.HORIZONTAL));
+        body.add(companySelector);
 
         JPanel content = new JPanel();
         content.setBackground(Color.WHITE);

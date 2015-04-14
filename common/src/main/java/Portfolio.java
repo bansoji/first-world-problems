@@ -3,6 +3,7 @@ import java.util.*;
 /**
  * Created by Edwin on 24/03/2015.
  * Modified by Banson on 28/03/2015.
+ * Updated by Edwin on 14/04/2015.
  * This class represents the Portfolio of orders and buy/sell history.
  */
 public class Portfolio {
@@ -12,99 +13,150 @@ public class Portfolio {
     private Map<String, List<Order>> boughtOrders; //Contains all orders bought.
     private Map<String, List<Order>> soldOrders; //Contains all orders sold.
 
+    private Map<String, List<Double>> returns; //Contains the return data for each company.
+    private Map<String, Double> assetValue; //Contains the asset value data for each company.
+
     /**
      * This is the constructor for Portfolio. This also calls "Fill Portfolio".
      */
     public Portfolio (History<Order> orderHistory)
     {
         this.orderHistory = orderHistory;
-        this.boughtOrders = new HashMap<String, List<Order>>();
-        this.soldOrders = new HashMap<String, List<Order>>();
-        this.FillPortfolio();
+        boughtOrders = new HashMap<>();
+        soldOrders = new HashMap<>();
+        returns = new HashMap<>();
+        assetValue = new HashMap<>();
+        FillPortfolio();
     }
 
     /**
-     * This method will analyse the orderHistory and fill out the list in boughtOrders and soldOrders.
+     * This method will analyse the orderHistory, filling the portfolio with orders while simultaneously
+     * calculating the return values and asset values using appropriate buy/sell pairs.
      */
     private void FillPortfolio ()
     {
-        Set<String> names = orderHistory.getAllCompanies();
-        for (String name : names)
+        for (String name : orderHistory.getAllCompanies())
         {
-            boughtOrders.put(name, new ArrayList<Order>());
-            soldOrders.put(name, new ArrayList<Order>());
+            //initialisation of variables for this particular company.
+            boughtOrders.put(name, new ArrayList<>());
+            soldOrders.put(name, new ArrayList<>());
+            returns.put(name, new ArrayList<>());
+            returns.get(name).add(0, 0.00);
+            returns.get(name).add(1, 0.00);
+            double valueNumber = 0.00;
+
             List<Order> companyHistory = orderHistory.getCompanyHistory(name);
             for (Order order : companyHistory)
             {
-                if (order.getOrderType().equals(OrderType.BUY))
-                {
+                if (order.getOrderType().equals(OrderType.BUY)) {
                     buyOrder(name, order);
                 } else {
                     sellOrder(name, order);
                 }
             }
+
+            if (boughtOrders.get(name).size() > 0) {
+                for (Order order : boughtOrders.get(name))
+                {
+                    valueNumber += getValue(order.getVolume(), order.getPrice());
+                }
+            } else if (soldOrders.get(name).size() > 0) {
+                for (Order order : soldOrders.get(name))
+                {
+                    valueNumber -= getValue(order.getVolume(), order.getPrice());
+                }
+            }
+
+            assetValue.put(name, valueNumber);
         }
     }
     
     /**
-     * This method will store the order in boughtOrders.
+     * This method will store the order in boughtOrders, or calculate Sell/Buy pair if a soldOrder exists.
      * @param company   The specified company the order is bought under.
      * @param order     The specified order to be bought.
      */
     private void buyOrder (String company, Order order)
     {
-        boughtOrders.get(company).add(order);
+        if (soldOrders.get(company).size() == 0) {
+            boughtOrders.get(company).add(order);
+        } else {
+            Order sellingOrder = soldOrders.get(company).get(0);
+            double sellValue = getValue(sellingOrder.getVolume(), sellingOrder.getPrice());
+            double buyValue = getValue(order.getVolume(), order.getPrice());
+            double returnValue = sellValue - buyValue;
+            double returnPercent = returnValue / sellValue; //short-selling change - divide by sell
+
+            addReturns(company, returnValue, returnPercent);
+            soldOrders.get(company).remove(0);
+        }
     }
 
     /**
-     * This method will store the order in soldOrders.
+     * This method will store the order in soldOrders, or calculate Buy/Sell pair if boughtOrder exists.
      * @param company   The specified company the order is sold under.
      * @param order     The specified order to be sold.
      */
     private void sellOrder (String company, Order order)
     {
-        soldOrders.get(company).add(order);
+        if (boughtOrders.get(company).size() == 0) {
+            soldOrders.get(company).add(order);
+        } else {
+            Order buyingOrder = boughtOrders.get(company).get(0);
+            double buyValue = getValue(buyingOrder.getVolume(), buyingOrder.getPrice());
+            double sellValue = getValue(order.getVolume(), order.getPrice());
+            double returnValue = sellValue - buyValue;
+            double returnPercent = returnValue / buyValue; //regular-selling - divide by buy
+
+            addReturns(company, returnValue, returnPercent);
+            boughtOrders.get(company).remove(0);
+        }
     }
 
     /**
-     * This method will clear the buy and sell history of the portfolio.
+     * Returns a map of all the companies' return values and percents.
+     * @return The map of companies' return values and percents.
      */
-    /*public void clearHistory() {
-        this.soldOrders.clear();
-    }*/
+    public Map<String, List<Double>> getReturns ()
+    {
+        return returns;
+    }
 
     /**
-     * This method calculates the total value of all the orders currently in possession.
-     * Note that this uses the price at the time that they were bought.
-     * @return  The total value of all the orders in possession.
+     * Returns a map of all the companies' asset values.
+     * @return The map of companies' asset values.
      */
-    /*public double calcOrderValue ()
+    public Map<String, Double> getAssetValue ()
     {
-        double totalValue = 0;
-        for (Order order : this.ordersHolder)
+        return assetValue;
+    }
+
+    public Map<String, Double> getPortfolioValue ()
+    {
+        Map<String, Double> portfolioValue = new HashMap<>();
+        for (String name : orderHistory.getAllCompanies())
         {
-            totalValue += getValue(order.getVolume(), order.getPrice());
+            portfolioValue.put(name, returns.get(name).get(0) + assetValue.get(name));
         }
 
-        return totalValue;
-    }*/
+        return portfolioValue;
+    }
 
     /**
-     * This method will calculate the returns off the buy/sell history in percent, actual value, as well as
-     * short-sells/assets in possession. If there is selling of a non-existant asset, the asset value
-     * should be negative.
-     * @return  A list of values pertaining to financial returns.
+     * This method will add the returnValue and returnPercent calculated in buyOrder/sellOrder for a company.
+     * @param company           The company name.
+     * @param returnValue       The specified returnValue.
+     * @param returnPercent     The specified returnPercent.
      */
-    /*public double calcReturns ()
+    private void addReturns (String company, double returnValue, double returnPercent)
     {
-        double profit = 0;
-        for (Order soldOrder : this.soldOrders.keySet())
-        {
-            profit += getValue(soldOrder.getVolume(), this.soldOrders.get(soldOrder) - soldOrder.getPrice());
-        }
-
-        return profit;
-    }*/
+        double totalReturn = returns.get(company).get(0);
+        double totalPercent = returns.get(company).get(1);
+        totalReturn += returnValue;
+        totalPercent += returnPercent;
+        returns.get(company).set(0, totalReturn);
+        returns.get(company).set(1, totalPercent);
+    }
 
     /**
      * This method calculates the individual value of an order in the portfolio.

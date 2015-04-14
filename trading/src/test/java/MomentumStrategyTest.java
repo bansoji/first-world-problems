@@ -14,14 +14,18 @@ public class MomentumStrategyTest {
 
     @Test
     public void testGenerateOrders() throws Exception {
-        test1();
-        test2();
+        try {
+            test1();
+            test2();
+        } catch (Exception e) {
+            fail();
+        }
     }
 
     private void test1() throws Exception
     {
         System.out.println("Testing with:");
-        String paramName = "resources/configTest.properties";
+        String paramName = "trading/src/test/resources/configTest.properties";
         InputStream input = new FileInputStream(paramName);
         SimpleDateFormat testDates = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -48,7 +52,6 @@ public class MomentumStrategyTest {
         priceList.add(price05);
         priceList.add(price06);
         priceList.add(price07);
-        priceList.add(price08);
         priceList.add(price09);
         priceList.add(price10);
         priceList.add(price11);
@@ -64,21 +67,17 @@ public class MomentumStrategyTest {
         TradingStrategy testStrategy = new MomentumStrategy(priceList, input);
         testStrategy.generateOrders();
         List<Order> testOutput = testStrategy.getOrders();
-        assert(testOutput.size() != 0);
+        assert(testOutput.size() == 3);
 
-        for (Order i : testOutput)
-        {
-            for (String field : i.toStringArray())
-            {
-                System.out.println(field);
-            }
-        }
+        assertEquals(testOutput.get(0).getPrice(), 10.6, 0.0001 );
+        assertEquals(testOutput.get(1).getPrice(), 10.5, 0.0001);
+        assertEquals(testOutput.get(2).getPrice(), 13.1, 0.0001 );
     }
 
     private void test2() throws Exception
     {
         System.out.println("Testing with:");
-        String paramName = "resources/configTest.properties";
+        String paramName = "trading/src/test/resources/configTest.properties";
         InputStream input = new FileInputStream(paramName);
         DateFormat testDates = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -111,10 +110,8 @@ public class MomentumStrategyTest {
         TradingStrategy testStrategy = new MomentumStrategy(priceList, input);
         testStrategy.generateOrders();
         List<Order> testOutput = testStrategy.getOrders();
-        assert(testOutput.size() == 3);
+        assert(testOutput.size() == 1);
 
-        assert(testOutput.get(0).getValue() == 31.29);
-        assert(testOutput.get(1).getValue() == 31.76);
-        assert(testOutput.get(2).getValue() == 32.58);
+        assertEquals(testOutput.get(0).getPrice(), 32.58, 0.0001 );
     }
 }

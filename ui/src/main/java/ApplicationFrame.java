@@ -6,6 +6,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -20,6 +22,9 @@ public class ApplicationFrame extends JFrame {
     private String strategyFile = "out/artifacts/trading_jar/trading.jar";
     private String dataFile = "common/src/main/resources/sampleDataSmall";
     private String paramFile = "trading/resources/config.properties";
+
+    private Reader orderReader;
+    private Reader priceReader;
 
     private JFXPanel graph;
     private JFXPanel table;
@@ -60,6 +65,8 @@ public class ApplicationFrame extends JFrame {
 //            System.out.println(e.getMessage());
 //        }
         JLabel title = new JLabel(APPLICATION_TITLE);
+        //ImageIcon companyIcon = new ImageIcon("ui/src/main/resources/BuyHardLogo.png");
+        //title.setIcon(companyIcon);
 //        Font font = new Font("Open Sans Light", Font.PLAIN, 28);
         title.setFont(title.getFont().deriveFont(28f));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -115,28 +122,26 @@ public class ApplicationFrame extends JFrame {
                         ProcessBuilder pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
                         pb.start();
 
-                        Reader reader = new PriceReader(dataFile);
-                        reader.readAll();
-                        Set<String> priceCompaniesSet = reader.getHistory().getAllCompanies();
-                        List<String> priceCompanies = new ArrayList<>();
+                        priceReader = new PriceReader(dataFile);
+                        priceReader.readAll();
+                        Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
+                        List<String> priceCompanies = new ArrayList<>(priceCompaniesSet);
+
+                        //update list of companies in the selector
                         companySelector.removeAllItems();
                         for (String company: priceCompaniesSet) {
-                            priceCompanies.add(company);
                             companySelector.addItem(company);
                         }
-                        List<Price> prices = reader.getCompanyHistory(priceCompanies.get(0));
+
+                        List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
                         companySelector.setVisible(true);
 
-                        reader = new OrderReader(OUTPUT_FILE_PATH);
-                        reader.readAll();
-                        List<Order> orders = reader.getCompanyHistory(priceCompanies.get(0));
+                        orderReader = new OrderReader(OUTPUT_FILE_PATH);
+                        orderReader.readAll();
+                        List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
+                        addCompanySelectorListener();
                         loadGraph(prices, orders);
-                        Map<Date,OrderType> orderRecord = new HashMap<>();
-                        for (Order order: orders)
-                        {
-                            orderRecord.put(order.getOrderDate(),order.getOrderType());
-                        }
-                        constructTable(prices,orderRecord);
+                        constructTable(prices,orders);
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null,
                                 "An unexpected error has occurred when running the given files." +
@@ -207,6 +212,20 @@ public class ApplicationFrame extends JFrame {
         });
     }
 
+    private void addCompanySelectorListener() {
+        companySelector.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                String companyName = (String)e.getItem();
+                System.out.println(companyName);
+                List<Price> prices = priceReader.getCompanyHistory(companyName);
+                List<Order> orders = orderReader.getCompanyHistory(companyName);
+                loadGraph(prices,orders);
+                constructTable(prices,orders);
+            }
+        });
+    }
+
     private void loadGraph(List<Price> prices, List<Order> orders)
     {
         Platform.runLater(new Runnable() {
@@ -217,12 +236,18 @@ public class ApplicationFrame extends JFrame {
         });
     }
 
-    private void constructTable(List<Price> prices, Map<Date,OrderType> orders)
+    private void constructTable(List<Price> prices, List<Order> orders)
     {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                TableBuilder.buildTable(table, prices, orders);
+                Map<Date,OrderType> orderRecord = new HashMap<>();
+                if (orders != null) {
+                    for (Order order : orders) {
+                        orderRecord.put(order.getOrderDate(), order.getOrderType());
+                    }
+                }
+                TableBuilder.buildTable(table, prices, orderRecord);
             }
         });
     }

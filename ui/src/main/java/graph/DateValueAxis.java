@@ -1,4 +1,4 @@
-package graph.plugins;
+package graph;
 
 import com.sun.javafx.charts.ChartLayoutAnimator;
 import com.sun.javafx.css.converters.SizeConverter;
@@ -18,8 +18,6 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.TimeStringConverter;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /*
@@ -367,8 +365,8 @@ public class DateValueAxis extends ValueAxis<Long> {
                         minorTickMarks.add((long) minor);
                         if (minorTickMarks.size() > 10000) {
                             // This is a ridiculous amount of major tick marks, something has probably gone wrong
-                            System.err.println("Warning we tried to create more than 10000 minor tick marks on a NumberAxis. " +
-                                    "Lower Bound=" + getLowerBound() + ", Upper Bound=" + getUpperBound() + ", Tick Unit=" + tickUnit);
+                            //System.err.println("Warning we tried to create more than 10000 minor tick marks on a NumberAxis. " +
+                            //        "Lower Bound=" + getLowerBound() + ", Upper Bound=" + getUpperBound() + ", Tick Unit=" + tickUnit);
                             break LOOP;
                         }
                     }

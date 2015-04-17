@@ -1,4 +1,4 @@
-package graph.plugins;/*
+package graph;/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2013, Christian Schudt

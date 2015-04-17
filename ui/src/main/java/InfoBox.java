@@ -11,6 +11,7 @@ import java.util.Date;
 /**
  * Sourced from https://gist.github.com/jewelsea/4681797
  */
+@Deprecated
 public abstract class InfoBox extends StackPane {
     public enum InfoBoxType
     {

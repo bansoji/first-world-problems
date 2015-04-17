@@ -1,7 +1,6 @@
+import date.DateUtils;
+
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -38,7 +37,7 @@ public class OrderParser extends Parser<Order> {
                 }
                 numberOfFileLines += 1;
                 value = Double.parseDouble(nextLine[ORDER_PRICE]);
-                date = DateUtils.parse(nextLine[ORDER_DATE],"Incorrect date format in the input file.");
+                date = DateUtils.parse(nextLine[ORDER_DATE], "Incorrect date format in the input file.");
 
                 OrderType type;
                 if (nextLine[ORDER_SIGNAL].equals("B")) {

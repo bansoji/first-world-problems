@@ -1,3 +1,4 @@
+import date.DateUtils;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -11,9 +12,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.*;
 import javafx.util.Callback;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -90,10 +88,15 @@ public class TableBuilder {
         ObservableList<Price> data = FXCollections.observableArrayList(prices);
         tableView.setItems(data);
         tableView.getColumns().addAll(dateCol, priceCol);
+        //ensures extra space to given to existing columns
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+
 
         final VBox vbox = new VBox();
+        vbox.setStyle("-fx-background-color: white");
         vbox.setSpacing(5);
-        vbox.setPadding(new javafx.geometry.Insets(10, 0, 0, 10));
+        vbox.setPadding(new javafx.geometry.Insets(0, 20, 0, 10));
         vbox.getChildren().addAll(tableView);
 
         Scene scene = new Scene(vbox);

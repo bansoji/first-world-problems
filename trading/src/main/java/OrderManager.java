@@ -107,6 +107,7 @@ public class OrderManager {
             logger.severe(e.getMessage());
         }
         input.close();
+        handler.close();
 
         // Log successful.
         logger.info("Module successful. No errors encountered.");

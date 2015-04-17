@@ -1,12 +1,14 @@
+import date.DateUtils;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * Created by calvin on 27/03/15.
+ * Created by Gavin Tam on 27/03/15.
  */
+
+@Deprecated
 public class VolumeInfoBox extends InfoBox {
 
     public VolumeInfoBox(double value, Date date, InfoBoxType type)

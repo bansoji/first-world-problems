@@ -1,3 +1,4 @@
+import date.DateUtils;
 import finance.FinanceUtils;
 import java.io.IOException;
 import java.io.InputStream;
@@ -69,8 +70,8 @@ public class MomentumStrategy implements TradingStrategy {
         // Get the start and end dates.
         if (startDateInput != null)
             this.startDate = DateUtils.parse(startDateInput,
-                "Incorrect Date format used for start date of simulations. " +
-                "Please make sure it is in the correct format of dd-MM-yyyy.");
+                    "Incorrect Date format used for start date of simulations. " +
+                            "Please make sure it is in the correct format of dd-MM-yyyy.");
         if (endDateInput != null)
             this.endDate = DateUtils.parse(endDateInput,
                 "Incorrect Date format used for end date of simulations. " +

@@ -29,20 +29,20 @@ public class MomentumStrategyTest {
         InputStream input = new FileInputStream(paramName);
         SimpleDateFormat testDates = new SimpleDateFormat("dd/MM/yyyy");
 
-        Price price01 = new Price("CompanyA", 10, testDates.parse("01/01/2013"));
-        Price price02 = new Price("CompanyA", 10.1, testDates.parse("02/01/2013"));
-        Price price03 = new Price("CompanyA", 10.3, testDates.parse("03/01/2013"));
-        Price price04 = new Price("CompanyA", 10.7, testDates.parse("04/01/2013"));
-        Price price05 = new Price("CompanyA", 11.2, testDates.parse("05/01/2013"));
-        Price price06 = new Price("CompanyA", 11.2, testDates.parse("06/01/2013"));
-        Price price07 = new Price("CompanyA", 11.19, testDates.parse("07/01/2013"));
-        Price price08 = new Price("CompanyA", 11.15, testDates.parse("08/01/2013"));
-        Price price09 = new Price("CompanyA", 10.8, testDates.parse("09/01/2013"));
-        Price price10 = new Price("CompanyA", 10.5, testDates.parse("10/01/2013"));
-        Price price11 = new Price("CompanyA", 10.6, testDates.parse("11/01/2013"));
-        Price price12 = new Price("CompanyA", 10.5, testDates.parse("12/01/2013"));
-        Price price13 = new Price("CompanyA", 9.05, testDates.parse("13/01/2013"));
-        Price price14 = new Price("CompanyA", 13.1, testDates.parse("14/01/2013"));
+        Price price01 = new Price("CompanyA", 10, testDates.parse("01/01/2013"), 0, 0, 0);
+        Price price02 = new Price("CompanyA", 10.1, testDates.parse("02/01/2013"), 0, 0, 0);
+        Price price03 = new Price("CompanyA", 10.3, testDates.parse("03/01/2013"), 0, 0, 0);
+        Price price04 = new Price("CompanyA", 10.7, testDates.parse("04/01/2013"), 0, 0, 0);
+        Price price05 = new Price("CompanyA", 11.2, testDates.parse("05/01/2013"), 0, 0, 0);
+        Price price06 = new Price("CompanyA", 11.2, testDates.parse("06/01/2013"), 0, 0, 0);
+        Price price07 = new Price("CompanyA", 11.19, testDates.parse("07/01/2013"), 0, 0, 0);
+        Price price08 = new Price("CompanyA", 11.15, testDates.parse("08/01/2013"), 0, 0, 0);
+        Price price09 = new Price("CompanyA", 10.8, testDates.parse("09/01/2013"), 0, 0, 0);
+        Price price10 = new Price("CompanyA", 10.5, testDates.parse("10/01/2013"), 0, 0, 0);
+        Price price11 = new Price("CompanyA", 10.6, testDates.parse("11/01/2013"), 0, 0, 0);
+        Price price12 = new Price("CompanyA", 10.5, testDates.parse("12/01/2013"), 0, 0, 0);
+        Price price13 = new Price("CompanyA", 9.05, testDates.parse("13/01/2013"), 0, 0, 0);
+        Price price14 = new Price("CompanyA", 13.1, testDates.parse("14/01/2013"), 0, 0, 0);
 
         List<Price> priceList = new ArrayList<>();
         priceList.add(price01);
@@ -81,15 +81,15 @@ public class MomentumStrategyTest {
         InputStream input = new FileInputStream(paramName);
         DateFormat testDates = new SimpleDateFormat("dd/MM/yyyy");
 
-        Price price01 = new Price("CompanyA", 30, testDates.parse("01/01/2013"));
-        Price price02 = new Price("CompanyA", 30.34, testDates.parse("02/01/2013"));
-        Price price03 = new Price("CompanyA", 30.71, testDates.parse("03/01/2013"));
-        Price price04 = new Price("CompanyA", 31.09, testDates.parse("04/01/2013"));
-        Price price05 = new Price("CompanyA", 31.29, testDates.parse("05/01/2013"));
-        Price price06 = new Price("CompanyA", 31.54, testDates.parse("06/01/2013"));
-        Price price07 = new Price("CompanyA", 31.76, testDates.parse("07/01/2013"));
-        Price price08 = new Price("CompanyA", 31.98, testDates.parse("08/01/2013"));
-        Price price09 = new Price("CompanyA", 32.58, testDates.parse("09/01/2013"));
+        Price price01 = new Price("CompanyA", 30, testDates.parse("01/01/2013"), 0, 0, 0);
+        Price price02 = new Price("CompanyA", 30.34, testDates.parse("02/01/2013"), 0, 0, 0);
+        Price price03 = new Price("CompanyA", 30.71, testDates.parse("03/01/2013"), 0, 0, 0);
+        Price price04 = new Price("CompanyA", 31.09, testDates.parse("04/01/2013"), 0, 0, 0);
+        Price price05 = new Price("CompanyA", 31.29, testDates.parse("05/01/2013"), 0, 0, 0);
+        Price price06 = new Price("CompanyA", 31.54, testDates.parse("06/01/2013"), 0, 0, 0);
+        Price price07 = new Price("CompanyA", 31.76, testDates.parse("07/01/2013"), 0, 0, 0);
+        Price price08 = new Price("CompanyA", 31.98, testDates.parse("08/01/2013"), 0, 0, 0);
+        Price price09 = new Price("CompanyA", 32.58, testDates.parse("09/01/2013"), 0, 0, 0);
 
         List<Price> priceList = new ArrayList<>();
         priceList.add(price01);

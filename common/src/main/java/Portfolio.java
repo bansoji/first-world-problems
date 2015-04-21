@@ -70,7 +70,7 @@ public class Portfolio {
             assetValue.put(name, valueNumber);
         }
     }
-
+    
     /**
      * This method will store the order in boughtOrders, or calculate Sell/Buy pair if a soldOrder exists.
      * @param company   The specified company the order is bought under.

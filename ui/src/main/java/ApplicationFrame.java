@@ -41,7 +41,7 @@ public class ApplicationFrame extends JFrame {
     private Reader priceReader;
 
     private JFXPanel graph;
-    private JFXPanel table;
+    private JFXPanel stats;
     private JComboBox<String> companySelector;
     private JPanel selector;
     private JPanel settings;
@@ -107,8 +107,8 @@ public class ApplicationFrame extends JFrame {
         content.add(graph, BorderLayout.CENTER);
         content.add(new JSeparator(SwingConstants.HORIZONTAL), BorderLayout.SOUTH);
 
-        table = new JFXPanel();
-        content.add(table, BorderLayout.EAST);
+        stats = new JFXPanel();
+        content.add(stats, BorderLayout.EAST);
         body.add(content);
 
         add(body, BorderLayout.CENTER);
@@ -162,7 +162,7 @@ public class ApplicationFrame extends JFrame {
                 List<Price> prices = priceReader.getCompanyHistory(companyName);
                 List<Order> orders = orderReader.getCompanyHistory(companyName);
                 loadGraph(prices, orders);
-                constructTable(prices, orders);
+                constructTable(orderReader.getHistory(), prices, orders);
             }
         });
     }
@@ -177,7 +177,7 @@ public class ApplicationFrame extends JFrame {
         });
     }
 
-    private void constructTable(List<Price> prices, List<Order> orders)
+    private void constructTable(History<Order> history, List<Price> prices, List<Order> orders)
     {
         Platform.runLater(new Runnable() {
             @Override
@@ -188,7 +188,7 @@ public class ApplicationFrame extends JFrame {
                         orderRecord.put(order.getOrderDate(), order.getOrderType());
                     }
                 }
-                TableBuilder.buildTable(table, prices, orderRecord);
+                StatsBuilder.build(stats, history, prices, orderRecord);
             }
         });
     }
@@ -265,7 +265,7 @@ public class ApplicationFrame extends JFrame {
                         List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
                         addCompanySelectorListener();
                         loadGraph(prices, orders);
-                        constructTable(prices,orders);
+                        constructTable(orderReader.getHistory(), prices,orders);
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null,
                                 "An unexpected error has occurred when running the given files." +

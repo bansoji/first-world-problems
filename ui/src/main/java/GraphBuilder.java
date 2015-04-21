@@ -37,6 +37,7 @@ public class GraphBuilder {
         xAxis.setMinorTickVisible(false);
         yAxis.setLabel("Price");
         lineChart = new CandleStickChart(xAxis, yAxis);
+        lineChart.getStyleClass().add("graph");
         yAxis.setForceZeroInRange(false);
 
         DateValueAxis xAxisVolume = new DateValueAxis();
@@ -46,8 +47,9 @@ public class GraphBuilder {
         yAxisVolume.setLabel("Volume");
         yAxisVolume.setForceZeroInRange(false);
         barChart = new XYBarChart(xAxisVolume, yAxisVolume);
+        barChart.getStyleClass().add("graph");
 
-        if (prices.size() > 0) {
+        if (prices != null && prices.size() > 0) {
             //lineChart.setTitle("Price of " + prices.get(0).getCompanyName());
             XYChart.Series<Long, Number> priceChart = new XYChart.Series<>();
             XYChart.Series<Long, Number> volumeChart = new XYChart.Series<>();

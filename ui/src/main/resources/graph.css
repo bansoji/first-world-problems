@@ -1,3 +1,4 @@
+/*
 .default-color0.chart-series-line {
     -fx-stroke: #3915AE;
 }
@@ -8,12 +9,9 @@
     -fx-font-size: 12;
     -fx-background-color: #3915AE, white;
 }
+*/
 
-.chart-content {
-    -fx-padding: 0px 20px 0px 20px;
-}
-
-.chart {
+.graph .chart {
     -fx-padding: 10px 20px 10px 0px;
 }
 
@@ -26,19 +24,12 @@
     -fx-stroke: #106ece;
     -fx-stroke-width: 2px;
 }
-.candlestick-candle {
-    /*-fx-effect: dropshadow( two-pass-box , rgba(0,0,0,0.4) , 10, 0.0 , 2 , 4 );*/
-}
 .candlestick-line {
     -fx-stroke: #666666;
     -fx-stroke-width: 3px;
 }
 .candlestick-bar {
     -fx-padding: 5;
-    /*-demo-bar-fill: red;
-    -fx-background-color: linear (0%,0%) to (0%,100%) stops (0%, derive(-demo-bar-fill,-30%)) (100%, derive(-demo-bar-fill,-40%)),
-                          linear (0%,0%) to (0%,100%) stops (0%, derive(-demo-bar-fill,100%)) (100%, derive(-demo-bar-fill, 10%)),
-                          linear (0%,0%) to (0%,100%) stops (0%, derive(-demo-bar-fill,30%)) (100%, derive(-demo-bar-fill,-10%));*/
     -fx-background-insets: 0,1,2;
 }
 .candlestick-bar.close-above-open {

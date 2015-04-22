@@ -15,7 +15,7 @@ import java.util.logging.SimpleFormatter;
 public class OrderManager {
 
     // Some class constants.
-    public Incremeneeestatic final String VERSION = "1.1.0";
+    public static final String VERSION = "1.1.0";
     public static final String OUTPUT_FILE = "orders.csv";
     public static final String LOG_FILE = "logfile.log";
     public static final String LOG_NAME = "log";

@@ -200,3 +200,20 @@ ul {
     color: white;
     padding-bottom: 50px;
 }
+
+.btn-about {
+    border-radius: 0;
+    background-color: #ff7722;
+    margin-right: -20px;
+    color:white;
+    border-color: #e8e8e8;
+    outline: none;
+}
+.btn-about:hover {
+    color:white;
+}
+
+.btn-about:focus {
+    outline: none;
+    color:white;
+}

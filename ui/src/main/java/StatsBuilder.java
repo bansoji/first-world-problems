@@ -20,14 +20,22 @@ import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.MapValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.*;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
+import javafx.util.converter.DoubleStringConverter;
 
+import javax.sound.sampled.Port;
 import java.util.*;
 
 /**
@@ -35,88 +43,20 @@ import java.util.*;
  */
 public class StatsBuilder {
 
-    public static void build(JFXPanel stats, History<Order> history, List<Price> prices, Map<Date, OrderType> orders) {
+    public static void build(Pane stats, History<Order> history, List<Price> prices, Map<Date, OrderType> orders) {
         final VBox vbox = new VBox();
-        vbox.setStyle("-fx-background-color: white");
         vbox.setSpacing(5);
-        vbox.setPadding(new javafx.geometry.Insets(0, 20, 0, 10));
-        vbox.getChildren().addAll(buildPortfolioStats(history),buildTable(prices, orders));
-        Scene scene = new Scene(vbox);
-        stats.setScene(scene);
+        Portfolio portfolio = new Portfolio(history);
+        vbox.getChildren().addAll(buildPortfolioStats(portfolio));
+
+        final HBox hbox = new HBox();
+        hbox.setSpacing(20);
+        hbox.getChildren().addAll(vbox,buildTable(portfolio.getReturns()));
+        hbox.setPadding(new javafx.geometry.Insets(15, 20, 20, 15));
+        stats.getChildren().setAll(hbox);
     }
 
-    private static TableView buildTable(List<Price> prices, Map<Date,OrderType> orders) {
-        TableView tableView = new TableView();
-
-        TableColumn dateCol = new TableColumn("Date");
-        dateCol.setMinWidth(100);
-        dateCol.setComparator(new Comparator<String>(){
-            @Override
-            public int compare(String t1, String t2) {
-                Date d1 = DateUtils.parseMonthAbbr(t1);
-                Date d2 = DateUtils.parseMonthAbbr(t2);
-                if (d1 == null || d2 == null) return -1;
-                return Long.compare(d1.getTime(),d2.getTime());
-            }
-        });
-        dateCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Price, String>, ObservableValue<String>>() {
-
-            @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<Price, String> p) {
-                if (p.getValue() != null) {
-                    return new SimpleStringProperty(DateUtils.formatMonthAbbr(p.getValue().getDate()));
-                } else {
-                    return new SimpleStringProperty("-");
-                }
-            }
-        });
-
-        TableColumn priceCol = new TableColumn("Price");
-        priceCol.setMinWidth(100);
-        priceCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Price, String>, ObservableValue<String>>() {
-
-            @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<Price, String> p) {
-                if (p.getValue() != null) {
-                    return new SimpleStringProperty(String.valueOf(p.getValue().getValue()));
-                } else {
-                    return new SimpleStringProperty("-");
-                }
-            }
-        });
-
-        tableView.setRowFactory(new Callback<TableView<Price>, TableRow<Price>>() {
-            @Override
-            public TableRow<Price> call(TableView<Price> tableView) {
-                final TableRow<Price> row = new TableRow<Price>() {
-                    @Override
-                    protected void updateItem(Price price, boolean empty) {
-                        super.updateItem(price, empty);
-                        if (price != null && !empty && orders.get(price.getDate()) != null) {
-                            setTextFill(Color.WHITE);
-                            if (orders.get(price.getDate()).equals(OrderType.BUY)) {
-                                setStyle("-fx-control-inner-background: green");
-                            } else if (orders.get(price.getDate()).equals(OrderType.SELL)) {
-                                setStyle("-fx-control-inner-background: red");
-                            }
-                        } else {
-                            setStyle("-fx-control-inner-background: white");
-                        }
-                    }
-                };
-                return row;
-            }
-        });
-
-        ObservableList<Price> data = FXCollections.observableArrayList(prices);
-        tableView.setItems(data);
-        tableView.getColumns().addAll(dateCol, priceCol);
-        //ensures extra space to given to existing columns
-        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        return tableView;
-    }
-
-    private static BarChart<Number,String> buildPortfolioStats(History<Order> history) {
+    private static BarChart<Number,String> buildPortfolioStats(Portfolio portfolio) {
 
         CategoryAxis yAxis = new CategoryAxis();
         NumberAxis xAxis = new NumberAxis();
@@ -125,50 +65,44 @@ public class StatsBuilder {
         xAxis.setOpacity(0);
         yAxis.setTickMarkVisible(false);
         BarChart<Number,String> barChart = new BarChart(xAxis, yAxis);
-        barChart.setVerticalGridLinesVisible(false);
-        barChart.setHorizontalGridLinesVisible(false);
-        barChart.setHorizontalZeroLineVisible(false);
+        barChart.setId("portfolio");
 
-        Portfolio portfolio = new Portfolio(history);
         Map<String,Double> portfolioValue = portfolio.getPortfolioValue();
         XYChart.Series<Number,String> portfolioStats = new XYChart.Series<>();
 
-        if (portfolioValue.size() > 0) {
-            double totalPortfolioValue = 0;
-            for (String company : portfolioValue.keySet()) {
-                totalPortfolioValue += portfolioValue.get(company);
-            }
-            XYChart.Data value = new XYChart.Data<Number,String>(totalPortfolioValue, "Portfolio");
-            value.nodeProperty().addListener(new ChangeListener<Node>() {
-                @Override public void changed(ObservableValue<? extends Node> ov, Node oldNode, final Node node) {
-                    if (node != null) {
-                        displayLabelForData(value);
-                    }
-                }
-            });
-            portfolioStats.getData().add(value);
+        double totalPortfolioValue = 0;
+        for (String company : portfolioValue.keySet()) {
+            totalPortfolioValue += portfolioValue.get(company);
         }
+        XYChart.Data valuePortfolio = new XYChart.Data<Number,String>(totalPortfolioValue, "Portfolio");
+        valuePortfolio.nodeProperty().addListener(new ChangeListener<Node>() {
+            @Override public void changed(ObservableValue<? extends Node> ov, Node oldNode, final Node node) {
+                if (node != null) {
+                    displayLabelForData(valuePortfolio);
+                }
+            }
+        });
+        portfolioStats.getData().add(valuePortfolio);
 
         Map<String,Double> equityValue = portfolio.getAssetValue();
-        if (equityValue.size() > 0) {
-            double totalEquityValue = 0;
-            for (String company : equityValue.keySet()) {
-                totalEquityValue += equityValue.get(company);
-            }
-            XYChart.Data value = new XYChart.Data<Number,String>(totalEquityValue, "Equity");
-            value.nodeProperty().addListener(new ChangeListener<Node>() {
-                @Override public void changed(ObservableValue<? extends Node> ov, Node oldNode, final Node node) {
-                    if (node != null) {
-                        displayLabelForData(value);
-                    }
-                }
-            });
-            portfolioStats.getData().add(value);
+        double totalEquityValue = 0;
+        for (String company : equityValue.keySet()) {
+            totalEquityValue += equityValue.get(company);
         }
+        XYChart.Data valueEquity = new XYChart.Data<Number,String>(totalEquityValue, "Equity");
+        valueEquity.nodeProperty().addListener(new ChangeListener<Node>() {
+            @Override public void changed(ObservableValue<? extends Node> ov, Node oldNode, final Node node) {
+                if (node != null) {
+                    displayLabelForData(valueEquity);
+                }
+            }
+        });
+        portfolioStats.getData().add(valueEquity);
+
         barChart.getData().add(portfolioStats);
         barChart.setLegendVisible(false);
         barChart.setPrefHeight(150);
-        barChart.setPrefWidth(300);
+        barChart.setPrefWidth(500);
         return barChart;
     }
 
@@ -186,16 +120,73 @@ public class StatsBuilder {
         node.boundsInParentProperty().addListener(new ChangeListener<Bounds>() {
             @Override public void changed(ObservableValue<? extends Bounds> ov, Bounds oldBounds, Bounds bounds) {
                 dataText.setLayoutX(
-                        Math.round(
-                                bounds.getMaxX() + 25
-                        )
+                        Math.round(bounds.getMaxX() + 25)
                 );
                 dataText.setLayoutY(
-                        Math.round(
-                                bounds.getMaxY() - dataText.prefHeight(-1) * 0.5
-                        )
+                        Math.round(bounds.getMaxY() - dataText.prefHeight(-1) * 0.5)
                 );
             }
         });
+    }
+
+    private static TableView buildTable(Map<String,List<Double>> assetValue) {
+
+        ObservableList<Map> data = FXCollections.observableArrayList();
+        for (String company: assetValue.keySet()) {
+            Map<String,Object> row = new HashMap<String,Object>();
+            row.put("Company",company);
+            row.put("Return", (double)Math.round(assetValue.get(company).get(0)*100)/100);
+            row.put("Return %", (double)Math.round(assetValue.get(company).get(1)*100)/100);
+            data.add(row);
+        }
+
+        TableView tableView = new TableView(data);
+
+        TableColumn companyCol = new TableColumn("Company");
+        companyCol.setMinWidth(100);
+        companyCol.setCellValueFactory(new MapValueFactory<>("Company"));
+
+        companyCol.setCellFactory(new Callback<TableColumn<Map, Object>,
+                TableCell<Map, Object>>() {
+            @Override
+            public TableCell call(TableColumn p) {
+                return new TextFieldTableCell(new StringConverter() {
+                    @Override
+                    public String toString(Object t) {
+                        return t.toString();
+                    }
+
+                    @Override
+                    public Object fromString(String string) {
+                        return string;
+                    }
+                });
+            }
+        });
+
+        Callback<TableColumn<Map, Object>, TableCell<Map, Object>>
+                returnCallback = new Callback<TableColumn<Map, Object>,
+                TableCell<Map, Object>>() {
+            @Override
+            public TableCell call(TableColumn p) {
+                return new TextFieldTableCell(new DoubleStringConverter());
+            }
+        };
+
+        TableColumn returnCol = new TableColumn("Return");
+        returnCol.setMinWidth(100);
+        returnCol.setCellValueFactory(new MapValueFactory<>("Return"));
+        returnCol.setCellFactory(returnCallback);
+
+        TableColumn returnPercentCol = new TableColumn("Return %");
+        returnPercentCol.setMinWidth(100);
+        returnPercentCol.setCellValueFactory(new MapValueFactory<>("Return %"));
+        returnPercentCol.setCellFactory(returnCallback);
+
+
+        tableView.getColumns().addAll(companyCol, returnCol, returnPercentCol);
+        //ensures extra space to given to existing columns
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        return tableView;
     }
 }

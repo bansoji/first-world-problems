@@ -701,7 +701,7 @@ public class XYBarChart extends XYChart<Long, Number> {
 
             switch (type) {
                 case BuyOrder:
-                    volumeValue.setStyle("-fx-text-fill: green");
+                    volumeValue.setStyle("-fx-text-fill: #2CFC0E");
                     break;
                 case SellOrder:
                     volumeValue.setStyle("-fx-text-fill: red");

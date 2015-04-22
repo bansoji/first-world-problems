@@ -12,6 +12,7 @@ public class PriceParser extends Parser<Price> {
     private static final int COMPANY_NAME = 0;
     private static final int DATE = 1;
     private static final int PRICE = 8;
+    private static final int OPEN_PRICE = 5;
     private static final int HIGH_PRICE = 6;
     private static final int LOW_PRICE = 7;
     private static final int VOLUME = 9;
@@ -26,9 +27,7 @@ public class PriceParser extends Parser<Price> {
             String[] nextLine = reader.readNext();
             if (nextLine != null) {
                 String companyName = nextLine[COMPANY_NAME];
-                double value;
-                double high_price;
-                double low_price;
+                double value, open_price, high_price, low_price;
                 int volume;
                 Date date = null;
 
@@ -49,11 +48,12 @@ public class PriceParser extends Parser<Price> {
 
                 value = Double.parseDouble(nextLine[PRICE]);
                 date = DateUtils.parseMonthAbbr(nextLine[DATE], "Error parsing price date");
+                open_price = Double.parseDouble(nextLine[OPEN_PRICE]);
                 high_price = Double.parseDouble(nextLine[HIGH_PRICE]);
                 low_price = Double.parseDouble(nextLine[LOW_PRICE]);
                 volume = Integer.parseInt(nextLine[VOLUME]);
 
-                return new Price(companyName, value, date, high_price, low_price, volume);
+                return new Price(companyName, value, date, open_price, high_price, low_price, volume);
             }
         } catch (IOException e) {
             e.printStackTrace();

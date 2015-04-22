@@ -15,6 +15,10 @@
     -fx-padding: 10px 20px 10px 0px;
 }
 
+.graph .chart-plot-background {
+    -fx-background-color: black;
+}
+
 .tooltip-content {
     -fx-font-size: 12;
 }
@@ -33,7 +37,7 @@
     -fx-background-insets: 0,1,2;
 }
 .candlestick-bar.close-above-open {
-    -fx-background-color: green;
+    -fx-background-color: #2CFC0E;
 }
 .candlestick-bar.open-above-close {
     -fx-background-color: red;

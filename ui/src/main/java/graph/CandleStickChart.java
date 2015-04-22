@@ -38,6 +38,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import color.ColorManager;
 import date.DateUtils;
 import javafx.animation.FadeTransition;
 import javafx.collections.ObservableList;
@@ -404,10 +405,10 @@ public class CandleStickChart extends XYChart<Long,Number> {
 
             switch (type) {
                 case BuyOrder:
-                    closeValue.setStyle("-fx-text-fill: green");
+                    closeValue.setStyle("-fx-text-fill: " + ColorManager.BUY);
                     break;
                 case SellOrder:
-                    closeValue.setStyle("-fx-text-fill: red");
+                    closeValue.setStyle("-fx-text-fill: " + ColorManager.SELL);
                     break;
             }
         }

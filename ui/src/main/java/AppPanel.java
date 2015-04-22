@@ -9,6 +9,6 @@ import java.awt.*;
 public class AppPanel extends JPanel {
     public AppPanel() {
         super();
-        setBackground(Color.WHITE);
+        setBackground(new Color(240,240,240));
     }
 }

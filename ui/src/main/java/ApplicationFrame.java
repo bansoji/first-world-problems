@@ -1,12 +1,21 @@
 import humanize.Humanize;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
 import javafx.event.*;
 import javafx.scene.Scene;
-import javafx.scene.control.DateCell;
-import javafx.scene.control.DatePicker;
+import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.util.Callback;
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,8 +24,6 @@ import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -40,10 +47,11 @@ public class ApplicationFrame extends JFrame {
     private Reader orderReader;
     private Reader priceReader;
 
-    private JFXPanel graph;
-    private JFXPanel stats;
-    private JComboBox<String> companySelector;
-    private JPanel selector;
+    private BorderPane graph;
+    private Pane stats;
+    private JFXPanel content;
+    private ComboBox<String> companySelector;
+    private HBox selector;
     private JPanel settings;
     private JPanel paramSettings;
     private ParameterManager manager = new ParameterManager();
@@ -72,19 +80,37 @@ public class ApplicationFrame extends JFrame {
 
     private void initHeader()
     {
-        JPanel header = new AppPanel();
-        header.setLayout(new BoxLayout(header,BoxLayout.Y_AXIS));
+        JFXPanel header = new JFXPanel();
+        header.setBackground(Color.WHITE);
+        header.setLayout(new FlowLayout(FlowLayout.LEADING));
+        header.setBorder(new EmptyBorder(10,0,10,0));
 
-        JLabel title = new JLabel(APPLICATION_TITLE);
-        title.setFont(title.getFont().deriveFont(28f));
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        title.setBorder(new EmptyBorder(50,0,5,0));
+//        HBox pane = new HBox();
+//        pane.setSpacing(10);
+//        Image image = new Image("ui/src/main/resources/logosizes/BuyHardLogo_Small.png");
+//
+//        // simple displays ImageView the image as is
+//        ImageView logo = new ImageView();
+//        logo.setImage(image);
+//        pane.getChildren().addAll(logo, new Label(APPLICATION_INFO));
+//        Scene scene = new Scene(pane);
+//        header.setScene(scene);
+
+
+        JLabel title = new JLabel();
+        title.setIcon(new ImageIcon("ui/src/main/resources/logosizes/BuyHardLogo_Small.png"));
+        //JLabel title = new JLabel(APPLICATION_TITLE);
+        //title.setFont(title.getFont().deriveFont(28f));
+        //title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //title.setBorder(new EmptyBorder(20,0,0,0));
         header.add(title);
+
+        header.add(Box.createRigidArea(new Dimension(20,0)));
 
         JLabel appInfo = new JLabel(APPLICATION_INFO);
         appInfo.setFont(appInfo.getFont().deriveFont(10f));
-        appInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        appInfo.setBorder(new EmptyBorder(0,0,30,0));
+        //appInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        //appInfo.setBorder(new EmptyBorder(0,0,30,0));
         header.add(appInfo);
 
         header.add(new JSeparator(SwingConstants.HORIZONTAL));
@@ -98,27 +124,42 @@ public class ApplicationFrame extends JFrame {
 
         addFileChoosers(body);
         addSettingsPanel(body);
-        addFilterSelector(body);
 
-        JPanel content = new AppPanel();
+        content = new JFXPanel();
         content.setLayout(new BorderLayout());
-        graph = new JFXPanel();
-        graph.setPreferredSize(getSize());
-        content.add(graph, BorderLayout.CENTER);
-        content.add(new JSeparator(SwingConstants.HORIZONTAL), BorderLayout.SOUTH);
 
-        stats = new JFXPanel();
-        content.add(stats, BorderLayout.EAST);
+        graph = new BorderPane();
+        stats = new Pane();
+        addFilterSelector();
+
+        TabPane tabPane = new TabPane();
+        Tab tab = new Tab();
+        tab.setText("Data");
+        tab.setClosable(false);
+        tab.setContent(graph);
+        Tab statsTab = new Tab();
+        statsTab.setText("Portfolio");
+        statsTab.setClosable(false);
+        statsTab.setContent(stats);
+        tabPane.getTabs().addAll(tab,statsTab);
+
+        Scene scene = new Scene(tabPane);
+        scene.getStylesheets().addAll("graph.css", "stats.css");
+        content.setScene(scene);
+
         body.add(content);
+        body.add(new JSeparator(SwingConstants.HORIZONTAL));
 
         add(body, BorderLayout.CENTER);
     }
 
     private void initFooter()
     {
+        JPanel footerPanel = new AppPanel();
         JLabel footer = new JLabel(FOOTER_MESSAGE);
         footer.setHorizontalAlignment(JLabel.CENTER);
-        add(footer, BorderLayout.SOUTH);
+        footerPanel.add(footer);
+        add(footerPanel, BorderLayout.SOUTH);
     }
 
     private void addFileChooserListener(final FileChooser fileChooser)
@@ -155,29 +196,17 @@ public class ApplicationFrame extends JFrame {
     }
 
     private void addCompanySelectorListener() {
-        companySelector.addItemListener(new ItemListener() {
+        companySelector.valueProperty().addListener(new ChangeListener<String>() {
             @Override
-            public void itemStateChanged(ItemEvent e) {
-                String companyName = (String) e.getItem();
+            public void changed(ObservableValue v, String old, String companyName) {
                 List<Price> prices = priceReader.getCompanyHistory(companyName);
                 List<Order> orders = orderReader.getCompanyHistory(companyName);
-                loadGraph(prices, orders);
-                constructTable(orderReader.getHistory(), prices, orders);
+                loadContent(orderReader.getHistory(), prices, orders);
             }
         });
     }
 
-    private void loadGraph(List<Price> prices, List<Order> orders)
-    {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                g.buildGraph(graph, prices, orders);
-            }
-        });
-    }
-
-    private void constructTable(History<Order> history, List<Price> prices, List<Order> orders)
+    private void loadContent(History<Order> history, List<Price> prices, List<Order> orders)
     {
         Platform.runLater(new Runnable() {
             @Override
@@ -188,13 +217,15 @@ public class ApplicationFrame extends JFrame {
                         orderRecord.put(order.getOrderDate(), order.getOrderType());
                     }
                 }
-                StatsBuilder.build(stats, history, prices, orderRecord);
+                g.buildGraph(graph,prices, orders, orderRecord);
+                StatsBuilder.build(stats,history, prices, orderRecord);
             }
         });
     }
 
     private void addFileChoosers(JPanel body) {
         JPanel fileChoosers = new AppPanel();
+        fileChoosers.setBorder(new EmptyBorder(20,0,0,0));
         fileChoosers.setLayout(new FlowLayout(FlowLayout.LEADING));
         //Choose csv file button
         FileChooser dataFileChooser = new FileChooser("Choose CSV");
@@ -216,6 +247,7 @@ public class ApplicationFrame extends JFrame {
 
     private void addSettingsPanel(JPanel body) {
         settings = new AppPanel();
+        settings.setBorder(new EmptyBorder(0, 5, 10, 0));
         settings.setLayout(new FlowLayout(FlowLayout.LEADING));
 
         //Run button
@@ -243,19 +275,11 @@ public class ApplicationFrame extends JFrame {
                         priceReader = new PriceReader(dataFile);
                         priceReader.readAll();
                         Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
-                        List<String> priceCompanies = new ArrayList<>(priceCompaniesSet);
-
+                        ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
                         //update list of companies in the selector
-                        companySelector.removeAllItems();
-                        for (String company: priceCompaniesSet) {
-                            companySelector.addItem(company);
-                        }
-
-                        //update list of companies in the selector
-                        companySelector.removeAllItems();
-                        for (String company: priceCompaniesSet) {
-                            companySelector.addItem(company);
-                        }
+                        companySelector.getSelectionModel().clearSelection();
+                        companySelector.setItems(priceCompanies);
+                        companySelector.getSelectionModel().selectFirst();
 
                         List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
                         selector.setVisible(true);
@@ -264,8 +288,7 @@ public class ApplicationFrame extends JFrame {
                         orderReader.readAll();
                         List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
                         addCompanySelectorListener();
-                        loadGraph(prices, orders);
-                        constructTable(orderReader.getHistory(), prices,orders);
+                        loadContent(orderReader.getHistory(), prices, orders);
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null,
                                 "An unexpected error has occurred when running the given files." +
@@ -281,33 +304,35 @@ public class ApplicationFrame extends JFrame {
         });
     }
 
-    private void addFilterSelector(JPanel body) {
-        selector = new AppPanel();
-        selector.setBorder(new EmptyBorder(0,15,0,15));
-        selector.setLayout(new FlowLayout(FlowLayout.LEADING));
-        addFilter("Company");
-        addDateFilters();
+    private void addFilterSelector() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                selector = new HBox();
+                selector.setSpacing(20);
+                selector.setPadding(new javafx.geometry.Insets(15, 15, 0, 15));
+                addFilter("Company");
+                addDateFilters();
 
-        selector.setVisible(false);
-        body.add(new JSeparator(SwingConstants.HORIZONTAL));
-        body.add(selector);
+                selector.setVisible(false);
+                graph.setTop(selector);
+            }
+        });
     }
 
     private void addDateFilters() {
-        selector.add(new JLabel("Start Date: "));
-        JFXPanel startDatePanel = new JFXPanel();
-        selector.add(startDatePanel);
-        selector.add(Box.createRigidArea(new Dimension(10,0)));
-        selector.add(new JLabel("End Date: "));
-        JFXPanel endDatePanel = new JFXPanel();
-        selector.add(endDatePanel);
+        HBox startDatePanel = new HBox();
+        startDatePanel.getChildren().add(new Label("Start Date: "));
+        selector.getChildren().add(startDatePanel);
+        HBox endDatePanel = new HBox();
+        endDatePanel.getChildren().add(new Label("End Date: "));
+        selector.getChildren().add(endDatePanel);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 DatePicker startDatePicker = new DatePicker();
                 startDatePicker.setMinHeight(20);
-                Scene startScene = new Scene(startDatePicker);
-                startDatePanel.setScene(startScene);
+                startDatePanel.getChildren().add(startDatePicker);
                 startDatePicker.setOnAction(new EventHandler() {
                     public void handle(javafx.event.Event t) {
                         LocalDate date = startDatePicker.getValue();
@@ -317,8 +342,7 @@ public class ApplicationFrame extends JFrame {
                 });
                 DatePicker endDatePicker = new DatePicker();
                 endDatePicker.setMinHeight(20);
-                Scene endScene = new Scene(endDatePicker);
-                endDatePanel.setScene(endScene);
+                endDatePanel.getChildren().add(endDatePicker);
                 endDatePicker.setOnAction(new EventHandler() {
                     public void handle(javafx.event.Event t) {
                         LocalDate date = endDatePicker.getValue();
@@ -367,11 +391,11 @@ public class ApplicationFrame extends JFrame {
     }
 
     private void addFilter(String name) {
-        selector.add(new JLabel(name + ": "));
-        companySelector = new JComboBox<>();
-        AutoCompleteDecorator.decorate(companySelector);
-        selector.add(companySelector);
-        selector.add(Box.createRigidArea(new Dimension(10,0)));
+        HBox filter = new HBox();
+        companySelector = new ComboBox<>();
+        new AutoCompleteComboBoxListener<>(companySelector);
+        filter.getChildren().addAll(new Label(name + ": "), companySelector);
+        selector.getChildren().add(filter);
     }
 
     private void changeParamSelection() {

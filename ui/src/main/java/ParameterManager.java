@@ -1,3 +1,6 @@
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -15,14 +18,10 @@ public class ParameterManager {
 
     public boolean updateParams(String paramFile)
     {
-        Properties props = getProperties(paramFile);
-        //error reading properties
-        if (props == null) return false;
-
-        FileOutputStream out;
+        PropertiesConfiguration props;
         try {
-            out = new FileOutputStream(paramFile);
-        } catch (FileNotFoundException e) {
+            props = new PropertiesConfiguration(paramFile);
+        } catch (ConfigurationException e) {
             e.printStackTrace();
             return false;
         }
@@ -30,12 +29,11 @@ public class ParameterManager {
         for (String key: params.keySet()) {
             props.setProperty(key, params.get(key));
         }
-        //output properties
         try {
-            props.store(out, null);
-            out.close();
-        } catch (IOException e) {
+            props.save();
+        } catch (ConfigurationException e) {
             e.printStackTrace();
+            return false;
         }
         return true;
     }

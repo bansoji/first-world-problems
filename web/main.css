@@ -225,3 +225,11 @@ ol{
     outline: none;
     color:white;
 }
+
+.btn-release:focus {
+    outline:none;
+}
+
+.testing-ss {
+    width:100%;
+}

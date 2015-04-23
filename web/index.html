@@ -23,16 +23,19 @@
 
 <body>
 <div class="container">
+
+    <!--Header-->
     <div class="panel panel-default" id="header-panel">
         <!--<img src="BuyHardLogo.png" class="logo">-->
         <h1 class="logo-text"><strong>Buy.Hard</strong></h1>
         <div class="header">
-            <!-- Button trigger modal -->
+            <!-- About Us Button -->
             <button type="button" class="btn btn-about"  data-toggle="modal" data-target="#myModal">
                 About Us
             </button>
         </div>
-        <!-- Modal -->
+
+        <!-- About Us Modal -->
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -57,6 +60,8 @@
             </div>
         </div>
     </div>
+
+    <!--Body Content-->
     <div role="tabpanel">
 
         <!-- Nav tabs -->
@@ -66,11 +71,9 @@
         </ul>
 
         <!-- Tab panes -->
-
         <div class="tab-content">
 
             <!--Strategy Tab-->
-
             <div role="tabpanel" class="tab-pane active" id="home">
                 <div class="panel panel-default download-panel" id="internal-panel">
 
@@ -81,7 +84,7 @@
                         File Name: <i>BuyHard-Momentum-1.1.0.jar</i><br>
                         Version: 1.1.0<br>
                         Date Released: 23/04/2015<br>
-                        Size: 28KB<br>
+                        Size: 6.7MB<br>
                     </p>
                 </div>
                 <div class="panel panel-default" id="internal-panel">
@@ -213,7 +216,6 @@
             </div>
 
             <!--Testing Platform Tab-->
-
             <div role="tabpanel" class="tab-pane" id="profile">
                 <div class="panel panel-default download-panel" id="internal-panel">
 
@@ -228,6 +230,12 @@
                     </p>
                 </div>
                 <div class="panel panel-default" id="internal-panel">
+                    <div class="subheading-content">
+                        <h2><span>User Interface</span></h2>
+                        <div class="well well-sm">
+                            <img class="testing-ss" src="testingplatform.png"/>
+                        </div>
+                    </div>
 
                     <hr>
                     <h2 class="heading">Getting Started</h2>
@@ -236,7 +244,7 @@
                     <div class="subheading-content">
                         <h2><span>Usage Instructions</span></h2>
                         <ol>
-                            <li>Select an input file. This needs to be a valid TRTH file following that format.</li>
+                            <li>Select an input data file. This needs to be a valid TRTH file..</li>
                             <li>Select a compatible module to use.</li>
                             <li>Select the parameters file for that module.</li>
                         </ol>
@@ -247,9 +255,24 @@
                         <ul>
                             <li>At the moment, the BuyHard testing platform only supports Java JAR modules.</li>
                             <li>Additionally, the output generated needs to be named orders.csv and located in your current working directory.</li>
-                            <li>The orders file generate should be a CSV that follows the following headers and format.</li>
+                            <li>The orders file generated should be a CSV that follows the following headers and formats:</li>
+                                <br>
+                                <ul>
+                                    <li>Company Name: any character string</li>
+                                    <li>Date: must be in dd-MM-yyyy format</li>
+                                    <li>Price must be numerical</li>
+                                    <li>Volume: must be numerical</li>
+                                    <li>Value: must be numerical, should equal to the price multiplied by the volume</li>
+                                    <li>Buy/Sell: must be either B (buy) or S (sell)</li>
+                                </ul>
+
+                                <br>For example:<br><br>
+                                <div class="well well-sm">
+                                    BHP.AX,2015-01-09,29.16,100,2916.0,B<br>
+                                    BHP.AX,2015-01-14,27.2,100,2720.0,S
+                                </div>
                             <li>The names of the CSV headers are not important but the order of the columns and the formats are. <br>
-                                See the sample input file provided in the ‘Getting Started’ section of the Modules tab.</li>
+                                A sample input file is provided in the <i>Getting Started</i> section of the Modules tab.</li>
                             <li>Please contact the developers of the module for issues originating from the trading module.</li>
                         </ul>
                     </div>
@@ -267,7 +290,7 @@
 
                         </td></tr>
                     </table>
-                    <!-- Modal -->
+                    <!-- Changelog Modals -->
                     <div class="modal fade" id="platform-v1-0-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
@@ -277,6 +300,15 @@
                                 </div>
                                 <div class="modal-body" id="changelog-modal">
                                     Initial release with:
+                                    <ul>
+                                        <li>Selection of data CSV, strategy module and parameters</li>
+                                        <li>Ability to change parameter values</li>
+                                        <li>Extensive charts including candlestick chart of prices data, bar chart of order volume, and table with date, price and order activity</li>
+                                        <li>Extensive performance breakdown including bar chart of portfolio (currently-held stock value + profit)
+                                            and equity (currently-held stock) value, table with returns from each security traded and pie chart of
+                                            returns contributions from each security by percentage</li>
+                                        <li>Chart features including filtering by company and date range, zooming, tooltips with detailed price and volume information</li>
+                                    </ul>
 
                                 </div>
                                 <div class="modal-footer">
@@ -291,9 +323,7 @@
                 </div>
             </div>
         </div>
-
     </div>
-
 </div> <!-- /container -->
 
 <script type="text/javascript">

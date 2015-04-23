@@ -3,7 +3,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -16,7 +15,7 @@ import java.util.logging.SimpleFormatter;
 public class OrderManager {
 
     // Some class constants.
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "1.1.0";
     public static String OUTPUT_FILE = "orders.csv";
     public static String LOG_FILE = "logfile.log";
     public static final String LOG_NAME = "log";
@@ -37,21 +36,6 @@ public class OrderManager {
 
         // Logger initialisation.
         Logger logger = Logger.getLogger("log");
-
-        // Load the properties file.
-        InputStream config = new FileInputStream(paramName);
-        Properties prop = new Properties();
-
-        try {
-            prop.load(config);
-        } catch (IOException e) {
-            logger.severe("Invalid Parameters File.");
-            e.printStackTrace();
-        }
-
-        OUTPUT_FILE = prop.getProperty("outputFileName", "orders.csv");
-        LOG_FILE = prop.getProperty("outputLogName", "logfile.log");
-
         FileHandler handler = new FileHandler(LOG_FILE);
         SimpleFormatter formatter = new SimpleFormatter();
         handler.setFormatter(formatter);
@@ -83,6 +67,8 @@ public class OrderManager {
         // Initialise the timer.
         long startTime = System.currentTimeMillis();
 
+        // Load the properties file.
+        InputStream input = new FileInputStream(paramName);
 
         for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
             logger.info("Analysing prices for " + company);
@@ -90,7 +76,7 @@ public class OrderManager {
             // PrintUtils.printPrices(companyHistory);
 
             // Initialise the trading strategy.
-            TradingStrategy strategy = new MomentumStrategy(companyHistory, config);
+            TradingStrategy strategy = new MomentumStrategy(companyHistory, input);
 
             ///////////////////////////////
             // RUNNING.
@@ -120,7 +106,7 @@ public class OrderManager {
         } catch (IOException e) {
             logger.severe(e.getMessage());
         }
-        config.close();
+        input.close();
 
         // Log successful.
         logger.info("Module successful. No errors encountered.");

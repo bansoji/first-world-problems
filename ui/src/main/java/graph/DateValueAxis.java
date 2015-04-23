@@ -1,4 +1,4 @@
-package graph.plugins;
+package graph;
 
 import com.sun.javafx.charts.ChartLayoutAnimator;
 import com.sun.javafx.css.converters.SizeConverter;
@@ -358,14 +358,17 @@ public class DateValueAxis extends ValueAxis<Long> {
         final double tickUnit = getTickUnit();
         final double minorUnit = tickUnit/getMinorTickCount();
         if (getTickUnit() > 0) {
-            for (double major = lowerBound; major < upperBound; major += tickUnit)  {
-                for (double minor=major+minorUnit; minor < (major+tickUnit); minor += minorUnit) {
-                    minorTickMarks.add((long)minor);
-                    if(minorTickMarks.size()>10000) {
-                        // This is a ridiculous amount of major tick marks, something has probably gone wrong
-                        System.err.println("Warning we tried to create more than 10000 minor tick marks on a NumberAxis. " +
-                                "Lower Bound=" + getLowerBound() + ", Upper Bound=" + getUpperBound() + ", Tick Unit=" + tickUnit);
-                        break;
+            LOOP:
+            {
+                for (double major = lowerBound; major < upperBound; major += tickUnit) {
+                    for (double minor = major + minorUnit; minor < (major + tickUnit); minor += minorUnit) {
+                        minorTickMarks.add((long) minor);
+                        if (minorTickMarks.size() > 10000) {
+                            // This is a ridiculous amount of major tick marks, something has probably gone wrong
+                            //System.err.println("Warning we tried to create more than 10000 minor tick marks on a NumberAxis. " +
+                            //        "Lower Bound=" + getLowerBound() + ", Upper Bound=" + getUpperBound() + ", Tick Unit=" + tickUnit);
+                            break LOOP;
+                        }
                     }
                 }
             }

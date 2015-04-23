@@ -1,4 +1,4 @@
-package graph.plugins;
+package graph;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

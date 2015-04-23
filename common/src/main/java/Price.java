@@ -10,15 +10,17 @@ public class Price {
     private Date date;
     private double high;
     private double low;
+    private double open;
 
     private int volume;
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public Price(String companyName, double value, Date date, double high, double low, int vol){
+    public Price(String companyName, double value, Date date, double open, double high, double low, int vol){
         this.companyName = companyName;
         this.value = value;
         this.date = date;
+        this.open = open;
         this.high = high;
         this.low = low;
         this.volume= vol;
@@ -34,6 +36,10 @@ public class Price {
 
     public Date getDate() {
         return date;
+    }
+
+    public double getOpen() {
+        return open;
     }
 
     public double getHigh() {

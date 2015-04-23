@@ -106,9 +106,32 @@ public class MomentumStrategy implements TradingStrategy {
 
 
         // Generate the orders.
-        OrderType nextStatus = OrderType.BUY; // The next status to look for.
-        for (int i=0; i<tradeSignals.size(); i++){
-            if (tradeSignals.get(i).equals(nextStatus)){
+        OrderType nextStatus = OrderType.NOTHING; // The next status to look for.
+
+        for (int i=0; i<tradeSignals.size(); i++) {
+            if (ordersGenerated.size() == 0){
+                // Starting case.
+                if (tradeSignals.get(i).equals(OrderType.NOTHING))
+                    continue;
+
+                // Skip if the date given is out of the simulation date range.
+                Price tradePrice = prices.get(i + movingAvgTimeWindow);
+
+                if (startDate != null && tradePrice.getDate().before(startDate)) continue;
+                if (endDate != null && tradePrice.getDate().after(endDate)) continue;
+
+                // Create a new Order.
+                OrderType currentSignal = tradeSignals.get(i);
+                Order o = new Order(currentSignal, tradePrice.getCompanyName(), tradePrice.getValue(),
+                        volume, tradePrice.getDate());
+                //System.out.println("Out");
+                ordersGenerated.add(o);
+
+                // Toggle the nextStatus.
+                nextStatus = currentSignal.getOppositeOrderType();
+            }
+
+            if (tradeSignals.get(i).equals(nextStatus)) {
                 // Create an order using this ith day.
                 // Get the price for that day. Offset by moving average.
                 Price tradePrice = prices.get(i + movingAvgTimeWindow);

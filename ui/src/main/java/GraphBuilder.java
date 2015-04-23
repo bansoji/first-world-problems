@@ -11,6 +11,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
 import javafx.event.EventHandler;
+import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
@@ -47,6 +48,7 @@ public class GraphBuilder {
         lineChart = new CandleStickChart(xAxis, yAxis);
         lineChart.getStyleClass().add("graph");
         yAxis.setForceZeroInRange(false);
+        lineChart.setCacheHint(CacheHint.SPEED);
 
         DateValueAxis xAxisVolume = new DateValueAxis();
         NumberAxis yAxisVolume = new NumberAxis();
@@ -56,6 +58,7 @@ public class GraphBuilder {
         yAxisVolume.setForceZeroInRange(false);
         barChart = new XYBarChart(xAxisVolume, yAxisVolume);
         barChart.getStyleClass().add("graph");
+        barChart.setCacheHint(CacheHint.SPEED);
 
         if (prices != null && prices.size() > 0) {
             //lineChart.setTitle("Price of " + prices.get(0).getCompanyName());

@@ -40,9 +40,9 @@ public class ApplicationFrame extends JFrame {
     private static final Logger logger = Logger.getLogger("log");
 
     //TODO Remove values - only for TESTING
-    private String strategyFile = "out/artifacts/trading_jar/trading.jar";
-    private String dataFile = "common/src/main/resources/sampleDataSmall";
-    private String paramFile = "trading/resources/config.properties";
+    private String strategyFile;// = "out/artifacts/trading_jar/trading.jar";
+    private String dataFile;// = "common/src/main/resources/sampleDataSmall";
+    private String paramFile;// = "trading/resources/config.properties";
 
     private Reader orderReader;
     private Reader priceReader;
@@ -51,6 +51,7 @@ public class ApplicationFrame extends JFrame {
     private Pane stats;
     private JFXPanel content;
     private ComboBox<String> companySelector;
+    private ChangeListener companyListener;
     private HBox selector;
     private JPanel settings;
     private JPanel paramSettings;
@@ -58,7 +59,6 @@ public class ApplicationFrame extends JFrame {
 
     private GraphBuilder g = new GraphBuilder();
 
-    private static String APPLICATION_TITLE = "Trading Platform";
     private static String VERSION_NUMBER = "1.0";
     private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
     private static String FOOTER_MESSAGE = "Get the latest release at our website.";
@@ -98,19 +98,13 @@ public class ApplicationFrame extends JFrame {
 
 
         JLabel title = new JLabel();
-        title.setIcon(new ImageIcon("ui/src/main/resources/logosizes/BuyHardLogo_Small.png"));
-        //JLabel title = new JLabel(APPLICATION_TITLE);
-        //title.setFont(title.getFont().deriveFont(28f));
-        //title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        //title.setBorder(new EmptyBorder(20,0,0,0));
+        title.setIcon(new ImageIcon(getClass().getResource("logosizes/BuyHardLogo_Small.png")));
         header.add(title);
 
         header.add(Box.createRigidArea(new Dimension(20,0)));
 
         JLabel appInfo = new JLabel(APPLICATION_INFO);
         appInfo.setFont(appInfo.getFont().deriveFont(10f));
-        //appInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
-        //appInfo.setBorder(new EmptyBorder(0,0,30,0));
         header.add(appInfo);
 
         header.add(new JSeparator(SwingConstants.HORIZONTAL));
@@ -196,14 +190,17 @@ public class ApplicationFrame extends JFrame {
     }
 
     private void addCompanySelectorListener() {
-        companySelector.valueProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue v, String old, String companyName) {
-                List<Price> prices = priceReader.getCompanyHistory(companyName);
-                List<Order> orders = orderReader.getCompanyHistory(companyName);
-                loadContent(orderReader.getHistory(), prices, orders);
-            }
-        });
+        if (companyListener == null) {
+            companyListener = new ChangeListener<String>() {
+                @Override
+                public void changed(ObservableValue v, String old, String companyName) {
+                    List<Price> prices = priceReader.getCompanyHistory(companyName);
+                    List<Order> orders = orderReader.getCompanyHistory(companyName);
+                    loadContent(orderReader.getHistory(), prices, orders);
+                }
+            };
+        }
+        companySelector.valueProperty().addListener(companyListener);
     }
 
     private void loadContent(History<Order> history, List<Price> prices, List<Order> orders)
@@ -276,10 +273,15 @@ public class ApplicationFrame extends JFrame {
                         priceReader.readAll();
                         Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
                         ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
+
                         //update list of companies in the selector
+                        if (companyListener != null) {
+                            companySelector.valueProperty().removeListener(companyListener);
+                        }
                         companySelector.getSelectionModel().clearSelection();
                         companySelector.setItems(priceCompanies);
                         companySelector.getSelectionModel().selectFirst();
+                        addCompanySelectorListener();
 
                         List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
                         selector.setVisible(true);
@@ -287,7 +289,6 @@ public class ApplicationFrame extends JFrame {
                         orderReader = new OrderReader(OUTPUT_FILE_PATH);
                         orderReader.readAll();
                         List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
-                        addCompanySelectorListener();
                         loadContent(orderReader.getHistory(), prices, orders);
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null,
@@ -405,8 +406,14 @@ public class ApplicationFrame extends JFrame {
 
         Enumeration properties = props.propertyNames();
         while (properties.hasMoreElements()) {
-            JPanel panel = new AppPanel();
             String key = (String)properties.nextElement();
+            //if the value of the property is not numerical, it is not a parameter
+            try {
+                Double.parseDouble(props.getProperty(key));
+            } catch (NumberFormatException e) {
+                continue;
+            }
+            JPanel panel = new AppPanel();
             JLabel label = new JLabel(Humanize.capitalize(Humanize.decamelize(key)) + ": ");
             panel.add(label);
             JTextField value = new JTextField(props.getProperty(key));
@@ -426,17 +433,17 @@ public class ApplicationFrame extends JFrame {
                 public void warn() {
                     if (value.getText().equals("")) return;
                     try {
-                        if (Integer.parseInt(value.getText()) > 0) {
+                        if (Double.parseDouble(value.getText()) >= 0) {
                             String paramValue = value.getText();
                             manager.put(value.getName(), paramValue);
                         } else {
                             JOptionPane.showMessageDialog(null,
-                                    "Error: Please enter number bigger than 0", "Error Massage",
+                                    "Error: Please enter a non-negative number", "Error Massage",
                                     JOptionPane.ERROR_MESSAGE);
                         }
                     } catch (NumberFormatException e) {
                         JOptionPane.showMessageDialog(null,
-                                "Error: Please enter number bigger than 0", "Error Massage",
+                                "Error: Please enter a non-negative number", "Error Massage",
                                 JOptionPane.ERROR_MESSAGE);
                     }
                 }

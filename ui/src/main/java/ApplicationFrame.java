@@ -400,10 +400,11 @@ public class ApplicationFrame extends JFrame {
     }
 
     private void changeParamSelection() {
+        //remove previously stored parameters
+        manager.clear();
         Properties props = manager.getProperties(paramFile);
         if (paramSettings != null) settings.remove(paramSettings);
         paramSettings = new AppPanel();
-
         Enumeration properties = props.propertyNames();
         while (properties.hasMoreElements()) {
             String key = (String)properties.nextElement();

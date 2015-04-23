@@ -1,0 +1,28 @@
+Developer Team: Kouncil of Kaindness
+Module Name: Aurora
+Version: 0.1.0
+Input File Name: sampleDataSmall
+
+Parameters:
+	start_date: 2000-01-31
+	end_date: 2000-05-08
+	moving_average_window: 5
+	threshold: 0.0053
+
+
+=== SUCCESS ===
+
+Start Date/Time: 2015-04-23T14:55:25.375
+End Date/Time: 2015-04-23T14:55:25.551
+Duration: PT0.176S
+
+output_dir: orders.csv
+
+Warnings:
+	No Warnings
+
+Errors:
+	No Errors
+
+Log:
+	No Logs

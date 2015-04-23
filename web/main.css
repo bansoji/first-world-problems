@@ -39,6 +39,10 @@ ul {
 	text-align: left;
 }
 
+ol{
+    text-align: left;
+}
+
 /* Custom page header */
 .header {
     text-align: right;
@@ -173,7 +177,7 @@ ul {
 }
 
 #icons {
-	width: 65%;
+	width: 45%;
 	padding-top: 30px;
 }
 
@@ -181,6 +185,10 @@ ul {
     background-color: #f8f8f8;
     -webkit-transition: all 0.5s linear;
     transition: all 0.5s linear;
+}
+.nav-tabs>li>a {
+    background-color: #f8f8f8;
+    border-bottom: #ddd;
 }
 
 .nav-tabs {

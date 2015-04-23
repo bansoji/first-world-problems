@@ -66,17 +66,21 @@
         </ul>
 
         <!-- Tab panes -->
+
         <div class="tab-content">
+
+            <!--Strategy Tab-->
+
             <div role="tabpanel" class="tab-pane active" id="home">
                 <div class="panel panel-default download-panel" id="internal-panel">
 
-                    <form method="get" action="BuyHard-Momentum-1.0.0.jar">
+                    <form method="get" action="BuyHard-Momentum-1.1.0.jar">
                         <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">Latest Release</button></p>
                     </form>
                     <p>
-                        File Name: <i>BuyHard-Momentum-1.0.0.jar</i><br>
-                        Version: 1.0.0<br>
-                        Date Released: 02/04/2015<br>
+                        File Name: <i>BuyHard-Momentum-1.1.0.jar</i><br>
+                        Version: 1.1.0<br>
+                        Date Released: 23/04/2015<br>
                         Size: 28KB<br>
                     </p>
                 </div>
@@ -139,23 +143,52 @@
                     <h3>Releases</h3>
                     <table class="table table-striped" id="release-list">
                         <tr><th>Version</th><th>Date</th><th>Changelog</th></tr>
+                        <tr><td>v1.1.0</td><td>23/04/2015</td><td>
 
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#release-v1-1-0">
+                                View
+                            </button>
+
+                        </td></tr>
                         <tr><td>v1.0.0</td><td>02/04/2015</td><td>
 
-                            <button type="button" class="btn btn-default" id="release-button" data-toggle="modal" data-target="#release-modal">
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#release-v1-0-0">
                                 <!--onclick="changeChangelog('1.0.0 changelog');"-->
                                 View
                             </button>
 
                         </td></tr>
+
                     </table>
-                    <!-- Modal -->
-                    <div class="modal fade" id="release-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <!-- Modals -->
+                    <!--Version 1.1.0-->
+                    <div class="modal fade" id="release-v1-1-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                    <h3 class="modal-title" id="myModalLabel">Changelog</h3>
+                                    <h3 class="modal-title" id="myModalLabel">v1.1.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+                                    Changes to previous release:
+                                    <ul>
+                                        <li>Added new options in the config file which allows you to to change the filename of the output and the log file. </li>
+                                        <li>Enabled/Allowed short selling to happen in the strategy module. </li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Version 1.0.0-->
+                    <div class="modal fade" id="release-v1-0-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.0.0 Changelog</h3>
                                 </div>
                                 <div class="modal-body" id="changelog-modal">
                                     Initial release with:
@@ -178,42 +211,69 @@
                     </footer>
                 </div>
             </div>
+
+            <!--Testing Platform Tab-->
+
             <div role="tabpanel" class="tab-pane" id="profile">
                 <div class="panel panel-default download-panel" id="internal-panel">
 
-                    <form method="get" action="">
+                    <form method="get" action="BuyHardPlatform-1.0.0.jar">
                         <p><button class="btn btn-lg btn-primary" type="submit" id="latest-release">Latest Release</button></p>
                     </form>
                     <p>
-                        File Name: <i>???</i><br>
+                        File Name: <i>BuyHardPlatform-1.0.0.jar</i><br>
                         Version: 1.0.0<br>
-                        Date Released: ???<br>
-                        Size: ???<br>
+                        Date Released: 23/04/2015<br>
+                        Size: 7MB<br>
                     </p>
                 </div>
                 <div class="panel panel-default" id="internal-panel">
+
+                    <hr>
+                    <h2 class="heading">Getting Started</h2>
+                    <hr>
+
+                    <div class="subheading-content">
+                        <h2><span>Usage Instructions</span></h2>
+                        <ol>
+                            <li>Select an input file. This needs to be a valid TRTH file following that format.</li>
+                            <li>Select a compatible module to use.</li>
+                            <li>Select the parameters file for that module.</li>
+                        </ol>
+                    </div>
+
+                    <div class="subheading-content">
+                        <h2><span>Notes on Compatibility</span></h2>
+                        <ul>
+                            <li>At the moment, the BuyHard testing platform only supports Java JAR modules.</li>
+                            <li>Additionally, the output generated needs to be named orders.csv and located in your current working directory.</li>
+                            <li>The orders file generate should be a CSV that follows the following headers and format.</li>
+                            <li>The names of the CSV headers are not important but the order of the columns and the formats are. <br>
+                                See the sample input file provided in the ‘Getting Started’ section of the Modules tab.</li>
+                            <li>Please contact the developers of the module for issues originating from the trading module.</li>
+                        </ul>
+                    </div>
 
                     <hr>
                     <h3>Releases</h3>
                     <table class="table table-striped" id="release-list">
                         <tr><th>Version</th><th>Date</th><th>Changelog</th></tr>
 
-                        <tr><td>v1.0.0</td><td>02/04/2015</td><td>
+                        <tr><td>v1.0.0</td><td>23/04/2015</td><td>
 
-                            <button type="button" class="btn btn-default" id="release-button" data-toggle="modal" data-target="#release-modal1">
-                                <!--onclick="changeChangelog('1.0.0 changelog');"-->
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#platform-v1-0-0">
                                 View
                             </button>
 
                         </td></tr>
                     </table>
                     <!-- Modal -->
-                    <div class="modal fade" id="release-modal1" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="platform-v1-0-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                    <h3 class="modal-title" id="myModalLabel">Changelog</h3>
+                                    <h3 class="modal-title" id="myModalLabel">v1.0.0 Changelog</h3>
                                 </div>
                                 <div class="modal-body" id="changelog-modal">
                                     Initial release with:

@@ -59,7 +59,7 @@ public class ApplicationFrame extends JFrame {
 
     private GraphBuilder g = new GraphBuilder();
 
-    private static String VERSION_NUMBER = "1.0";
+    private static String VERSION_NUMBER = "1.0.0";
     private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
     private static String FOOTER_MESSAGE = "Get the latest release at our website.";
 

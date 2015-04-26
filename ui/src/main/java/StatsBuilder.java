@@ -1,37 +1,22 @@
-import color.ColorManager;
-import date.DateUtils;
-import graph.CandleStickChart;
-import graph.DateValueAxis;
-import graph.NodeType;
-import graph.XYBarChart;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
-import javafx.css.PseudoClass;
-import javafx.embed.swing.JFXPanel;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.*;
+import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
 
-import javax.sound.sampled.Port;
 import java.util.*;
 
 /**
@@ -41,14 +26,14 @@ public class StatsBuilder {
 
     public static void build(Pane stats, History<Order> history, List<Price> prices, Map<Date, OrderType> orders) {
         final VBox vbox = new VBox();
-        vbox.setSpacing(5);
+        vbox.setSpacing(15);
         Portfolio portfolio = new Portfolio(history);
-        vbox.getChildren().addAll(buildPortfolioStats(portfolio));
+        vbox.getChildren().addAll(buildPortfolioStats(portfolio),buildEquityTable(portfolio.getAssetValue()));
 
         final HBox hbox = new HBox();
         hbox.setSpacing(50);
         hbox.getChildren().addAll(vbox,buildTable(portfolio.getReturns()),buildReturnChart(portfolio.getReturns()));
-        hbox.setPadding(new javafx.geometry.Insets(50, 30, 50, 30));
+        hbox.setPadding(new Insets(50, 30, 50, 30));
         stats.getChildren().setAll(hbox);
     }
 
@@ -219,6 +204,59 @@ public class StatsBuilder {
         final PieChart chart = new PieChart(pieChartData);
         chart.setTitle("Returns by company");
         return chart;
+    }
+
+    private static TableView buildEquityTable(Map<String,Double> equities) {
+        ObservableList<Map> data = FXCollections.observableArrayList();
+        for (String company: equities.keySet()) {
+            Map<String,Object> row = new HashMap<String,Object>();
+            row.put("Company",company);
+            row.put("Equity Value", equities.get(company));
+            data.add(row);
+        }
+
+        TableView tableView = new TableView(data);
+        tableView.setPlaceholder(new Label("No securities held."));
+
+        TableColumn companyCol = new TableColumn("Company");
+        companyCol.setMinWidth(100);
+        companyCol.setCellValueFactory(new MapValueFactory<>("Company"));
+
+        companyCol.setCellFactory(new Callback<TableColumn<Map, Object>,
+                TableCell<Map, Object>>() {
+            @Override
+            public TableCell call(TableColumn p) {
+                return new TextFieldTableCell(new StringConverter() {
+                    @Override
+                    public String toString(Object t) {
+                        return t.toString();
+                    }
+
+                    @Override
+                    public Object fromString(String string) {
+                        return string;
+                    }
+                });
+            }
+        });
+
+        TableColumn equityCol = new TableColumn("Equity Value");
+        equityCol.setMinWidth(100);
+        equityCol.setCellValueFactory(new MapValueFactory<>("Equity Value"));
+        equityCol.setCellFactory(new Callback<TableColumn<Map, Object>,
+                TableCell<Map, Object>>() {
+            @Override
+            public TableCell call(TableColumn p) {
+                return new TextFieldTableCell(new DoubleStringConverter());
+            }
+        });
+
+
+        tableView.getColumns().addAll(companyCol, equityCol);
+        //ensures extra space to given to existing columns
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tableView.setPrefHeight(150);
+        return tableView;
     }
 
     private static class TooltipContent extends GridPane {

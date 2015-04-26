@@ -42,3 +42,28 @@
 .candlestick-bar.open-above-close {
     -fx-background-color: red;
 }
+
+.candlestick-bar.close-above-open:hover {
+    -fx-background-color: green;
+}
+.candlestick-bar.open-above-close:hover {
+    -fx-background-color: #990000;
+}
+
+/* Bar chart */
+
+.bar-buy {
+    -fx-bar-fill: #2CFC0E;
+}
+
+.bar-sell {
+    -fx-bar-fill: red;
+}
+
+.bar-buy:hover {
+    -fx-bar-fill: green;
+}
+
+.bar-sell:hover {
+    -fx-bar-fill: #990000;
+}

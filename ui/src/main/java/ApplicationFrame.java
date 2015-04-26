@@ -40,9 +40,9 @@ public class ApplicationFrame extends JFrame {
     private static final Logger logger = Logger.getLogger("log");
 
     //TODO Remove values - only for TESTING
-    private String strategyFile;// = "out/artifacts/trading_jar/trading.jar";
-    private String dataFile;// = "common/src/main/resources/sampleDataSmall";
-    private String paramFile;// = "trading/resources/config.properties";
+    private String strategyFile = "out/artifacts/trading_jar/trading.jar";
+    private String dataFile = "common/src/main/resources/sampleDataSmall";
+    private String paramFile = "trading/resources/config.properties";
 
     private Reader orderReader;
     private Reader priceReader;
@@ -138,7 +138,7 @@ public class ApplicationFrame extends JFrame {
         tabPane.getTabs().addAll(tab,statsTab);
 
         Scene scene = new Scene(tabPane);
-        scene.getStylesheets().addAll("graph.css", "stats.css");
+        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css");
         content.setScene(scene);
 
         body.add(content);

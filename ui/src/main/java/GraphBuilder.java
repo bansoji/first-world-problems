@@ -159,7 +159,7 @@ public class GraphBuilder {
                 }
             }
         });
-        syncGraphZooming();
+        if (prices.size() > 0) syncGraphZooming();
         addMenu();
         pane.setCenter(JFXChartUtil.setupZooming(lineChart));
         pane.setBottom(JFXChartUtil.setupZooming(barChart));

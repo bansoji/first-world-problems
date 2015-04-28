@@ -1,42 +1,44 @@
 import humanize.Humanize;
+import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.JFXPanel;
+import javafx.concurrent.Task;
 import javafx.event.*;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.effect.DropShadow;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.*;
+import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javax.swing.text.PlainDocument;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 
 /**
  * Created by Gavin Tam on 17/03/15.
  */
-public class ApplicationFrame extends JFrame {
+public class ApplicationFrame extends Application {
 
     private static final Logger logger = Logger.getLogger("log");
 
@@ -48,15 +50,16 @@ public class ApplicationFrame extends JFrame {
     private Reader orderReader;
     private Reader priceReader;
 
+    private Stage stage;
+    private BorderPane main;
     private BorderPane graph;
     private GridPane stats;
-    private JFXPanel content;
     private ComboBox<String> companySelector;
     private ChangeListener companyListener;
     private HBox selector;
-    private JPanel settings;
-    private JPanel paramSettings;
+    private HBox settings;
     private ParameterManager manager = new ParameterManager();
+    private TableView paramTable;
 
     private GraphBuilder g = new GraphBuilder();
 
@@ -66,60 +69,47 @@ public class ApplicationFrame extends JFrame {
 
     private static String OUTPUT_FILE_PATH = "orders.csv";
 
-    public ApplicationFrame()
-    {
-        super();
-        getContentPane().setBackground(Color.WHITE);
-        setSize(Toolkit.getDefaultToolkit().getScreenSize());
-        setMinimumSize(new Dimension (1024,768));
-        setLayout(new BorderLayout());
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        //primaryStage.setFullScreen(true);
+        main = new BorderPane();
+        Scene scene = new Scene(main);
+        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css");
+        primaryStage.setScene(scene);
+        primaryStage.setMinHeight(768);
+        primaryStage.setMinWidth(1024);
+        stage = primaryStage;
         initHeader();
         initBody();
         initFooter();
-        setLocationRelativeTo(null);    //centre frame
+        primaryStage.show();
     }
 
     private void initHeader()
     {
-        JFXPanel header = new JFXPanel();
-        header.setLayout(new BoxLayout(header,BoxLayout.X_AXIS));
-        header.setBorder(new EmptyBorder(10,0,10,0));
+        HBox header = new HBox();
+        header.setId("header");
+        header.setPrefHeight(100);
+        header.setSpacing(50);
 
-//        HBox pane = new HBox();
-//        pane.setSpacing(10);
-//        Image image = new Image("ui/src/main/resources/logosizes/BuyHardLogo_Small.png");
-//
-//        // simple displays ImageView the image as is
-//        ImageView logo = new ImageView();
-//        logo.setImage(image);
-//        pane.getChildren().addAll(logo, new Label(APPLICATION_INFO));
-//        Scene scene = new Scene(pane);
-//        header.setScene(scene);
-
-
-        JLabel title = new JLabel();
-        title.setIcon(new ImageIcon(getClass().getResource("logosizes/BuyHardLogo_Small.png")));
-        header.add(title);
-
-        header.add(Box.createRigidArea(new Dimension(20,0)));
-
-        JLabel appInfo = new JLabel(APPLICATION_INFO);
-        appInfo.setFont(appInfo.getFont().deriveFont(10f));
-        header.add(appInfo);
+        // simple displays ImageView the image as is
+        HBox appInfo = new HBox();
+        appInfo.setSpacing(50);
+        appInfo.setId("app-info");
+        ImageView logo = new ImageView(getClass().getResource("logosizes/BuyHardLogo_Small.png").toExternalForm());
+        Label info = new Label(APPLICATION_INFO);
+        appInfo.setAlignment(Pos.CENTER_LEFT);
+        appInfo.getChildren().addAll(logo, info);
+        header.getChildren().addAll(appInfo);
+        main.setTop(header);
 
         addFileChoosers(header);
         addSettingsPanel(header);
-
-        add(header, BorderLayout.NORTH);
     }
 
     private void initBody()
     {
-        final JPanel body = new AppPanel();
-        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
-
-        content = new JFXPanel();
-        content.setLayout(new BorderLayout());
+        final VBox body = new VBox();
 
         graph = new BorderPane();
         stats = new GridPane();
@@ -135,49 +125,46 @@ public class ApplicationFrame extends JFrame {
         statsTab.setClosable(false);
         statsTab.setContent(stats);
         tabPane.getTabs().addAll(tab,statsTab);
+        //TODO Remove hack - for some reason the graph doesn't load for the first time
+        loadContent(new History<>(), new ArrayList<>(),new ArrayList<>());
+        graph.setVisible(false);
 
-        Scene scene = new Scene(tabPane);
-        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css");
-        content.setScene(scene);
+        body.getChildren().addAll(tabPane);
 
-        body.add(content);
-        body.add(new JSeparator(SwingConstants.HORIZONTAL));
-
-        add(body, BorderLayout.CENTER);
+        main.setCenter(body);
     }
 
     private void initFooter()
     {
-        JPanel footerPanel = new AppPanel();
-        JLabel footer = new JLabel(FOOTER_MESSAGE);
-        footer.setHorizontalAlignment(JLabel.CENTER);
-        footerPanel.add(footer);
-        add(footerPanel, BorderLayout.SOUTH);
+        HBox footerPanel = new HBox();
+        footerPanel.setId("footer");
+        Label footer = new Label(FOOTER_MESSAGE);
+        footerPanel.getChildren().add(footer);
+        main.setBottom(footerPanel);
     }
 
-    private void addFileChooserListener(final FileChooser fileChooser)
+    private void addFileChooserListener(final AppFileChooser fileChooser)
     {
-        fileChooser.addActionListener(new ActionListener() {
+        fileChooser.addListener(new EventHandler<ActionEvent>() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                String userDirLocation = System.getProperty("user.dir");
-                File userDir = new File(userDirLocation);
-                JFileChooser fc = new JFileChooser(userDir);
-                int val = fc.showOpenDialog(getContentPane());
-                if (val == JFileChooser.APPROVE_OPTION)
+            public void handle(ActionEvent event) {
+                FileChooser chooser = new FileChooser();
+                chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+                File file = chooser.showOpenDialog(stage);
+                if (file != null)
                 {
                     try {
                         if (fileChooser.getButtonText().equals("Choose CSV")) {
-                            dataFile = fc.getSelectedFile().getAbsolutePath();
+                            dataFile = file.getAbsolutePath();
                         } else if (fileChooser.getButtonText().equals("Choose strategy")) {
-                            strategyFile = fc.getSelectedFile().getAbsolutePath();
+                            strategyFile = file.getAbsolutePath();
                         } else if (fileChooser.getButtonText().equals("Choose parameters")) {
-                            paramFile = fc.getSelectedFile().getAbsolutePath();
+                            paramFile = file.getAbsolutePath();
                             changeParamSelection();
                         } else {
                             return;
                         }
-                        fileChooser.setLabelText(fc.getSelectedFile().getName());
+                        fileChooser.setLabelText(file.getName());
                     }
                     catch (Exception ex)
                     {
@@ -204,60 +191,75 @@ public class ApplicationFrame extends JFrame {
 
     private void loadContent(History<Order> history, List<Price> prices, List<Order> orders)
     {
-        Platform.runLater(new Runnable() {
+        Map<Date,OrderType> orderRecord = new HashMap<>();
+        if (orders != null) {
+            for (Order order : orders) {
+                orderRecord.put(order.getOrderDate(), order.getOrderType());
+            }
+        }
+        Runnable r = new Runnable() {
             @Override
             public void run() {
-                Map<Date,OrderType> orderRecord = new HashMap<>();
-                if (orders != null) {
-                    for (Order order : orders) {
-                        orderRecord.put(order.getOrderDate(), order.getOrderType());
-                    }
-                }
-                g.buildGraph(graph,prices, orders, orderRecord);
-                StatsBuilder.build(stats,history, prices, orderRecord);
+                g.buildGraph(graph, prices, orders, orderRecord);
+                StatsBuilder.build(stats, history, prices, orderRecord);
+                graph.setVisible(true);
             }
-        });
+        };
+        if (Platform.isFxApplicationThread()) r.run();
+        else Platform.runLater(r);
     }
 
-    private void addFileChoosers(JFXPanel header) {
-        JPanel fileChoosers = new JPanel();
-        fileChoosers.setOpaque(false);
-        fileChoosers.setLayout(new FlowLayout(FlowLayout.TRAILING));
-        //fileChoosers.setBorder(new EmptyBorder(20,0,0,0));
+    private void addFileChoosers(HBox header) {
+        HBox fileChoosers = new HBox();
+        fileChoosers.setSpacing(50);
 
         //Choose csv file button
-        FileChooser dataFileChooser = new FileChooser("Choose CSV");
+        AppFileChooser dataFileChooser = new AppFileChooser("Choose CSV");
         addFileChooserListener(dataFileChooser);
-        fileChoosers.add(dataFileChooser);
 
         //Choose strategy module file button
-        FileChooser strategyFileChooser = new FileChooser("Choose strategy");
+        AppFileChooser strategyFileChooser = new AppFileChooser("Choose strategy");
         addFileChooserListener(strategyFileChooser);
-        fileChoosers.add(strategyFileChooser);
 
         //Choose parameters file button
-        FileChooser paramFileChooser = new FileChooser("Choose parameters");
+        AppFileChooser paramFileChooser = new AppFileChooser("Choose parameters");
         addFileChooserListener(paramFileChooser);
-        fileChoosers.add(paramFileChooser);
 
-        header.add(fileChoosers);
+        fileChoosers.getChildren().addAll(dataFileChooser,strategyFileChooser,paramFileChooser);
+
+        header.getChildren().add(fileChoosers);
     }
 
-    private void addSettingsPanel(JFXPanel header) {
-        settings = new JPanel();
-        settings.setOpaque(false);
-        //settings.setBorder(new EmptyBorder(0, 5, 10, 0));
-        settings.setLayout(new FlowLayout(FlowLayout.LEADING));
+    private void addSettingsPanel(HBox header) {
+        settings = new HBox();
+        settings.setSpacing(50);
+
+        Button settingsButton = new Button("Change parameters");
+        settings.getChildren().add(settingsButton);
+        settingsButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                final Stage dialog = new Stage();
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(null);
+                VBox dialogVbox = new VBox();
+                changeParamSelection();
+                dialogVbox.getChildren().add(paramTable);
+                Scene dialogScene = new Scene(dialogVbox);
+                dialog.setScene(dialogScene);
+                dialog.show();
+            }
+        });
 
         //Run button
-        JButton runButton = new JButton("Run");
-        settings.add(runButton);
+        Button runButton = new Button("Run");
+        settings.getChildren().add(runButton);
 
-        header.add(settings);
+        header.getChildren().add(settings);
 
-        runButton.addActionListener(new ActionListener() {
+        runButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void handle(ActionEvent event) {
                 if (strategyFile != null && dataFile != null && paramFile != null) {
                     try {
                         updateParams();
@@ -308,19 +310,14 @@ public class ApplicationFrame extends JFrame {
     }
 
     private void addFilterSelector() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                selector = new HBox();
-                selector.setSpacing(20);
-                selector.setPadding(new javafx.geometry.Insets(15, 15, 0, 15));
-                addFilter("Company");
-                addDateFilters();
+        selector = new HBox();
+        selector.setSpacing(20);
+        selector.setPadding(new javafx.geometry.Insets(15, 15, 0, 15));
+        addFilter("Company");
+        addDateFilters();
 
-                selector.setVisible(false);
-                graph.setTop(selector);
-            }
-        });
+        selector.setVisible(false);
+        graph.setTop(selector);
     }
 
     private void addDateFilters() {
@@ -330,67 +327,63 @@ public class ApplicationFrame extends JFrame {
         HBox endDatePanel = new HBox();
         endDatePanel.getChildren().add(new Label("End Date: "));
         selector.getChildren().add(endDatePanel);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                DatePicker startDatePicker = new DatePicker();
-                startDatePicker.setMinHeight(20);
-                startDatePanel.getChildren().add(startDatePicker);
-                startDatePicker.setOnAction(new EventHandler() {
-                    public void handle(javafx.event.Event t) {
-                        LocalDate date = startDatePicker.getValue();
-                        long startDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                        g.updateLowerBound(startDate);
-                    }
-                });
-                DatePicker endDatePicker = new DatePicker();
-                endDatePicker.setMinHeight(20);
-                endDatePanel.getChildren().add(endDatePicker);
-                endDatePicker.setOnAction(new EventHandler() {
-                    public void handle(javafx.event.Event t) {
-                        LocalDate date = endDatePicker.getValue();
-                        long endDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                        g.updateUpperBound(endDate);
-                    }
-                });
-                final Callback<DatePicker, DateCell> endDayCellFactory =
-                        new Callback<DatePicker, DateCell>() {
-                            @Override
-                            public DateCell call(final DatePicker datePicker) {
-                                return new DateCell() {
-                                    @Override
-                                    public void updateItem(LocalDate item, boolean empty) {
-                                        super.updateItem(item, empty);
 
-                                        if (startDatePicker.getValue() != null && item.isBefore(startDatePicker.getValue())) {
-                                            setDisable(true);
-                                            setStyle("-fx-background-color: #ffc0cb;");
-                                        }
-                                    }
-                                };
-                            }
-                        };
-                endDatePicker.setDayCellFactory(endDayCellFactory);
-                final Callback<DatePicker, DateCell> startDayCellFactory =
-                        new Callback<DatePicker, DateCell>() {
-                            @Override
-                            public DateCell call(final DatePicker datePicker) {
-                                return new DateCell() {
-                                    @Override
-                                    public void updateItem(LocalDate item, boolean empty) {
-                                        super.updateItem(item, empty);
-
-                                        if (endDatePicker.getValue() != null && item.isAfter(endDatePicker.getValue())) {
-                                            setDisable(true);
-                                            setStyle("-fx-background-color: #ffc0cb;");
-                                        }
-                                    }
-                                };
-                            }
-                        };
-                startDatePicker.setDayCellFactory(startDayCellFactory);
+        DatePicker startDatePicker = new DatePicker();
+        startDatePicker.setMinHeight(20);
+        startDatePanel.getChildren().add(startDatePicker);
+        startDatePicker.setOnAction(new EventHandler() {
+            public void handle(javafx.event.Event t) {
+                LocalDate date = startDatePicker.getValue();
+                long startDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                g.updateLowerBound(startDate);
             }
         });
+        DatePicker endDatePicker = new DatePicker();
+        endDatePicker.setMinHeight(20);
+        endDatePanel.getChildren().add(endDatePicker);
+        endDatePicker.setOnAction(new EventHandler() {
+            public void handle(javafx.event.Event t) {
+                LocalDate date = endDatePicker.getValue();
+                long endDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                g.updateUpperBound(endDate);
+            }
+        });
+        final Callback<DatePicker, DateCell> endDayCellFactory =
+                new Callback<DatePicker, DateCell>() {
+                    @Override
+                    public DateCell call(final DatePicker datePicker) {
+                        return new DateCell() {
+                            @Override
+                            public void updateItem(LocalDate item, boolean empty) {
+                                super.updateItem(item, empty);
+
+                                if (startDatePicker.getValue() != null && item.isBefore(startDatePicker.getValue())) {
+                                    setDisable(true);
+                                    setStyle("-fx-background-color: #ffc0cb;");
+                                }
+                            }
+                        };
+                    }
+                };
+        endDatePicker.setDayCellFactory(endDayCellFactory);
+        final Callback<DatePicker, DateCell> startDayCellFactory =
+                new Callback<DatePicker, DateCell>() {
+                    @Override
+                    public DateCell call(final DatePicker datePicker) {
+                        return new DateCell() {
+                            @Override
+                            public void updateItem(LocalDate item, boolean empty) {
+                                super.updateItem(item, empty);
+
+                                if (endDatePicker.getValue() != null && item.isAfter(endDatePicker.getValue())) {
+                                    setDisable(true);
+                                    setStyle("-fx-background-color: #ffc0cb;");
+                                }
+                            }
+                        };
+                    }
+                };
+        startDatePicker.setDayCellFactory(startDayCellFactory);
     }
 
     private void addFilter(String name) {
@@ -405,8 +398,6 @@ public class ApplicationFrame extends JFrame {
         //remove previously stored parameters
         manager.clear();
         Properties props = manager.getProperties(paramFile);
-        if (paramSettings != null) settings.remove(paramSettings);
-        paramSettings = new AppPanel();
         Enumeration properties = props.propertyNames();
         while (properties.hasMoreElements()) {
             String key = (String)properties.nextElement();
@@ -416,46 +407,47 @@ public class ApplicationFrame extends JFrame {
             } catch (NumberFormatException e) {
                 continue;
             }
-            JPanel panel = new AppPanel();
-            JLabel label = new JLabel(Humanize.capitalize(Humanize.decamelize(key)) + ": ");
-            panel.add(label);
-            JTextField value = new JTextField(props.getProperty(key));
-            value.getDocument().addDocumentListener(new DocumentListener() {
-                public void changedUpdate(DocumentEvent e) {
-                    warn();
-                }
+            paramTable = new TableView();
+            paramTable.setEditable(true);
+            ObservableList<Map.Entry> data = FXCollections.observableArrayList(props.entrySet());
+            paramTable.setPlaceholder(new Label("No parameters available."));
 
-                public void removeUpdate(DocumentEvent e) {
-                    warn();
-                }
-
-                public void insertUpdate(DocumentEvent e) {
-                    warn();
-                }
-
-                public void warn() {
-                    if (value.getText().equals("")) return;
-                    try {
-                        if (Double.parseDouble(value.getText()) >= 0) {
-                            String paramValue = value.getText();
-                            manager.put(value.getName(), paramValue);
-                        } else {
-                            JOptionPane.showMessageDialog(null,
-                                    "Error: Please enter a non-negative number", "Error Massage",
-                                    JOptionPane.ERROR_MESSAGE);
-                        }
-                    } catch (NumberFormatException e) {
-                        JOptionPane.showMessageDialog(null,
-                                "Error: Please enter a non-negative number", "Error Massage",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
+            TableColumn keyCol = new TableColumn("Key");
+            keyCol.setMinWidth(100);
+            keyCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
+                    String key = (String) param.getValue().getKey();
+                    return new SimpleStringProperty(key);
                 }
             });
-            value.setName(key);
-            panel.add(value);
-            paramSettings.add(panel);
+
+            TableColumn valueCol = new TableColumn("Value");
+            valueCol.setEditable(true);
+            valueCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
+                @Override
+                public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
+                    String value = (String) param.getValue().getValue();
+                    return new SimpleStringProperty(value);
+                }
+            });
+            valueCol.setCellFactory(TextFieldTableCell.forTableColumn());
+
+            valueCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent>() {
+                @Override
+                public void handle(TableColumn.CellEditEvent event) {
+                    Map.Entry row = (Map.Entry)event.getRowValue();
+                    String newValue = (String)event.getNewValue();
+                    manager.put((String)row.getKey(), newValue);
+                }
+            });
+
+            paramTable.getColumns().addAll(keyCol, valueCol);
+            //ensures extra space to given to existing columns
+            paramTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+            paramTable.setMinWidth(300);
+            paramTable.setItems(data);
         }
-        settings.add(paramSettings);
     }
 
     private void updateParams() {

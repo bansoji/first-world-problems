@@ -27,3 +27,12 @@
     -fx-background-insets: 0, 0 0 1 0;
     -fx-padding: 0;
 }
+
+#footer {
+    -fx-alignment: center;
+}
+
+#header {
+    -fx-background-color: white;
+    -fx-padding: 15px;
+}

@@ -24,17 +24,25 @@ import java.util.*;
  */
 public class StatsBuilder {
 
-    public static void build(Pane stats, History<Order> history, List<Price> prices, Map<Date, OrderType> orders) {
+    public static void build(GridPane stats, History<Order> history, List<Price> prices, Map<Date, OrderType> orders) {
         final VBox vbox = new VBox();
         vbox.setSpacing(15);
         Portfolio portfolio = new Portfolio(history);
-        vbox.getChildren().addAll(buildPortfolioStats(portfolio),buildEquityTable(portfolio.getAssetValue()));
+        TableView equity = buildEquityTable(portfolio.getAssetValue());
+        vbox.getChildren().addAll(buildPortfolioStats(portfolio),equity);
+        VBox.setVgrow(equity, Priority.ALWAYS);
 
-        final HBox hbox = new HBox();
-        hbox.setSpacing(50);
-        hbox.getChildren().addAll(vbox,buildTable(portfolio.getReturns()),buildReturnChart(portfolio.getReturns()));
-        hbox.setPadding(new Insets(50, 30, 50, 30));
-        stats.getChildren().setAll(hbox);
+        stats.setPadding(new Insets(50, 30, 50, 30));
+        TableView returnTable = buildTable(portfolio.getReturns());
+        PieChart returnChart = buildReturnChart(portfolio.getReturns());
+        stats.setConstraints(vbox,0,0);
+        stats.setConstraints(returnTable,1,0);
+        stats.setConstraints(returnChart,2,0);
+        stats.setHgap(50);
+        GridPane.setVgrow(vbox, Priority.ALWAYS);
+        GridPane.setVgrow(returnTable, Priority.ALWAYS);
+        GridPane.setVgrow(returnChart, Priority.ALWAYS);
+        stats.getChildren().setAll(vbox,returnTable,returnChart);
     }
 
     private static VBox buildPortfolioStats(Portfolio portfolio) {
@@ -188,6 +196,7 @@ public class StatsBuilder {
         tableView.getColumns().addAll(companyCol, returnCol, returnPercentCol);
         //ensures extra space to given to existing columns
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        tableView.setMinWidth(300);
         return tableView;
     }
 
@@ -195,13 +204,16 @@ public class StatsBuilder {
         List<PieChart.Data> returnData = new ArrayList<>();
         for (String company: returns.keySet()) {
             PieChart.Data companyData = new PieChart.Data(company,returns.get(company).get(0));
-            Tooltip tooltip = new Tooltip();
-            tooltip.setGraphic(new TooltipContent(company,companyData.getPieValue()));
-            Tooltip.install(companyData.getNode(), tooltip);
             returnData.add(companyData);
         }
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(returnData);
         final PieChart chart = new PieChart(pieChartData);
+        //tooltip installation only works after pie chart is set up
+        for (PieChart.Data data: pieChartData) {
+            Tooltip tooltip = new Tooltip();
+            tooltip.setGraphic(new TooltipContent(data.getName(),data.getPieValue()));
+            Tooltip.install(data.getNode(), tooltip);
+        }
         chart.setTitle("Returns by company");
         return chart;
     }

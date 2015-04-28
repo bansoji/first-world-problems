@@ -25,6 +25,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
@@ -165,7 +166,9 @@ public class GraphBuilder {
 
         final VBox table = new VBox();
         table.setPadding(new javafx.geometry.Insets(20, 20, 20, 20));
-        table.getChildren().add(buildTable(prices,orderSummary));
+        TableView tableView = buildTable(prices,orderSummary);
+        table.getChildren().add(tableView);
+        VBox.setVgrow(tableView,Priority.ALWAYS);
 
         graph.setCenter(pane);
         graph.setRight(table);

@@ -13,6 +13,7 @@ import javafx.scene.image.Image;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.util.Callback;
@@ -48,7 +49,7 @@ public class ApplicationFrame extends JFrame {
     private Reader priceReader;
 
     private BorderPane graph;
-    private Pane stats;
+    private GridPane stats;
     private JFXPanel content;
     private ComboBox<String> companySelector;
     private ChangeListener companyListener;
@@ -81,8 +82,7 @@ public class ApplicationFrame extends JFrame {
     private void initHeader()
     {
         JFXPanel header = new JFXPanel();
-        header.setBackground(Color.WHITE);
-        header.setLayout(new FlowLayout(FlowLayout.LEADING));
+        header.setLayout(new BoxLayout(header,BoxLayout.X_AXIS));
         header.setBorder(new EmptyBorder(10,0,10,0));
 
 //        HBox pane = new HBox();
@@ -107,7 +107,9 @@ public class ApplicationFrame extends JFrame {
         appInfo.setFont(appInfo.getFont().deriveFont(10f));
         header.add(appInfo);
 
-        header.add(new JSeparator(SwingConstants.HORIZONTAL));
+        addFileChoosers(header);
+        addSettingsPanel(header);
+
         add(header, BorderLayout.NORTH);
     }
 
@@ -116,14 +118,11 @@ public class ApplicationFrame extends JFrame {
         final JPanel body = new AppPanel();
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
 
-        addFileChoosers(body);
-        addSettingsPanel(body);
-
         content = new JFXPanel();
         content.setLayout(new BorderLayout());
 
         graph = new BorderPane();
-        stats = new Pane();
+        stats = new GridPane();
         addFilterSelector();
 
         TabPane tabPane = new TabPane();
@@ -220,10 +219,12 @@ public class ApplicationFrame extends JFrame {
         });
     }
 
-    private void addFileChoosers(JPanel body) {
-        JPanel fileChoosers = new AppPanel();
-        fileChoosers.setBorder(new EmptyBorder(20,0,0,0));
-        fileChoosers.setLayout(new FlowLayout(FlowLayout.LEADING));
+    private void addFileChoosers(JFXPanel header) {
+        JPanel fileChoosers = new JPanel();
+        fileChoosers.setOpaque(false);
+        fileChoosers.setLayout(new FlowLayout(FlowLayout.TRAILING));
+        //fileChoosers.setBorder(new EmptyBorder(20,0,0,0));
+
         //Choose csv file button
         FileChooser dataFileChooser = new FileChooser("Choose CSV");
         addFileChooserListener(dataFileChooser);
@@ -239,19 +240,20 @@ public class ApplicationFrame extends JFrame {
         addFileChooserListener(paramFileChooser);
         fileChoosers.add(paramFileChooser);
 
-        body.add(fileChoosers);
+        header.add(fileChoosers);
     }
 
-    private void addSettingsPanel(JPanel body) {
-        settings = new AppPanel();
-        settings.setBorder(new EmptyBorder(0, 5, 10, 0));
+    private void addSettingsPanel(JFXPanel header) {
+        settings = new JPanel();
+        settings.setOpaque(false);
+        //settings.setBorder(new EmptyBorder(0, 5, 10, 0));
         settings.setLayout(new FlowLayout(FlowLayout.LEADING));
 
         //Run button
         JButton runButton = new JButton("Run");
         settings.add(runButton);
 
-        body.add(settings);
+        header.add(settings);
 
         runButton.addActionListener(new ActionListener() {
             @Override

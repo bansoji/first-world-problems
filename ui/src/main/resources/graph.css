@@ -19,6 +19,14 @@
     -fx-background-color: black;
 }
 
+.graph .chart-vertical-grid-lines {
+    -fx-stroke: #404040;
+}
+
+.graph .chart-horizontal-grid-lines {
+    -fx-stroke: #404040;
+}
+
 .tooltip-content {
     -fx-font-size: 12;
 }
@@ -29,12 +37,17 @@
     -fx-stroke-width: 2px;
 }
 .candlestick-line {
-    -fx-stroke: #666666;
     -fx-stroke-width: 3px;
 }
 .candlestick-bar {
     -fx-padding: 5;
     -fx-background-insets: 0,1,2;
+}
+.candlestick-line.close-above-open {
+     -fx-stroke: #2CFC0E;
+ }
+.candlestick-line.open-above-close {
+    -fx-stroke: red;
 }
 .candlestick-bar.close-above-open {
     -fx-background-color: #2CFC0E;

@@ -13,7 +13,11 @@ public class FileChooser extends AppPanel {
     public FileChooser (String buttonName)
     {
         button = new JButton(buttonName);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
         label = new JLabel("No file selected");
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
+        setOpaque(false);
         add(button);
         add(label);
     }

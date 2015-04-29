@@ -1,6 +1,7 @@
 import date.DateUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -44,14 +45,33 @@ public class PriceParser extends Parser<Price> {
                     if (nextLine == null) return null;
                 }
                 numberOfFileLines += 1;
-
+                //System.out.println(Arrays.toString(nextLine));
 
                 value = Double.parseDouble(nextLine[PRICE]);
                 date = DateUtils.parseMonthAbbr(nextLine[DATE], "Error parsing price date");
-                open_price = Double.parseDouble(nextLine[OPEN_PRICE]);
-                high_price = Double.parseDouble(nextLine[HIGH_PRICE]);
-                low_price = Double.parseDouble(nextLine[LOW_PRICE]);
-                volume = Integer.parseInt(nextLine[VOLUME]);
+                try {
+                    open_price = Double.parseDouble(nextLine[OPEN_PRICE]);
+                } catch (NumberFormatException e){
+                    open_price = 0;
+                }
+
+                try {
+                    high_price = Double.parseDouble(nextLine[HIGH_PRICE]);
+                } catch (NumberFormatException e){
+                    high_price = 0;
+                }
+
+                try {
+                    low_price = Double.parseDouble(nextLine[LOW_PRICE]);
+                } catch (NumberFormatException e){
+                    low_price = 0;
+                }
+
+                try {
+                    volume = Integer.parseInt(nextLine[VOLUME]);
+                } catch (NumberFormatException e){
+                    volume = 0;
+                }
 
                 return new Price(companyName, value, date, open_price, high_price, low_price, volume);
             }

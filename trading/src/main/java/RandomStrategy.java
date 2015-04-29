@@ -14,4 +14,9 @@ public class RandomStrategy implements TradingStrategy{
     public List<Order> getOrders() {
         return null;
     }
+
+    @Override
+    public void run() {
+
+    }
 }

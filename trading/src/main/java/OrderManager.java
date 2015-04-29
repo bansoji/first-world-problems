@@ -80,9 +80,6 @@ public class OrderManager {
             List<Price> companyHistory = tReader.getCompanyHistory(company);
             // PrintUtils.printPrices(companyHistory);
 
-            // Load the properties file.
-            InputStream input = new FileInputStream(paramName);
-
             // Initialise the trading strategy.
             TradingStrategy strategy = new MomentumStrategy(companyHistory, input);
 

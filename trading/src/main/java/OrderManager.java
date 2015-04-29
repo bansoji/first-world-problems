@@ -16,15 +16,15 @@ import java.util.logging.SimpleFormatter;
 public class OrderManager {
 
     // Some class constants.
-    public static final String VERSION = "0.9.0";
-    public static final String OUTPUT_FILE = "orders.csv";
-    public static final String LOG_FILE = "logfile.log";
+    public static final String VERSION = "1.1.0";
+    public static String OUTPUT_FILE = "orders.csv";
+    public static String LOG_FILE = "logfile.log";
     public static final String LOG_NAME = "log";
 
     public static void main(String[] args) throws IOException {
         if (args.length != 2){
             System.out.println("Error: Incorrect program usage.");
-            System.out.println("Usage: java -jar BuyHard inputFile paramsFile");
+            System.out.println("Usage: java -jar <BuyHardModule> <pricesFile> <paramFile>");
             return;
         }
         String fileName = args[0];
@@ -44,6 +44,7 @@ public class OrderManager {
 
         logger.info("====== Buy Hard =========\n" +
                 "Developer Team: Group 1\n" +
+                "MODULE NAME: BuyHard-Momentum-" + VERSION + ".jar\n" +
                 "MODULE VERSION: " + VERSION + "\n" +
                 "INPUT FILE: " + fileName + "\n" +
                 "OUTPUT FILE: " + OUTPUT_FILE + "\n" +
@@ -71,7 +72,11 @@ public class OrderManager {
         long startTime = System.currentTimeMillis();
 
         int i = 0;
+        // Load the properties file.
+        InputStream input = new FileInputStream(paramName);
+
         for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
+            logger.info("Analysing prices for " + company);
             List<Price> companyHistory = tReader.getCompanyHistory(company);
             // PrintUtils.printPrices(companyHistory);
 
@@ -122,6 +127,8 @@ public class OrderManager {
         } catch (IOException e) {
             logger.severe(e.getMessage());
         }
+        input.close();
+        handler.close();
 
         // Log successful.
         logger.info("Module successful. No errors encountered.");

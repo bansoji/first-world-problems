@@ -1,0 +1,26 @@
+#portfolio .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+#portfolio {
+    -fx-vertical-grid-lines-visible: false;
+    -fx-horizontal-grid-lines-visible: false;
+    -fx-horizontal-zero-line-visible: false;
+}
+
+#portfolio .chart {
+    -fx-padding: 20px 0px 0px 0px;
+}
+
+.sm-label {
+    -fx-font-size: 14px;
+}
+
+.lg-label {
+    -fx-font-size: 30px;
+}
+
+#returns {
+    -fx-background-color: white;
+    -fx-padding: 30px;
+}

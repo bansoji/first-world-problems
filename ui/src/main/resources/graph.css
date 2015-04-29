@@ -1,3 +1,4 @@
+/*
 .default-color0.chart-series-line {
     -fx-stroke: #3915AE;
 }
@@ -8,11 +9,36 @@
     -fx-font-size: 12;
     -fx-background-color: #3915AE, white;
 }
+*/
 
-.chart-content {
-    -fx-padding: 0px 20px 0px 20px;
+.graph .chart {
+    -fx-padding: 10px 20px 10px 0px;
 }
 
-.chart {
-    -fx-padding: 10px 20px 10px 0px;
+.graph .chart-plot-background {
+    -fx-background-color: black;
+}
+
+.tooltip-content {
+    -fx-font-size: 12;
+}
+
+/* ====== CANDLE STICK CHART =========================================================== */
+.candlestick-average-line {
+    -fx-stroke: #106ece;
+    -fx-stroke-width: 2px;
+}
+.candlestick-line {
+    -fx-stroke: #666666;
+    -fx-stroke-width: 3px;
+}
+.candlestick-bar {
+    -fx-padding: 5;
+    -fx-background-insets: 0,1,2;
+}
+.candlestick-bar.close-above-open {
+    -fx-background-color: #2CFC0E;
+}
+.candlestick-bar.open-above-close {
+    -fx-background-color: red;
 }

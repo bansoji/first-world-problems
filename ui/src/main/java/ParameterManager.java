@@ -64,4 +64,8 @@ public class ParameterManager {
     public void put(String key, String value) {
         params.put(key,value);
     }
+
+    public void clear() {
+        params.clear();
+    }
 }

@@ -3,7 +3,9 @@ body {
     padding-top: 20px;
     padding-bottom: 20px;
     font-family: 'Open Sans', sans-serif;
-    background-image: url(http://www.stockmarketchartingprogramsanddataspecialists.info/images/slide1.jpg);
+    background-color: #f8f8f8;
+    /*background-image: url(http://www.stockmarketchartingprogramsanddataspecialists.info/images/slide1.jpg);*/
+    background-image: url(http://wallpaper.pickywallpapers.com/2560x1600/aluminium-clean.jpg);
     background-attachment: fixed;
     background-repeat: no-repeat;
 
@@ -35,6 +37,10 @@ hr {
 
 ul {
 	text-align: left;
+}
+
+ol{
+    text-align: left;
 }
 
 /* Custom page header */
@@ -81,6 +87,8 @@ ul {
 	padding: 20px 0 30px 0;
 	margin-bottom: 10px;
     border-radius: 0;
+    background-image: url(http://www.fxpips.com/wp-content/uploads/2014/07/STOCKS1.jpg);
+    background-size: contain;
 }
 
 #internal-panel{
@@ -166,4 +174,62 @@ ul {
 
 .logo {
     height: 150px;
+}
+
+#icons {
+	width: 45%;
+	padding-top: 30px;
+}
+
+.nav-tabs>li>a:hover{
+    background-color: #f8f8f8;
+    -webkit-transition: all 0.5s linear;
+    transition: all 0.5s linear;
+}
+.nav-tabs>li>a {
+    background-color: #f8f8f8;
+    border-bottom: #ddd;
+}
+
+.nav-tabs {
+    padding-top: 2px;
+    padding-left: 2px;
+    border-top: outset 1px #ddd;
+    border-left: outset 1px #ddd;
+    border-right: solid 1px #ddd;
+    background-color: white;
+}
+
+.download-panel {
+    border-top: none;
+}
+
+.logo-text {
+    color: white;
+    padding-bottom: 50px;
+}
+
+.btn-about {
+    border-radius: 0;
+    background-color: #ff7722;
+    margin-right: -20px;
+    color:white;
+    border-color: #e8e8e8;
+    outline: none;
+}
+.btn-about:hover {
+    color:white;
+}
+
+.btn-about:focus {
+    outline: none;
+    color:white;
+}
+
+.btn-release:focus {
+    outline:none;
+}
+
+.testing-ss {
+    width:100%;
 }

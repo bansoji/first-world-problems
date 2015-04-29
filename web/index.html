@@ -23,15 +23,19 @@
 
 <body>
 <div class="container">
+
+    <!--Header-->
     <div class="panel panel-default" id="header-panel">
-        <img src="BuyHardLogo.png" class="logo">
+        <!--<img src="BuyHardLogo.png" class="logo">-->
+        <h1 class="logo-text"><strong>Buy.Hard</strong></h1>
         <div class="header">
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-default" id="custom-buttons" data-toggle="modal" data-target="#myModal">
+            <!-- About Us Button -->
+            <button type="button" class="btn btn-about"  data-toggle="modal" data-target="#myModal">
                 About Us
             </button>
         </div>
-        <!-- Modal -->
+
+        <!-- About Us Modal -->
         <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -56,112 +60,271 @@
             </div>
         </div>
     </div>
-    <div class="panel panel-default" id="internal-panel">
-        <form method="get" action="BuyHard-Momentum-1.0.0.jar">
-            <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">Latest Release</button></p>
-        </form>
-        <p>
-        File Name: <i>BuyHard-Momentum-1.0.0.jar</i><br>
-        Version: 1.0.0<br>
-        Date Released: 01/04/2015<br>
-        Size: 890KB<br>
-        </p>
-    </div>
-    <div class="panel panel-default" id="internal-panel">
-        <p>
-            <i>Buy Hard</i> is an algorithmic trading module that provides customers with orders that yield the highest amount of profit. Our range of strategies are designed to cater for individual investors of different economic statuses based on risk-taking ability and amount of investment principal.
-            <br><br>
-		  </p>
-		  <hr>
-        <h2 class="heading">Getting Started</h2>
-        <hr>
-		  <div class="subheading-content">
-        <h2><span>Running in Standalone Mode</span></h2>
-           Run the following command in a terminal:
-           <div class="well well-sm"> java -jar &lt;BuyHardModule&gt; &lt;pricesFile&gt; &lt;paramFile&gt;</div>
-			  Minimum requirement is <b>Java 7</b>, but we recommend Java 8.
-        </div>
 
-        <div class="subheading-content">
-		  <h3>Input Files</h3>
-				There are 3 input files required:
-				<ul>
-		        <li><i>Buy Hard</i> strategy module, downloadable from the Releases section.</li>
+    <!--Body Content-->
+    <div role="tabpanel">
 
-				  <li>Prices data file: must be a valid Sicra file from TRTH. Try using the sample data set
-		        <form id="inputData" class="submit-link" method="get" action="samples/prices.csv"> 
-					<a href="javascript:submitLink('inputData')">here.</a>
-				  </form></li>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Module</a></li>
+            <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Testing Platform</a></li>
+        </ul>
 
-				  <li>Parameters file: configures the strategy module used.
-		        A sample parameters file can be obtained 
-		        <form id="params" class="submit-link" method="get" action="samples/config.properties"> 
-					<a href="javascript:submitLink('params')">here.</a>
-				  </form></li>
-				</ul>
-        </div>
+        <!-- Tab panes -->
+        <div class="tab-content">
 
-        <div class="subheading-content">
-        <h3>Output Files</h3>
-           <i>Buy Hard </i> will produce 2 output files:
-		     <ul>
-			   <li><i>orders.csv</i>, which contains the orders generated from the trading module. </li>
-		      <li><i>logfile.log</i>, which contains the logs from the module, and any warnings or errors encountered. </li>
-		     </ul>
-		  </div>
+            <!--Strategy Tab-->
+            <div role="tabpanel" class="tab-pane active" id="home">
+                <div class="panel panel-default download-panel" id="internal-panel">
 
-        <div class="subheading-content">
-		  <h2><span>Integrating with trading systems</span></h2>
-           <i>Buy Hard</i> modules can be easily integrated to existing trading systems using the command provided for the standalone mode.
-			  This will produce the same output files, whereby the <i>orders.csv</i> file can then be processed.
-			  For example, to run in a Java application, you can use the following code:
-           <div class="well well-sm"> 
-				   ProcessBuilder pb = new ProcessBuilder("java", "-jar", <i>BuyHardModule</i>, <i>pricesFile</i>, <i>paramFile</i>);<br>
-               pb.start();
-			  </div>
-		  </div>
-
-        <hr>
-        <h3>Releases</h3>
-        <table class="table table-striped" id="release-list">
-            <tr><th>Version</th><th>Date</th><th>Changelog</th></tr>
-
-            <tr><td>v1.0.0</td><td>01/04/2015</td><td>
-
-                <button type="button" class="btn btn-default" id="release-button" data-toggle="modal" data-target="#release-modal">
-                        <!--onclick="changeChangelog('1.0.0 changelog');"-->
-                    View
-                </button>
-
-            </td></tr>
-        </table>
-        <!-- Modal -->
-        <div class="modal fade" id="release-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                        <h3 class="modal-title" id="myModalLabel">Changelog</h3>
+                    <form method="get" action="BuyHard-Momentum-1.1.0.jar">
+                        <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">Latest Release</button></p>
+                    </form>
+                    <p>
+                        File Name: <i>BuyHard-Momentum-1.1.0.jar</i><br>
+                        Version: 1.1.0<br>
+                        Date Released: 23/04/2015<br>
+                        Size: 1MB<br>
+                    </p>
+                </div>
+                <div class="panel panel-default" id="internal-panel">
+                    <p>
+                        <i>Buy Hard</i> is an algorithmic trading module that provides customers with orders that yield the highest amount of profit. Our range of strategies are designed to cater for individual investors of different economic statuses based on risk-taking ability and amount of investment principal.
+                        <br><img id="icons" src="icons.png">
+                        <br><br>
+                    </p>
+                    <hr>
+                    <h2 class="heading">Getting Started</h2>
+                    <hr>
+                    <div class="subheading-content">
+                        <h2><span>Running in Standalone Mode</span></h2>
+                        Run the following command in a terminal:
+                        <div class="well well-sm"> java -jar &lt;BuyHardModule&gt; &lt;pricesFile&gt; &lt;paramFile&gt;</div>
+                        Minimum requirement is <b>Java 7</b>, but we recommend Java 8.
                     </div>
-                    <div class="modal-body" id="changelog-modal">
-							Initial release with:
-							<ul>
-								<li>Reading Sicra file from TRTH.</li>
-								<li>Loading parameters to configure the strategy.</li>
-								<li>Implementation of momentum strategy including calculating simple moving averages.</li>
-								<li>Outputting orders using the strategy.</li>
-							    <li>Generating a log report with details of input files and execution time.</li>
-							</ul>
+
+                    <div class="subheading-content">
+                        <h3>Input Files</h3>
+                        There are 3 input files required:
+                        <ul>
+                            <li><i>Buy Hard</i> strategy module, downloadable from the Releases section.</li>
+
+                            <li>Prices data file: must be a valid Sicra file from TRTH. Try using the sample data set
+                                <form id="inputData" class="submit-link" method="get" action="samples/prices.csv">
+                                    <a href="javascript:submitLink('inputData')">here.</a>
+                                </form></li>
+
+                            <li>Parameters file: configures the strategy module used.
+                                A sample parameters file can be obtained
+                                <form id="params" class="submit-link" method="get" action="samples/config.properties">
+                                    <a href="javascript:submitLink('params')">here.</a>
+                                </form></li>
+                        </ul>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+
+                    <div class="subheading-content">
+                        <h3>Output Files</h3>
+                        <i>Buy Hard </i> will produce 2 output files:
+                        <ul>
+                            <li><i>orders.csv</i>, which contains the orders generated from the trading module. </li>
+                            <li><i>logfile.log</i>, which contains the logs from the module, and any warnings or errors encountered. </li>
+                        </ul>
                     </div>
+
+                    <div class="subheading-content">
+                        <h2><span>Integrating with trading systems</span></h2>
+                        <i>Buy Hard</i> modules can be easily integrated to existing trading systems using the command provided for the standalone mode.
+                        This will produce the same output files, whereby the <i>orders.csv</i> file can then be processed.
+                        For example, to run in a Java application, you can use the following code:
+                        <div class="well well-sm">
+                            ProcessBuilder pb = new ProcessBuilder("java", "-jar", <i>BuyHardModule</i>, <i>pricesFile</i>, <i>paramFile</i>);<br>
+                            pb.start();
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h3>Releases</h3>
+                    <table class="table table-striped" id="release-list">
+                        <tr><th>Version</th><th>Date</th><th>Changelog</th></tr>
+                        <tr><td>v1.1.0</td><td>23/04/2015</td><td>
+
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#release-v1-1-0">
+                                View
+                            </button>
+
+                        </td></tr>
+                        <tr><td>v1.0.0</td><td>02/04/2015</td><td>
+
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#release-v1-0-0">
+                                <!--onclick="changeChangelog('1.0.0 changelog');"-->
+                                View
+                            </button>
+
+                        </td></tr>
+
+                    </table>
+                    <!-- Modals -->
+                    <!--Version 1.1.0-->
+                    <div class="modal fade" id="release-v1-1-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.1.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+                                    Changes to previous release:
+                                    <ul>
+                                        <li>Added new options in the config file which allows you to to change the filename of the output and the log file. </li>
+                                        <li>Enabled/Allowed short selling to happen in the strategy module. </li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Version 1.0.0-->
+                    <div class="modal fade" id="release-v1-0-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.0.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+                                    Initial release with:
+                                    <ul>
+                                        <li>Reading Sicra file from TRTH.</li>
+                                        <li>Loading parameters to configure the strategy.</li>
+                                        <li>Implementation of momentum strategy including calculating simple moving averages.</li>
+                                        <li>Outputting orders using the strategy.</li>
+                                        <li>Generating a log report with details of input files and execution time.</li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="footer">
+                        <p>&copy; Group 1 2015</p>
+                    </footer>
+                </div>
+            </div>
+
+            <!--Testing Platform Tab-->
+            <div role="tabpanel" class="tab-pane" id="profile">
+                <div class="panel panel-default download-panel" id="internal-panel">
+
+                    <form method="get" action="BuyHardPlatform-1.0.0.jar">
+                        <p><button class="btn btn-lg btn-primary" type="submit" id="latest-release">Latest Release</button></p>
+                    </form>
+                    <p>
+                        File Name: <i>BuyHardPlatform-1.0.0.jar</i><br>
+                        Version: 1.0.0<br>
+                        Date Released: 23/04/2015<br>
+                        Size: 7MB<br>
+                    </p>
+                </div>
+                <div class="panel panel-default" id="internal-panel">
+                    <div class="subheading-content">
+                        <h2><span>User Interface</span></h2>
+                        <div class="well well-sm">
+                            <img class="testing-ss" src="testingplatform.png"/>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <h2 class="heading">Getting Started</h2>
+                    <hr>
+
+                    <div class="subheading-content">
+                        <h2><span>Usage Instructions</span></h2>
+                        <ol>
+                            <li>Select an input data file. This needs to be a valid TRTH file..</li>
+                            <li>Select a compatible module to use.</li>
+                            <li>Select the parameters file for that module.</li>
+                        </ol>
+								<br>
+								Please note that the minimum required JRE is <b>Java 8</b>.
+                    </div>
+
+                    <div class="subheading-content">
+                        <h2><span>Notes on Compatibility</span></h2>
+                        <ul>
+                            <li>At the moment, the BuyHard testing platform only supports Java JAR modules.</li>
+                            <li>Additionally, the output generated needs to be named orders.csv and located in your current working directory.</li>
+                            <li>The orders file generated should be a CSV that follows the following headers and formats:</li>
+                                <br>
+                                <ul>
+                                    <li>Company Name: any character string</li>
+                                    <li>Date: must be in dd-MM-yyyy format</li>
+                                    <li>Price must be numerical</li>
+                                    <li>Volume: must be numerical</li>
+                                    <li>Value: must be numerical, should equal to the price multiplied by the volume</li>
+                                    <li>Buy/Sell: must be either B (buy) or S (sell)</li>
+                                </ul>
+
+                                <br>For example:<br><br>
+                                <div class="well well-sm">
+                                    BHP.AX,2015-01-09,29.16,100,2916.0,B<br>
+                                    BHP.AX,2015-01-14,27.2,100,2720.0,S
+                                </div>
+                            <li>The names of the CSV headers are not important but the order of the columns and the formats are. <br>
+                                A sample input file is provided in the <i>Getting Started</i> section of the Modules tab.</li>
+                            <li>Please contact the developers of the module for issues originating from the trading module.</li>
+                        </ul>
+                    </div>
+
+                    <hr>
+                    <h3>Releases</h3>
+                    <table class="table table-striped" id="release-list">
+                        <tr><th>Version</th><th>Date</th><th>Changelog</th></tr>
+
+                        <tr><td>v1.0.0</td><td>23/04/2015</td><td>
+
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#platform-v1-0-0">
+                                View
+                            </button>
+
+                        </td></tr>
+                    </table>
+                    <!-- Changelog Modals -->
+                    <div class="modal fade" id="platform-v1-0-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.0.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+                                    Initial release with:
+                                    <ul>
+                                        <li>Selection of data CSV, strategy module and parameters</li>
+                                        <li>Ability to change parameter values</li>
+                                        <li>Extensive charts including candlestick chart of prices data, bar chart of order volume, and table with date, price and order activity</li>
+                                        <li>Extensive performance breakdown including bar chart of portfolio (currently-held stock value + profit)
+                                            and equity (currently-held stock) value, table with returns from each security traded and pie chart of
+                                            returns contributions from each security by percentage</li>
+                                        <li>Chart features including filtering by company and date range, zooming, tooltips with detailed price and volume information</li>
+                                    </ul>
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <footer class="footer">
+                        <p>&copy; Group 1 2015</p>
+                    </footer>
                 </div>
             </div>
         </div>
-        <footer class="footer">
-            <p>&copy; Group 1 2015</p>
-        </footer>
     </div>
 </div> <!-- /container -->
 

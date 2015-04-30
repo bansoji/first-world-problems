@@ -1,3 +1,10 @@
+package quickDate;
+
+import main.History;
+import quickDate.Price;
+import quickDate.PriceParser;
+import main.Reader;
+
 /**
  * Created by jasonlim on 30/03/15.
  */

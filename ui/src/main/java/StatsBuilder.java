@@ -16,6 +16,7 @@ import javafx.scene.text.Text;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
+import main.*;
 import org.joda.time.DateTime;
 
 import java.util.*;

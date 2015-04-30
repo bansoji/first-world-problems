@@ -1,3 +1,5 @@
+package main;
+
 import com.opencsv.CSVReader;
 
 import java.io.BufferedReader;

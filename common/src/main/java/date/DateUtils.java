@@ -62,6 +62,7 @@ public class DateUtils {
         return parseMonthAbbr(string, "Error parsing date.");
     }
 
+    //compare two date strings
     public static Boolean before(String s1, String s2) {
         if (!(s1.matches(dd_MMM_yyyy) && s1.matches(dd_MM_yyyy))
                 && !(s2.matches(dd_MMM_yyyy) && s2.matches(dd_MM_yyyy)))

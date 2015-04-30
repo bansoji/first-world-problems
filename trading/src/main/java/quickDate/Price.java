@@ -1,6 +1,7 @@
+package quickDate;
+
 import org.joda.time.DateTime;
 
-import java.util.Date;
 import java.util.logging.Logger;
 
 /**
@@ -9,7 +10,7 @@ import java.util.logging.Logger;
 public class Price {
     private String companyName; // The company name, identical to RIC from the input file.
     private double value; // The value of the share.
-    private DateTime date;
+    private String date;
     private double high;
     private double low;
     private double open;
@@ -18,7 +19,7 @@ public class Price {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public Price(String companyName, double value, DateTime date, double open, double high, double low, int vol){
+    public Price(String companyName, double value, String date, double open, double high, double low, int vol){
         this.companyName = companyName;
         this.value = value;
         this.date = date;
@@ -36,7 +37,7 @@ public class Price {
         return this.value;
     }
 
-    public DateTime getDate() {
+    public String getDate() {
         return date;
     }
 

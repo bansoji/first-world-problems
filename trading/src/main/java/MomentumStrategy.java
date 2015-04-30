@@ -1,11 +1,12 @@
 import date.DateUtils;
 import finance.FinanceUtils;
-import org.joda.time.DateTime;
+import quickDate.Order;
+import main.OrderType;
+import quickDate.Price;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -14,14 +15,13 @@ import java.util.logging.Logger;
  * An implementation of the Momentum Strategy.
  */
 public class MomentumStrategy implements TradingStrategy {
-
     private List<Price> prices;
     private List<Order> ordersGenerated;
     private int movingAvgTimeWindow;
     private double threshold;
     private int volume;
-    private DateTime startDate;
-    private DateTime endDate;
+    private String startDate;
+    private String endDate;
 
     private static final Logger logger = Logger.getLogger("log");
 
@@ -66,18 +66,8 @@ public class MomentumStrategy implements TradingStrategy {
         this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.001"));
         this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
 
-        String startDateInput = prop.getProperty("startDate");
-        String endDateInput = prop.getProperty("endDate");
-
-        // Get the start and end dates.
-        if (startDateInput != null)
-            this.startDate = DateUtils.parse(startDateInput,
-                    "Incorrect Date format used for start date of simulations. " +
-                            "Please make sure it is in the correct format of dd-MM-yyyy.");
-        if (endDateInput != null)
-            this.endDate = DateUtils.parse(endDateInput,
-                "Incorrect Date format used for end date of simulations. " +
-                "Please make sure it is in the correct format of dd-MM-yyyy.");
+        startDate = prop.getProperty("startDate");
+        endDate = prop.getProperty("endDate");
     }
 
     /**
@@ -120,8 +110,8 @@ public class MomentumStrategy implements TradingStrategy {
                 // Skip if the date given is out of the simulation date range.
                 Price tradePrice = prices.get(i + movingAvgTimeWindow);
 
-                if (startDate != null && tradePrice.getDate().isBefore(startDate)) continue;
-                if (endDate != null && tradePrice.getDate().isAfter(endDate)) continue;
+                if (startDate != null && DateUtils.before(tradePrice.getDate(), startDate)) continue;
+                if (endDate != null && DateUtils.after(tradePrice.getDate(), endDate)) continue;
 
                 // Create a new Order.
                 OrderType currentSignal = tradeSignals.get(i);
@@ -140,8 +130,8 @@ public class MomentumStrategy implements TradingStrategy {
                 Price tradePrice = prices.get(i + movingAvgTimeWindow);
 
                 // Skip if the date given is out of the simulation date range.
-                if (startDate != null && tradePrice.getDate().isBefore(startDate)) continue;
-                if (endDate != null && tradePrice.getDate().isAfter(endDate)) continue;
+                if (startDate != null && DateUtils.before(tradePrice.getDate(), startDate)) continue;
+                if (endDate != null && DateUtils.after(tradePrice.getDate(), endDate)) continue;
 
                 // Create a new Order.
                 Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(),

@@ -1,4 +1,3 @@
-import humanize.Humanize;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,6 +19,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import main.*;
 import org.joda.time.DateTime;
 
 import javax.swing.*;
@@ -188,7 +188,7 @@ public class ApplicationFrame extends Application {
 
     private void loadContent(History<Order> history, List<Price> prices, List<Order> orders)
     {
-        Map<DateTime,OrderType> orderRecord = new HashMap<>();
+        Map<DateTime, OrderType> orderRecord = new HashMap<>();
         if (orders != null) {
             for (Order order : orders) {
                 orderRecord.put(order.getOrderDate(), order.getOrderType());

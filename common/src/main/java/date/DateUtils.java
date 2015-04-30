@@ -1,5 +1,10 @@
 package date;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,63 +16,65 @@ import java.util.logging.Logger;
  */
 public class DateUtils {
 
-    private static final DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
-    private static final DateFormat monthAbbrFormat = new SimpleDateFormat("dd-MMM-yyyy");
+    private static final DateTimeFormatter df = DateTimeFormat.forPattern("dd-MM-yyyy");
+    private static final DateTimeFormatter monthAbbrFormat = DateTimeFormat.forPattern("dd-MMM-yyyy");
     private static final Logger logger = Logger.getLogger("log");
+    private static final String dd_MM_yyyy = "\\d{1,2}-\\d{1,2}-\\d{4}";
+    private static final String dd_MMM_yyyy = "\\d{1,2}-[a-zA-Z]{1,3}-\\d{4}";
 
-    public static String format(Date date)
+    public static String format(DateTime date)
     {
-        return df.format(date);
+        return df.print(date);
     }
 
-    public static String formatMonthAbbr(Date date)
+    public static String formatMonthAbbr(DateTime date)
     {
-        return monthAbbrFormat.format(date);
+        return monthAbbrFormat.print(date);
     }
 
-    public static Date parse(String string, String parseErrorMessage)
+    public static DateTime parse(String string, String parseErrorMessage)
     {
         try {
-            return df.parse(string);
-        } catch (NullPointerException | ParseException e) {
+            return df.parseDateTime(string).withZone(DateTimeZone.getDefault());
+        } catch (Exception e) {
             logger.warning(parseErrorMessage);
             return null;
         }
     }
 
-    public static Date parse(String string)
+    public static DateTime parse(String string)
     {
         return parse(string, "Error parsing date.");
     }
 
-    public static Date parseMonthAbbr(String string, String parseErrorMessage)
+    public static DateTime parseMonthAbbr(String string, String parseErrorMessage)
     {
         try {
-            return monthAbbrFormat.parse(string);
-        } catch (NullPointerException | ParseException e) {
+            return monthAbbrFormat.parseDateTime(string).withZone(DateTimeZone.getDefault());
+        } catch (Exception e) {
             logger.warning(parseErrorMessage);
             return null;
         }
     }
 
-    public static Date parseMonthAbbr(String string)
+    public static DateTime parseMonthAbbr(String string)
     {
         return parseMonthAbbr(string, "Error parsing date.");
     }
 
     public static Boolean before(String s1, String s2) {
-        boolean s1ddMMMyyyy = s1.matches("\\d{1,2}-[a-zA-Z]{1,3}-\\d{4}");
-        boolean s2ddMMMyyyy = s2.matches("\\d{1,2}-[a-zA-Z]{1,3}-\\d{4}");
-        if (!(s1ddMMMyyyy && s1.matches("\\d{1,2}-\\d{1,2}-\\d{4}"))
-                && !(s2ddMMMyyyy && s2.matches("\\d{1,2}-\\d{1,2}-\\d{4}")))
+        if (!(s1.matches(dd_MMM_yyyy) && s1.matches(dd_MM_yyyy))
+                && !(s2.matches(dd_MMM_yyyy) && s2.matches(dd_MM_yyyy)))
             return null;
 
         String[] tokens1 = s1.split("-");
         String[] tokens2 = s2.split("-");
 
+        //if month is MMM
         if (tokens1[1].length() == 3) tokens1[1] = convertToMonthNum(tokens1[1]);
         if (tokens2[1].length() == 3) tokens2[1] = convertToMonthNum(tokens2[1]);
 
+        //format date string to YYYYMMDD
         String t1 = tokens1[2] + (tokens1[1].length() == 1 ? "0" + tokens1[1] : tokens1[1]) + (tokens1[0].length() == 1 ? "0" + tokens1[0] : tokens1[0]);
         String t2 = tokens2[2] + (tokens2[1].length() == 1 ? "0" + tokens2[1] : tokens2[1]) + (tokens2[0].length() == 1 ? "0" + tokens2[0] : tokens2[0]);
         return (Integer.parseInt(t1) < Integer.parseInt(t2));

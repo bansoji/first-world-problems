@@ -22,6 +22,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
+import org.joda.time.DateTime;
 
 import java.util.*;
 
@@ -696,7 +697,7 @@ public class XYBarChart extends XYChart<Long, Number> {
         }
 
         public void update(NodeType type, long date, long volume) {
-            dateValue.setText(DateUtils.formatMonthAbbr(new Date(date)));
+            dateValue.setText(DateUtils.formatMonthAbbr(new DateTime(date)));
             volumeValue.setText(Long.toString(volume));
 
             switch (type) {

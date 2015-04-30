@@ -1,3 +1,6 @@
+import date.DateUtils;
+import org.joda.time.DateTime;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -46,7 +49,7 @@ public class PriceParser extends Parser<Price> {
                 numberOfFileLines += 1;
 
                 value = Double.parseDouble(nextLine[PRICE]);
-                String date = nextLine[DATE];
+                DateTime date = DateUtils.parseMonthAbbr(nextLine[DATE]);
                 try {
                     open_price = Double.parseDouble(nextLine[OPEN_PRICE]);
                 } catch (NumberFormatException e) {

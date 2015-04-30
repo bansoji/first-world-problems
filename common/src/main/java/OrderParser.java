@@ -1,3 +1,6 @@
+import date.DateUtils;
+import org.joda.time.DateTime;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -37,7 +40,7 @@ public class OrderParser extends Parser<Order> {
                 }
                 numberOfFileLines += 1;
                 value = Double.parseDouble(nextLine[ORDER_PRICE]);
-                String date = nextLine[ORDER_DATE];
+                DateTime date = DateUtils.parseMonthAbbr(nextLine[ORDER_DATE]);
 
                 OrderType type;
                 if (nextLine[ORDER_SIGNAL].equals("B")) {

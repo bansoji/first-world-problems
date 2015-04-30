@@ -16,6 +16,7 @@ import javafx.scene.text.Text;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
+import org.joda.time.DateTime;
 
 import java.util.*;
 
@@ -24,7 +25,7 @@ import java.util.*;
  */
 public class StatsBuilder {
 
-    public static void build(GridPane stats, History<Order> history, List<Price> prices, Map<Date, OrderType> orders) {
+    public static void build(GridPane stats, History<Order> history, List<Price> prices, Map<DateTime, OrderType> orders) {
         final VBox vbox = new VBox();
         vbox.setSpacing(15);
         Portfolio portfolio = new Portfolio(history);

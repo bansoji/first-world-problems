@@ -33,6 +33,7 @@ import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
 import org.gillius.jfxutils.chart.JFXChartUtil;
+import org.joda.time.DateTime;
 
 import java.util.*;
 
@@ -44,7 +45,7 @@ public class GraphBuilder {
     private CandleStickChart lineChart;
     private XYBarChart barChart;
 
-    public void buildGraph(BorderPane graph, List<Price> prices, List<Order> orders, Map<Date, OrderType> orderSummary)
+    public void buildGraph(BorderPane graph, List<Price> prices, List<Order> orders, Map<DateTime, OrderType> orderSummary)
     {
         DateValueAxis xAxis = new DateValueAxis();
         NumberAxis yAxis = new NumberAxis();
@@ -89,16 +90,16 @@ public class GraphBuilder {
                             XYChart.Data volume;
                             if (currOrder.getOrderType().equals(OrderType.BUY)) {
                                 type = NodeType.BuyOrder;
-                                volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getTime(), currOrder.getVolume(),
+                                volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getMillis(), currOrder.getVolume(),
                                         new XYBarChart.XYBarExtraValues(type));
                                 changeBarColour(volume, "buy");
                             } else {
                                 type = NodeType.SellOrder;
-                                volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getTime(), currOrder.getVolume(),
+                                volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getMillis(), currOrder.getVolume(),
                                         new XYBarChart.XYBarExtraValues(type));
                                 changeBarColour(volume, "sell");
                             }
-                            XYChart.Data price = new XYChart.Data<Long, Number>(prices.get(i).getDate().getTime(), prices.get(i).getOpen(),
+                            XYChart.Data price = new XYChart.Data<Long, Number>(prices.get(i).getDate().getMillis(), prices.get(i).getOpen(),
                                     new CandleStickChart.CandleStickExtraValues(type,
                                             prices.get(i).getValue(),
                                             prices.get(i).getHigh(),
@@ -107,8 +108,8 @@ public class GraphBuilder {
                             priceChart.getData().add(price);
                             volumeChart.getData().add(volume);
                             //if no order is placed at this price
-                        } else if (currOrder == null || currOrder.getOrderDate().after(prices.get(i).getDate())) {
-                            XYChart.Data price = new XYChart.Data<Long, Number>(prices.get(i).getDate().getTime(), prices.get(i).getOpen(),
+                        } else if (currOrder == null || currOrder.getOrderDate().isAfter(prices.get(i).getDate())) {
+                            XYChart.Data price = new XYChart.Data<Long, Number>(prices.get(i).getDate().getMillis(), prices.get(i).getOpen(),
                                     new CandleStickChart.CandleStickExtraValues(NodeType.Price,
                                             prices.get(i).getValue(),
                                             prices.get(i).getHigh(),
@@ -116,7 +117,7 @@ public class GraphBuilder {
                                             prices.get(i).getValue()));
                             priceChart.getData().add(price);
                             if (i == 0 || i == prices.size() - 1) {
-                                XYChart.Data volume = new XYChart.Data<Long, Number>(prices.get(i).getDate().getTime(), 0,
+                                XYChart.Data volume = new XYChart.Data<Long, Number>(prices.get(i).getDate().getMillis(), 0,
                                         new XYBarChart.XYBarExtraValues(NodeType.Price));
                                 volumeChart.getData().add(volume);
                             }
@@ -224,7 +225,7 @@ public class GraphBuilder {
     }
 
 
-    private static TableView buildTable(List<Price> prices, Map<Date,OrderType> orders) {
+    private static TableView buildTable(List<Price> prices, Map<DateTime,OrderType> orders) {
         TableView tableView = new TableView();
 
         TableColumn dateCol = new TableColumn("Date");
@@ -232,10 +233,10 @@ public class GraphBuilder {
         dateCol.setComparator(new Comparator<String>(){
             @Override
             public int compare(String t1, String t2) {
-                Date d1 = DateUtils.parseMonthAbbr(t1);
-                Date d2 = DateUtils.parseMonthAbbr(t2);
+                DateTime d1 = DateUtils.parseMonthAbbr(t1);
+                DateTime d2 = DateUtils.parseMonthAbbr(t2);
                 if (d1 == null || d2 == null) return -1;
-                return Long.compare(d1.getTime(),d2.getTime());
+                return Long.compare(d1.getMillis(),d2.getMillis());
             }
         });
         dateCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Price, String>, ObservableValue<String>>() {

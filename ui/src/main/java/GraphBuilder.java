@@ -4,6 +4,7 @@ import graph.CandleStickChart;
 import graph.DateValueAxis;
 import graph.NodeType;
 import graph.XYBarChart;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -89,7 +90,7 @@ public class GraphBuilder {
                             if (currOrder.getOrderType().equals(OrderType.BUY)) {
                                 type = NodeType.BuyOrder;
                                 volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getTime(), currOrder.getVolume(),
-                                                new XYBarChart.XYBarExtraValues(type));
+                                        new XYBarChart.XYBarExtraValues(type));
                                 changeBarColour(volume, "buy");
                             } else {
                                 type = NodeType.SellOrder;
@@ -114,9 +115,9 @@ public class GraphBuilder {
                                             prices.get(i).getLow(),
                                             prices.get(i).getValue()));
                             priceChart.getData().add(price);
-                            if (i == 0 || i == prices.size()-1) {
+                            if (i == 0 || i == prices.size() - 1) {
                                 XYChart.Data volume = new XYChart.Data<Long, Number>(prices.get(i).getDate().getTime(), 0,
-                                                                        new XYBarChart.XYBarExtraValues(NodeType.Price));
+                                        new XYBarChart.XYBarExtraValues(NodeType.Price));
                                 volumeChart.getData().add(volume);
                             }
                         } else if (orderIterator != null && orderIterator.hasNext()) {
@@ -130,14 +131,14 @@ public class GraphBuilder {
             barChart.getData().add(volumeChart);
             barChart.setLegendVisible(false);
             barChart.setPrefHeight(200);
-            ObservableList<XYChart.Series<Long,Number>> data = lineChart.getData();
+            ObservableList<XYChart.Series<Long, Number>> data = lineChart.getData();
             if (data == null) {
                 data = FXCollections.observableArrayList(priceChart);
                 lineChart.setData(data);
             } else {
                 lineChart.getData().add(priceChart);
             }
-           // lineChart.getData().add(priceChart);
+            // lineChart.getData().add(priceChart);
             lineChart.setLegendVisible(false);
             if (orders == null) {
                 xAxisVolume.setLowerBound(xAxis.getLowerBound());
@@ -159,7 +160,7 @@ public class GraphBuilder {
                 }
             }
         });
-        if (prices.size() > 0) syncGraphZooming();
+        if (prices != null && prices.size() > 0) syncGraphZooming();
         addMenu();
         pane.setCenter(JFXChartUtil.setupZooming(lineChart));
         pane.setBottom(JFXChartUtil.setupZooming(barChart));

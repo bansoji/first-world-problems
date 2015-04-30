@@ -1,14 +1,13 @@
 import humanize.Humanize;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.*;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -23,16 +22,12 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 import javax.swing.*;
-import javax.swing.text.PlainDocument;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.logging.Logger;
 
 /**
@@ -72,6 +67,7 @@ public class ApplicationFrame extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         //primaryStage.setFullScreen(true);
+        primaryStage.setTitle("BuyHard Platform");
         main = new BorderPane();
         Scene scene = new Scene(main);
         scene.getStylesheets().addAll("general.css", "graph.css", "stats.css");
@@ -232,6 +228,7 @@ public class ApplicationFrame extends Application {
 
     private void addSettingsPanel(HBox header) {
         settings = new HBox();
+        settings.setAlignment(Pos.CENTER);
         settings.setSpacing(50);
 
         Button settingsButton = new Button("Change parameters");
@@ -240,11 +237,22 @@ public class ApplicationFrame extends Application {
             @Override
             public void handle(ActionEvent event) {
                 final Stage dialog = new Stage();
+                dialog.setTitle("Parameters");
                 dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(null);
+                dialog.initOwner(stage);
                 VBox dialogVbox = new VBox();
+                dialogVbox.setPadding(new Insets(20));
+                dialogVbox.setSpacing(20);
+                dialogVbox.setAlignment(Pos.CENTER_RIGHT);
                 changeParamSelection();
-                dialogVbox.getChildren().add(paramTable);
+                Button close = new Button("Close");
+                close.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        dialog.close();
+                    }
+                });
+                dialogVbox.getChildren().addAll(paramTable, close);
                 Scene dialogScene = new Scene(dialogVbox);
                 dialog.setScene(dialogScene);
                 dialog.show();
@@ -253,58 +261,61 @@ public class ApplicationFrame extends Application {
 
         //Run button
         Button runButton = new Button("Run");
-        settings.getChildren().add(runButton);
+        settings.getChildren().addAll(runButton);
 
         header.getChildren().add(settings);
 
         runButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                if (strategyFile != null && dataFile != null && paramFile != null) {
-                    try {
-                        updateParams();
+                new Thread() {
+                    public void run() {
+                        if (strategyFile != null && dataFile != null && paramFile != null) {
+                            try {
+                                updateParams();
+                                ProcessBuilder pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
+                                Process p = pb.start();
+                                try {
+                                    p.waitFor();
+                                } catch (InterruptedException ex) {
+                                    logger.severe("Failed to run module without errors.");
+                                    return;
+                                }
 
-                        ProcessBuilder pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
-                        Process p = pb.start();
-                        try {
-                            p.waitFor();
-                        } catch (InterruptedException ex) {
-                            logger.severe("Failed to run module without errors.");
-                            return;
+                                priceReader = new PriceReader(dataFile);
+                                priceReader.readAll();
+                                Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
+                                ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
+
+                                //update list of companies in the selector
+                                if (companyListener != null) {
+                                    companySelector.valueProperty().removeListener(companyListener);
+                                }
+                                companySelector.getSelectionModel().clearSelection();
+                                companySelector.setItems(priceCompanies);
+                                companySelector.getSelectionModel().selectFirst();
+                                addCompanySelectorListener();
+
+                                List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
+                                selector.setVisible(true);
+
+                                orderReader = new OrderReader(OUTPUT_FILE_PATH);
+                                orderReader.readAll();
+                                List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
+                                loadContent(orderReader.getHistory(), prices, orders);
+                            } catch (IOException ex) {
+                                JOptionPane.showMessageDialog(null,
+                                        "An unexpected error has occurred when running the given files." +
+                                                "Please check that the file content is in the correct format",
+                                        "Files could not be run", JOptionPane.ERROR_MESSAGE);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null,
+                                    "Please check that you have selected all the required files.",
+                                    "Missing files", JOptionPane.INFORMATION_MESSAGE);
                         }
-
-                        priceReader = new PriceReader(dataFile);
-                        priceReader.readAll();
-                        Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
-                        ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
-
-                        //update list of companies in the selector
-                        if (companyListener != null) {
-                            companySelector.valueProperty().removeListener(companyListener);
-                        }
-                        companySelector.getSelectionModel().clearSelection();
-                        companySelector.setItems(priceCompanies);
-                        companySelector.getSelectionModel().selectFirst();
-                        addCompanySelectorListener();
-
-                        List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
-                        selector.setVisible(true);
-
-                        orderReader = new OrderReader(OUTPUT_FILE_PATH);
-                        orderReader.readAll();
-                        List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
-                        loadContent(orderReader.getHistory(), prices, orders);
-                    } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(null,
-                                "An unexpected error has occurred when running the given files." +
-                                        "Please check that the file content is in the correct format",
-                                "Files could not be run", JOptionPane.ERROR_MESSAGE);
                     }
-                } else {
-                    JOptionPane.showMessageDialog(null,
-                            "Please check that you have selected all the required files.",
-                            "Missing files", JOptionPane.INFORMATION_MESSAGE);
-                }
+                }.start();
             }
         });
     }

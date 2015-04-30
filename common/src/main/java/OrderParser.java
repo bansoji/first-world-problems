@@ -1,7 +1,9 @@
 import date.DateUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by jasonlim on 30/03/15.
@@ -20,36 +22,38 @@ public class OrderParser extends Parser<Order> {
     }
 
     @Override
-    public Order parseNextLine() {
+    public List<Order> parseAllLines() {
         //Read the remaining lines and store data into ArrayList.
         try {
-            String[] nextLine = reader.readNext();
-            if (nextLine != null) {
-                String companyName = nextLine[ORDER_COMPANY_NAME];
-                double value;
-                Date date = null;
+            List<String[]> lines = reader.readAll();
+            List<Order> orders = new ArrayList<>();
+            for (String[] nextLine: lines) {
+                if (nextLine != null) {
+                    String companyName = nextLine[ORDER_COMPANY_NAME];
+                    double value;
+                    Date date = null;
 
-                //get the next line with a price
-                while (nextLine[ORDER_PRICE].equals("")) {
-                    nextLine = reader.readNext();       //No value.
+                    //get the next line with a price
+                    if (nextLine[ORDER_PRICE].equals("")) {
+                        numberOfFileLines += 1;
+                        continue;
+                    }
                     numberOfFileLines += 1;
-                    if (nextLine == null) return null;
-                }
-                numberOfFileLines += 1;
-                value = Double.parseDouble(nextLine[ORDER_PRICE]);
-                date = DateUtils.parse(nextLine[ORDER_DATE], "Incorrect date format in the input file.");
+                    value = Double.parseDouble(nextLine[ORDER_PRICE]);
+                    date = DateUtils.parse(nextLine[ORDER_DATE], "Incorrect date format in the input file.");
 
-                OrderType type;
-                if (nextLine[ORDER_SIGNAL].equals("B")) {
-                    type = OrderType.BUY;
-                } else {
-                    type = OrderType.SELL;
-                }
+                    OrderType type;
+                    if (nextLine[ORDER_SIGNAL].equals("B")) {
+                        type = OrderType.BUY;
+                    } else {
+                        type = OrderType.SELL;
+                    }
 
-                int volume = Integer.parseInt(nextLine[ORDER_VOLUME]);
-                return new Order(type, companyName, value, volume, date);
+                    int volume = Integer.parseInt(nextLine[ORDER_VOLUME]);
+                    orders.add(new Order(type, companyName, value, volume, date));
+                }
+                return orders;
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,3 +1,5 @@
+import java.util.List;
+
 /**
  * Created by jasonlim on 30/03/15.
  */
@@ -8,11 +10,12 @@ public class PriceReader extends Reader<Price> {
         history = new History<Price>();
     }
 
-    protected boolean readNext()
-    {
-        Price nextPrice = (Price)parser.parseNextLine();
-        if (nextPrice == null) return false;
-        history.add(nextPrice.getCompanyName(),nextPrice);
+    public boolean readAllLines() {
+        List<Price> prices = parser.parseAllLines();
+        if (prices == null) return false;
+        for (Price p: prices) {
+            if (p != null) history.add(p.getCompanyName(),p);
+        }
         return true;
     }
 }

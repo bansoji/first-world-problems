@@ -32,7 +32,7 @@ public abstract class Parser<T> {
         numberOfFileLines = 0;
     }
 
-    public abstract List<T> parseAllLines();
+    public abstract T parseNextLine();
 
     public void close()
     {

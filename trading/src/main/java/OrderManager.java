@@ -24,8 +24,6 @@ public class OrderManager {
             System.out.println("Usage: java -jar <BuyHardModule> <pricesFile> <paramFile>");
             return;
         }
-        long endTime = System.currentTimeMillis();
-        System.out.println("Read args:" + (endTime-startTime));
 
         String fileName = args[0];
         String paramName = args[1]; // To use, go to "Run -> Edit Configurations" and add
@@ -34,7 +32,6 @@ public class OrderManager {
         ///////////////////////////////
         // INITIALISATION.
         ///////////////////////////////
-        startTime = System.currentTimeMillis();
         // Logger initialisation.
         Logger logger = Logger.getLogger("log");
         FileHandler handler = new FileHandler(LOG_FILE);
@@ -50,16 +47,10 @@ public class OrderManager {
                 "OUTPUT FILE: " + OUTPUT_FILE + "\n" +
                 "LOG FILE: " + LOG_FILE);
 
-        endTime = System.currentTimeMillis();
-        System.out.println("Init:" + (endTime-startTime));
         // Load the csv file.
-        startTime = System.currentTimeMillis();
         Reader tReader = new PriceReader(fileName);
         tReader.readAll();
-        endTime = System.currentTimeMillis();
-        System.out.println("Read:" + (endTime-startTime));
 
-        startTime = System.currentTimeMillis();
         // Initialise the File and CSV Writer.
         BufferedWriter orderFile;
         try {
@@ -116,8 +107,6 @@ public class OrderManager {
         }
         input.close();
         handler.close();
-        endTime = System.currentTimeMillis();
-        System.out.println("Write:" + (endTime-startTime));
         // Log successful.
         logger.info("Module successful. No errors encountered.");
     }

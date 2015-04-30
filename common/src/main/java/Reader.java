@@ -15,10 +15,10 @@ public abstract class Reader<T> {
         return history.getCompanyHistory(companyName);
     }
 
-    protected abstract boolean readAllLines();
+    protected abstract boolean readNext();
     public void readAll()
     {
-        readAllLines();
+        while (readNext());
         parser.close();
         logger.info(String.valueOf("Number of file lines read is " + parser.getNumberOfFileLines()));
     }

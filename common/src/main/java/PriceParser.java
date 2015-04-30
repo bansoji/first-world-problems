@@ -45,7 +45,7 @@ public class PriceParser extends Parser<Price> {
                     if (nextLine == null) return null;
                 }
                 numberOfFileLines += 1;
-                //System.out.println(Arrays.toString(nextLine));
+                //System.out.println(Arrays.toString(nextLine)); //
 
                 value = Double.parseDouble(nextLine[PRICE]);
                 date = DateUtils.parseMonthAbbr(nextLine[DATE], "Error parsing price date");

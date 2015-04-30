@@ -1,0 +1,38 @@
+
+/* Sourced from http://stackoverflow.com/questions/19788661/change-javafx-tab-default-look */
+
+.tab-pane
+{
+    -fx-tab-min-width:150px;
+    /*-fx-background-color: black;*/
+}
+
+.tab{
+    -fx-background-insets: 0 1 0 1,0,0;
+}
+
+.tab .tab-label {
+    -fx-alignment: CENTER;
+    -fx-text-fill: #828282;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.tab:selected .tab-label {
+    -fx-alignment: CENTER;
+    -fx-text-fill: black;
+}
+
+.tab-pane:top *.tab-header-area {
+    -fx-background-insets: 0, 0 0 1 0;
+    -fx-padding: 0;
+}
+
+#footer {
+    -fx-alignment: center;
+}
+
+#header {
+    -fx-background-color: white;
+    -fx-padding: 15px;
+}

@@ -4,16 +4,20 @@ import graph.CandleStickChart;
 import graph.DateValueAxis;
 import graph.NodeType;
 import graph.XYBarChart;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
+import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.CacheHint;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
@@ -22,8 +26,10 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
 import org.gillius.jfxutils.chart.JFXChartUtil;
@@ -84,13 +90,13 @@ public class GraphBuilder {
                             if (currOrder.getOrderType().equals(OrderType.BUY)) {
                                 type = NodeType.BuyOrder;
                                 volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getTime(), currOrder.getVolume(),
-                                                new XYBarChart.XYBarExtraValues(type));
-                                changeBarColour(volume, ColorManager.BUY);
+                                        new XYBarChart.XYBarExtraValues(type));
+                                changeBarColour(volume, "buy");
                             } else {
                                 type = NodeType.SellOrder;
                                 volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getTime(), currOrder.getVolume(),
                                         new XYBarChart.XYBarExtraValues(type));
-                                changeBarColour(volume, ColorManager.SELL);
+                                changeBarColour(volume, "sell");
                             }
                             XYChart.Data price = new XYChart.Data<Long, Number>(prices.get(i).getDate().getTime(), prices.get(i).getOpen(),
                                     new CandleStickChart.CandleStickExtraValues(type,
@@ -109,9 +115,9 @@ public class GraphBuilder {
                                             prices.get(i).getLow(),
                                             prices.get(i).getValue()));
                             priceChart.getData().add(price);
-                            if (i == 0 || i == prices.size()-1) {
+                            if (i == 0 || i == prices.size() - 1) {
                                 XYChart.Data volume = new XYChart.Data<Long, Number>(prices.get(i).getDate().getTime(), 0,
-                                                                        new XYBarChart.XYBarExtraValues(NodeType.Price));
+                                        new XYBarChart.XYBarExtraValues(NodeType.Price));
                                 volumeChart.getData().add(volume);
                             }
                         } else if (orderIterator != null && orderIterator.hasNext()) {
@@ -125,14 +131,14 @@ public class GraphBuilder {
             barChart.getData().add(volumeChart);
             barChart.setLegendVisible(false);
             barChart.setPrefHeight(200);
-            ObservableList<XYChart.Series<Long,Number>> data = lineChart.getData();
+            ObservableList<XYChart.Series<Long, Number>> data = lineChart.getData();
             if (data == null) {
                 data = FXCollections.observableArrayList(priceChart);
                 lineChart.setData(data);
             } else {
                 lineChart.getData().add(priceChart);
             }
-           // lineChart.getData().add(priceChart);
+            // lineChart.getData().add(priceChart);
             lineChart.setLegendVisible(false);
             if (orders == null) {
                 xAxisVolume.setLowerBound(xAxis.getLowerBound());
@@ -154,37 +160,40 @@ public class GraphBuilder {
                 }
             }
         });
-        syncGraphZooming(lineChart,barChart);
+        if (prices != null && prices.size() > 0) syncGraphZooming();
+        addMenu();
         pane.setCenter(JFXChartUtil.setupZooming(lineChart));
         pane.setBottom(JFXChartUtil.setupZooming(barChart));
 
         final VBox table = new VBox();
         table.setPadding(new javafx.geometry.Insets(20, 20, 20, 20));
-        table.getChildren().add(buildTable(prices,orderSummary));
+        TableView tableView = buildTable(prices,orderSummary);
+        table.getChildren().add(tableView);
+        VBox.setVgrow(tableView,Priority.ALWAYS);
 
         graph.setCenter(pane);
         graph.setRight(table);
     }
 
-    private static void changeBarColour (XYChart.Data data, String colour)
+    private void changeBarColour (XYChart.Data data, String type)
     {
         data.nodeProperty().addListener(new ChangeListener<Node>() {
             @Override
             public void changed(ObservableValue<? extends Node> ov, Node oldNode, Node newNode) {
                 if (newNode != null) {
-                    newNode.setStyle("-fx-bar-fill: " + colour);
+                    newNode.getStyleClass().add("bar-" + type);
                 }
             }
         });
     }
 
-    private static void syncGraphZooming(CandleStickChart lineChart, XYBarChart barChart)
+    private void syncGraphZooming()
     {
         syncZooming(lineChart,barChart);
         syncZooming(barChart,lineChart);
     }
 
-    private static void syncZooming(XYChart chart1, XYChart chart2) {
+    private void syncZooming(XYChart chart1, XYChart chart2) {
         ((ValueAxis)chart1.getXAxis()).lowerBoundProperty().addListener(new ChangeListener<Number>() {
             @Override
             public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
@@ -286,5 +295,46 @@ public class GraphBuilder {
         //ensures extra space to given to existing columns
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         return tableView;
+    }
+
+    private void addMenu() {
+        final MenuItem resetZoomItem = new MenuItem("Reset zoom");
+        resetZoomItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                lineChart.getXAxis().setAutoRanging(true);
+                lineChart.getYAxis().setAutoRanging(true);
+            }
+        });
+
+        final MenuItem hideShowLineItem = new MenuItem("Hide Line");
+        hideShowLineItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                for (int seriesIndex=0; seriesIndex < lineChart.getData().size(); seriesIndex++) {
+                    if (lineChart.getData().get(seriesIndex).getNode() instanceof Path) {
+                        Path path = (Path)lineChart.getData().get(seriesIndex).getNode();
+                        if (path.getOpacity() == 1) {
+                            path.setOpacity(0);
+                            hideShowLineItem.setText("Show Line");
+                        } else if (path.getOpacity() == 0) {
+                            path.setOpacity(1);
+                            hideShowLineItem.setText("Hide Line");
+                        }
+                    }
+                }
+                lineChart.layout();
+            }
+        });
+
+        final ContextMenu menu = new ContextMenu(
+                resetZoomItem, new SeparatorMenuItem(), hideShowLineItem
+        );
+
+        lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override public void handle(MouseEvent event) {
+                if (MouseButton.SECONDARY.equals(event.getButton())) {
+                    menu.show(lineChart, event.getScreenX(), event.getScreenY());
+                }
+            }
+        });
     }
 }

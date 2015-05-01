@@ -29,7 +29,11 @@
 }
 
 #footer {
-    -fx-alignment: center;
+    -fx-padding: 5px 0px 5px 15px;
+}
+
+#footer-text {
+    -fx-padding: 0px 15px 0px 0px;
 }
 
 #header {

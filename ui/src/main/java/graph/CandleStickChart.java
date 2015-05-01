@@ -33,10 +33,7 @@
 //Sourced from https://code.google.com/p/javafx-ui-hxzon/source/browse/trunk/ChartsSampler/chartssampler/?r=13
 package graph;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import color.ColorManager;
 import date.DateUtils;
@@ -47,6 +44,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.chart.Axis;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
@@ -67,6 +65,8 @@ import org.joda.time.DateTime;
  * extra value property using a CandleStickExtraValues object.
  */
 public class CandleStickChart extends XYChart<Long,Number> {
+
+    private HashSet<Node> candlesShown = new HashSet<>();
 
     // -------------- CONSTRUCTORS ----------------------------------------------
 
@@ -110,38 +110,65 @@ public class CandleStickChart extends XYChart<Long,Number> {
                 seriesPath = (Path)series.getNode();
                 seriesPath.getElements().clear();
             }
+
+            int j = 0;
+            boolean removeAllCandles = false;
             while(iter.hasNext()) {
                 Data<Long,Number> item = iter.next();
                 double x = getXAxis().getDisplayPosition(getCurrentDisplayedXValue(item));
                 double y = getYAxis().getDisplayPosition(getCurrentDisplayedYValue(item));
-                Node itemNode = item.getNode();
                 CandleStickExtraValues extra = (CandleStickExtraValues)item.getExtraValue();
-                if (itemNode instanceof Candle && extra != null) {
-                    Candle candle = (Candle) itemNode;
 
-                    double close = getYAxis().getDisplayPosition(extra.getClose());
-                    double high = getYAxis().getDisplayPosition(extra.getHigh());
-                    double low = getYAxis().getDisplayPosition(extra.getLow());
-                    // calculate candle width
-                    double candleWidth = -1;
-                    if (getXAxis() instanceof DateValueAxis) {
-                        DateValueAxis xa = (DateValueAxis)getXAxis();
-                        //candleWidth = xa.getDisplayPosition((long)xa.getTickUnit()) * 0.90; // use 90% width between ticks
-                        candleWidth = 10;
+                if ((series.getNode() instanceof Path) && extra != null) {
+                    if (((ValueAxis)getXAxis()).getUpperBound()-((ValueAxis)getXAxis()).getLowerBound() < 15e9) {
+                        Candle candle = (Candle)createCandle(seriesIndex,item,j++);
+                        candle.setOpacity(1);
+                        if (shouldAnimate()) {
+                            getPlotChildren().add(candle);
+                            candlesShown.add(candle);
+                            // fade in new candle
+                            FadeTransition ft = new FadeTransition(Duration.millis(500),candle);
+                            ft.setToValue(1);
+                            ft.play();
+                        } else if (!candlesShown.contains(candle)) {
+                            getPlotChildren().add(candle);
+                            candlesShown.add(candle);
+                        }
+
+                        double close = getYAxis().getDisplayPosition(extra.getClose());
+                        double high = getYAxis().getDisplayPosition(extra.getHigh());
+                        double low = getYAxis().getDisplayPosition(extra.getLow());
+                        // calculate candle width
+                        double candleWidth = -1;
+                        if (getXAxis() instanceof DateValueAxis) {
+                            //DateValueAxis xa = (DateValueAxis) getXAxis();
+                            //candleWidth = xa.getDisplayPosition((long)xa.getTickUnit()) * 0.90; // use 90% width between ticks
+                            candleWidth = 10;
+                        }
+                        // update candle
+                        candle.update(close - y, high - y, low - y, candleWidth);
+                        candle.updateTooltip(((CandleStickExtraValues) item.getExtraValue()).getType(), item.getXValue(), item.getYValue().doubleValue(), extra.getClose(), extra.getHigh(), extra.getLow());
+
+                        // position the candle
+                        candle.setLayoutX(x);
+                        candle.setLayoutY(y);
+                    } else {
+                        removeAllCandles = true;
                     }
-                    // update candle
-                    candle.update(close-y, high-y, low-y, candleWidth);
-                    candle.updateTooltip(((CandleStickExtraValues)item.getExtraValue()).getType(), item.getXValue(), item.getYValue().doubleValue(), extra.getClose(), extra.getHigh(), extra.getLow());
-
-                    // position the candle
-                    candle.setLayoutX(x);
-                    candle.setLayoutY(y);
                 }
                 if (seriesPath != null) {
                     if (seriesPath.getElements().isEmpty()) {
                         seriesPath.getElements().add(new MoveTo(x,getYAxis().getDisplayPosition(extra.getAverage())));
                     } else {
                         seriesPath.getElements().add(new LineTo(x,getYAxis().getDisplayPosition(extra.getAverage())));
+                    }
+                }
+            }
+            if (removeAllCandles) {
+                for (Object n: getPlotChildren().toArray()) {
+                    if (n instanceof Candle) {
+                        getPlotChildren().remove(n);
+                        candlesShown.remove(n);
                     }
                 }
             }
@@ -184,21 +211,7 @@ public class CandleStickChart extends XYChart<Long,Number> {
     }
 
     @Override protected  void seriesAdded(Series<Long,Number> series, int seriesIndex) {
-        // handle any data already in series
-        for (int j=0; j<series.getData().size(); j++) {
-            Data item = series.getData().get(j);
-            Node candle = createCandle(seriesIndex, item, j);
-            if (shouldAnimate()) {
-                candle.setOpacity(0);
-                getPlotChildren().add(candle);
-                // fade in new candle
-                FadeTransition ft = new FadeTransition(Duration.millis(500),candle);
-                ft.setToValue(1);
-                ft.play();
-            } else {
-                getPlotChildren().add(candle);
-            }
-        }
+        //don't add candles yet as for large data sets, it's really slow
         // create series path
         Path seriesPath = new Path();
         seriesPath.getStyleClass().setAll("candlestick-average-line","series"+seriesIndex);

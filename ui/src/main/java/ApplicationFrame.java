@@ -1,3 +1,4 @@
+import com.sun.xml.internal.bind.v2.model.annotation.RuntimeAnnotationReader;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -54,6 +55,8 @@ public class ApplicationFrame extends Application {
     private ChangeListener companyListener;
     private HBox selector;
     private HBox settings;
+    private Label loadingInfo;
+    private ProgressBar loading;
     private ParameterManager manager = new ParameterManager();
     private TableView paramTable;
 
@@ -126,7 +129,7 @@ public class ApplicationFrame extends Application {
         loadContent(new History<>(), new ArrayList<>(),new ArrayList<>());
         graph.setVisible(false);
 
-        body.getChildren().addAll(tabPane);
+        body.getChildren().addAll(tabPane, new Separator());
 
         main.setCenter(body);
     }
@@ -134,9 +137,18 @@ public class ApplicationFrame extends Application {
     private void initFooter()
     {
         HBox footerPanel = new HBox();
+        footerPanel.setAlignment(Pos.CENTER_LEFT);
         footerPanel.setId("footer");
-        Label footer = new Label(FOOTER_MESSAGE);
-        footerPanel.getChildren().add(footer);
+        footerPanel.setSpacing(20);
+        HBox footerText = new HBox();
+        footerText.setId("footer-text");
+        HBox.setHgrow(footerText,Priority.ALWAYS);
+        footerText.setAlignment(Pos.CENTER_RIGHT);
+        Label text = new Label(FOOTER_MESSAGE);
+        footerText.getChildren().add(text);
+        loading = new ProgressBar(0);
+        loadingInfo = new Label();
+        footerPanel.getChildren().addAll(loading, loadingInfo,footerText);
         main.setBottom(footerPanel);
     }
 
@@ -274,6 +286,13 @@ public class ApplicationFrame extends Application {
                         if (strategyFile != null && dataFile != null && paramFile != null) {
                             try {
                                 updateParams();
+                                Platform.runLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        loadingInfo.setText("Running strategy...");
+                                        loading.setProgress(0);
+                                    }
+                                });
                                 ProcessBuilder pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
                                 Process p = pb.start();
                                 try {
@@ -282,6 +301,12 @@ public class ApplicationFrame extends Application {
                                     logger.severe("Failed to run module without errors.");
                                     return;
                                 }
+                                Platform.runLater(new Runnable() {
+                                    public void run() {
+                                        loadingInfo.setText("Updating prices and orders information...");
+                                        loading.setProgress(0.5);
+                                    }
+                                });
 
                                 priceReader = new PriceReader(dataFile);
                                 priceReader.readAll();
@@ -304,6 +329,12 @@ public class ApplicationFrame extends Application {
                                 orderReader.readAll();
                                 List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
                                 loadContent(orderReader.getHistory(), prices, orders);
+                                Platform.runLater(new Runnable() {
+                                    public void run() {
+                                        loadingInfo.setText("");
+                                        loading.setProgress(1);
+                                    }
+                                });
                             } catch (IOException ex) {
                                 JOptionPane.showMessageDialog(null,
                                         "An unexpected error has occurred when running the given files." +

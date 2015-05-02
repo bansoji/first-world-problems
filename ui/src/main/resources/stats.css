@@ -24,3 +24,7 @@
     -fx-background-color: white;
     -fx-padding: 30px;
 }
+
+#profit-graph {
+    -fx-padding: 15px;
+}

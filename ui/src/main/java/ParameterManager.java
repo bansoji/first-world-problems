@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Created by Gavin Tam on 15/04/15.
@@ -59,6 +60,10 @@ public class ParameterManager {
 
     public int getNumParams() {
         return params.size();
+    }
+
+    public Map<String,String> getParams() {
+        return params;
     }
 
     public void put(String key, String value) {

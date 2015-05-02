@@ -1,9 +1,11 @@
+import graph.DateValueAxis;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -36,15 +38,21 @@ public class StatsBuilder {
 
         stats.setPadding(new Insets(50, 30, 50, 30));
         TableView returnTable = buildTable(portfolio.getReturns());
-        PieChart returnChart = buildReturnChart(portfolio.getReturns());
-        stats.setConstraints(vbox,0,0);
+
+        VBox graphs = new VBox();
+        vbox.setSpacing(30);
+
+        //TODO Add list of profit
+        graphs.getChildren().addAll(buildReturnChart(portfolio.getReturns()), buildProfitChart());
+
+        stats.setConstraints(vbox, 0, 0);
         stats.setConstraints(returnTable,1,0);
-        stats.setConstraints(returnChart,2,0);
+        stats.setConstraints(graphs,2,0);
         stats.setHgap(50);
         GridPane.setVgrow(vbox, Priority.ALWAYS);
         GridPane.setVgrow(returnTable, Priority.ALWAYS);
-        GridPane.setVgrow(returnChart, Priority.ALWAYS);
-        stats.getChildren().setAll(vbox,returnTable,returnChart);
+        GridPane.setVgrow(graphs, Priority.ALWAYS);
+        stats.getChildren().setAll(vbox,returnTable,graphs);
     }
 
     private static VBox buildPortfolioStats(Portfolio portfolio) {
@@ -220,6 +228,23 @@ public class StatsBuilder {
         return chart;
     }
 
+    private static LineChart buildProfitChart () {
+        DateValueAxis xAxis = new DateValueAxis();
+        NumberAxis yAxis = new NumberAxis();
+        xAxis.setLabel("Date");
+        xAxis.setMinorTickVisible(false);
+        yAxis.setLabel("Profit");
+        LineChart lineChart = new LineChart(xAxis, yAxis);
+        lineChart.setId("profit-graph");
+        yAxis.setForceZeroInRange(false);
+        lineChart.setCacheHint(CacheHint.SPEED);
+
+        XYChart.Series<Long,Double> series = new XYChart.Series<>();
+        lineChart.getData().add(series);
+        lineChart.setLegendVisible(false);
+        return lineChart;
+    }
+
     private static TableView buildEquityTable(Map<String,Double> equities) {
         ObservableList<Map> data = FXCollections.observableArrayList();
         for (String company: equities.keySet()) {
@@ -264,7 +289,6 @@ public class StatsBuilder {
                 return new TextFieldTableCell(new DoubleStringConverter());
             }
         });
-
 
         tableView.getColumns().addAll(companyCol, equityCol);
         //ensures extra space to given to existing columns

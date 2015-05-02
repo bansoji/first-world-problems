@@ -1,4 +1,3 @@
-import com.sun.xml.internal.bind.v2.model.annotation.RuntimeAnnotationReader;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -51,6 +50,7 @@ public class ApplicationFrame extends Application {
     private BorderPane main;
     private BorderPane graph;
     private GridPane stats;
+    private BorderPane analysis;
     private ComboBox<String> companySelector;
     private ChangeListener companyListener;
     private HBox selector;
@@ -61,6 +61,7 @@ public class ApplicationFrame extends Application {
     private TableView paramTable;
 
     private GraphBuilder g = new GraphBuilder();
+    private AnalysisBuilder a = new AnalysisBuilder();
 
     private static String VERSION_NUMBER = "1.0.0";
     private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
@@ -74,7 +75,7 @@ public class ApplicationFrame extends Application {
         primaryStage.setTitle("BuyHard Platform");
         main = new BorderPane();
         Scene scene = new Scene(main);
-        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css");
+        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css", "analysis.css");
         primaryStage.setScene(scene);
         primaryStage.setMinHeight(768);
         primaryStage.setMinWidth(1024);
@@ -113,6 +114,7 @@ public class ApplicationFrame extends Application {
 
         graph = new BorderPane();
         stats = new GridPane();
+        analysis = new BorderPane();
         addFilterSelector();
 
         TabPane tabPane = new TabPane();
@@ -124,7 +126,11 @@ public class ApplicationFrame extends Application {
         statsTab.setText("Portfolio");
         statsTab.setClosable(false);
         statsTab.setContent(stats);
-        tabPane.getTabs().addAll(tab,statsTab);
+        Tab analysisTab = new Tab();
+        analysisTab.setText("Analysis");
+        analysisTab.setClosable(false);
+        analysisTab.setContent(analysis);
+        tabPane.getTabs().addAll(tab,statsTab,analysisTab);
         //TODO Remove hack - for some reason the graph doesn't load for the first time
         loadContent(new History<>(), new ArrayList<>(),new ArrayList<>());
         graph.setVisible(false);
@@ -165,11 +171,13 @@ public class ApplicationFrame extends Application {
                     try {
                         if (fileChooser.getButtonText().equals("Choose CSV")) {
                             dataFile = file.getAbsolutePath();
+                            updateParamTable();
                         } else if (fileChooser.getButtonText().equals("Choose strategy")) {
                             strategyFile = file.getAbsolutePath();
+                            updateParamTable();
                         } else if (fileChooser.getButtonText().equals("Choose parameters")) {
                             paramFile = file.getAbsolutePath();
-                            changeParamSelection();
+                            updateParamTable();
                         } else {
                             return;
                         }
@@ -211,6 +219,7 @@ public class ApplicationFrame extends Application {
             public void run() {
                 g.buildGraph(graph, prices, orders, orderRecord);
                 StatsBuilder.build(stats, history, prices, orderRecord);
+                a.buildAnalysis(analysis, manager.getParams().keySet());
                 graph.setVisible(true);
             }
         };
@@ -246,6 +255,7 @@ public class ApplicationFrame extends Application {
 
         Button settingsButton = new Button("Change parameters");
         settings.getChildren().add(settingsButton);
+        initParamTable();
         settingsButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -257,7 +267,6 @@ public class ApplicationFrame extends Application {
                 dialogVbox.setPadding(new Insets(20));
                 dialogVbox.setSpacing(20);
                 dialogVbox.setAlignment(Pos.CENTER_RIGHT);
-                changeParamSelection();
                 Button close = new Button("Close");
                 close.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
@@ -328,6 +337,8 @@ public class ApplicationFrame extends Application {
                                 orderReader = new OrderReader(OUTPUT_FILE_PATH);
                                 orderReader.readAll();
                                 List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
+
+                                a.addRow(manager.getParams(),new Portfolio(orderReader.getHistory()).getTotalReturnValue());
                                 loadContent(orderReader.getHistory(), prices, orders);
                                 Platform.runLater(new Runnable() {
                                     public void run() {
@@ -437,11 +448,59 @@ public class ApplicationFrame extends Application {
         selector.getChildren().add(filter);
     }
 
-    private void changeParamSelection() {
+    private void initParamTable() {
+
+        paramTable = new TableView();
+        paramTable.setEditable(true);
+        paramTable.setPlaceholder(new Label("No parameters available."));
+
+        TableColumn keyCol = new TableColumn("Key");
+        keyCol.setMinWidth(100);
+        keyCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
+                String key = (String) param.getValue().getKey();
+                return new SimpleStringProperty(key);
+            }
+        });
+
+        TableColumn valueCol = new TableColumn("Value");
+        valueCol.setEditable(true);
+        valueCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
+                String value = (String) param.getValue().getValue();
+                return new SimpleStringProperty(value);
+            }
+        });
+        valueCol.setCellFactory(TextFieldTableCell.forTableColumn());
+
+        valueCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent event) {
+                Map.Entry row = (Map.Entry)event.getRowValue();
+                String newValue = (String)event.getNewValue();
+                manager.put((String)row.getKey(), newValue);
+            }
+        });
+
+        paramTable.getColumns().addAll(keyCol, valueCol);
+        //ensures extra space to given to existing columns
+        paramTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        paramTable.setMinWidth(300);
+        updateParamTable();
+    }
+
+    private void updateParamTable() {
         //remove previously stored parameters
         manager.clear();
+        a.restart();
+
         Properties props = manager.getProperties(paramFile);
         Enumeration properties = props.propertyNames();
+        ObservableList<Map.Entry> data = FXCollections.observableArrayList(props.entrySet());
+        paramTable.setItems(data);
+
         while (properties.hasMoreElements()) {
             String key = (String)properties.nextElement();
             //if the value of the property is not numerical, it is not a parameter
@@ -450,46 +509,7 @@ public class ApplicationFrame extends Application {
             } catch (NumberFormatException e) {
                 continue;
             }
-            paramTable = new TableView();
-            paramTable.setEditable(true);
-            ObservableList<Map.Entry> data = FXCollections.observableArrayList(props.entrySet());
-            paramTable.setPlaceholder(new Label("No parameters available."));
-
-            TableColumn keyCol = new TableColumn("Key");
-            keyCol.setMinWidth(100);
-            keyCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
-                @Override
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
-                    String key = (String) param.getValue().getKey();
-                    return new SimpleStringProperty(key);
-                }
-            });
-
-            TableColumn valueCol = new TableColumn("Value");
-            valueCol.setEditable(true);
-            valueCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
-                @Override
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
-                    String value = (String) param.getValue().getValue();
-                    return new SimpleStringProperty(value);
-                }
-            });
-            valueCol.setCellFactory(TextFieldTableCell.forTableColumn());
-
-            valueCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent>() {
-                @Override
-                public void handle(TableColumn.CellEditEvent event) {
-                    Map.Entry row = (Map.Entry)event.getRowValue();
-                    String newValue = (String)event.getNewValue();
-                    manager.put((String)row.getKey(), newValue);
-                }
-            });
-
-            paramTable.getColumns().addAll(keyCol, valueCol);
-            //ensures extra space to given to existing columns
-            paramTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-            paramTable.setMinWidth(300);
-            paramTable.setItems(data);
+            manager.put(key,props.getProperty(key));
         }
     }
 

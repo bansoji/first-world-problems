@@ -186,4 +186,8 @@ public class Portfolio {
     public double getTotalReturnValue() {
         return totalReturnValue;
     }
+
+    public List<Profit> getProfitList() {
+        return profitList;
+    }
 }

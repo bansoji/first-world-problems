@@ -1,6 +1,7 @@
 package finance;
 
 import org.junit.Test;
+import utils.FinanceUtils;
 
 import java.util.ArrayList;
 import java.util.List;

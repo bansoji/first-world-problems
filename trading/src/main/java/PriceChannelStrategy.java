@@ -94,11 +94,12 @@ public class PriceChannelStrategy implements TradingStrategy {
         ArrayList<Double> highs = new ArrayList<Double>();
         ArrayList<Double> lows = new ArrayList<Double>();
 
-        for (int i = 0; i < priceInput.size(); i++){
+        int j;
+        for (int i = 0; i < priceInput.size(); i += j){
             double min = Double.MAX_VALUE;
             double max = Double.MIN_VALUE;
 
-            int j;
+
             boolean highsAndLowsAdded = false;
             for (j = 0; i+j < priceInput.size() && !highsAndLowsAdded; j++){
                 Double price = priceInput.get(j+i);
@@ -114,9 +115,7 @@ public class PriceChannelStrategy implements TradingStrategy {
                     highsAndLowsAdded = true;
                 }
             }
-            i += j;
         }
-
         result.add(lows);
         result.add(highs);
         return result;

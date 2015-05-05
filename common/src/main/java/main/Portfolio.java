@@ -96,7 +96,7 @@ public class Portfolio {
             double returnValue = sellValue - buyValue;
             double returnPercent = returnValue / sellValue; //short-selling change - divide by sell
             totalReturnValue += returnValue;
-            profitList.add(new Profit(returnValue, order.getOrderDate()));
+            profitList.add(new Profit(totalReturnValue, order.getOrderDate()));
 
             addReturns(company, returnValue, returnPercent, buyValue);
             soldOrders.get(company).remove(0);
@@ -120,7 +120,7 @@ public class Portfolio {
             double returnValue = sellValue - buyValue;
             double returnPercent = returnValue / buyValue; //regular-selling - divide by buy
             totalReturnValue += returnValue;
-            profitList.add(new Profit(returnValue, order.getOrderDate()));
+            profitList.add(new Profit(totalReturnValue, order.getOrderDate()));
 
             addReturns(company, returnValue, returnPercent, buyValue);
             boughtOrders.get(company).remove(0);

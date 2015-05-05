@@ -1,3 +1,4 @@
+import main.OrderType;
 import quickDate.Order;
 import quickDate.Price;
 
@@ -55,6 +56,7 @@ public class PriceChannelStrategy implements TradingStrategy {
 
     /**
      * Configure the strategy given a Properties file.
+     *
      * @param prop a Properties object, containing the configuration parameters of
      *             the strategy module.
      */
@@ -74,14 +76,22 @@ public class PriceChannelStrategy implements TradingStrategy {
     public void generateOrders() {
         // This will trigger the pipeline to generate orders.
         List<Double> priceInput = new ArrayList<Double>();
-        for (Price p : prices){
+        for (Price p : prices) {
             priceInput.add(p.getValue());       // TODO: This could potentially be optimised.
         }
 
-        //result.get(0) returns lows.
-        //result.get(1) returns highs.
+        //result.get(0) returns lows. result.get(1) returns highs.
         List<List<Double>> result = calculateLowsAndHighs(priceInput, minWindowSize, variance);
+        List<Double> lows = result.get(0);
+        List<Double> highs = result.get(1);
         //TODO: Rest of method needs to be completed after Channel class is able to return 2 lines.
+        //Channel channel = new Channel(lows, highs);
+        //double lowGradient =
+        //double lowB =
+        //double highGradient =
+        //double highB =
+
+
     }
 
     @Override
@@ -89,27 +99,26 @@ public class PriceChannelStrategy implements TradingStrategy {
         return ordersGenerated;
     }
 
-    public List<List<Double>> calculateLowsAndHighs(List<Double> priceInput, int minWindowSize, double variance){
+    public List<List<Double>> calculateLowsAndHighs(List<Double> priceInput, int minWindowSize, double variance) {
         List<List<Double>> result = new ArrayList<List<Double>>();
         ArrayList<Double> highs = new ArrayList<Double>();
         ArrayList<Double> lows = new ArrayList<Double>();
 
         int j;
-        for (int i = 0; i < priceInput.size(); i += j){
+        for (int i = 0; i < priceInput.size(); i += j) {
             double min = Double.MAX_VALUE;
             double max = Double.MIN_VALUE;
 
-
             boolean highsAndLowsAdded = false;
-            for (j = 0; i+j < priceInput.size() && !highsAndLowsAdded; j++){
-                Double price = priceInput.get(j+i);
+            for (j = 0; i + j < priceInput.size() && !highsAndLowsAdded; j++) {
+                Double price = priceInput.get(j + i);
                 if (price < min) {
                     min = price;
                 } else if (price > max) {
                     max = price;
                 }
 
-                if (j >= minWindowSize && max-min >= variance){
+                if (j >= minWindowSize && max - min >= variance) {
                     highs.add(max);
                     lows.add(min);
                     highsAndLowsAdded = true;
@@ -120,4 +129,13 @@ public class PriceChannelStrategy implements TradingStrategy {
         result.add(highs);
         return result;
     }
+
+    //private List<OrderType> generateTradeSignals(List<Double priceInput, Line high, Line low, double threshold){
+    //List<OrderType> l = new ArrayList<OrderType>();
+    //  for (int i=1; i<priceInput.size(); i++){
+    //  if point > highLine and lastMove == SELL, buy
+    //  if point < lowline and lastMove == BUY, sell
+    //  }
+    //  return l;
+    //}
 }

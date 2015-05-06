@@ -17,6 +17,7 @@ public class Portfolio {
 
     private Map<String, List<Double>> returns; //Contains the return data for each company.
     private Map<String, Double> assetValue; //Contains the asset value data for each company.
+    private List<Profit> profitList; //Contains the buy/sell points with date and return.
 
     private double totalBuyValue;
     private double totalSellValue;
@@ -95,6 +96,7 @@ public class Portfolio {
             double returnValue = sellValue - buyValue;
             double returnPercent = returnValue / sellValue; //short-selling change - divide by sell
             totalReturnValue += returnValue;
+            profitList.add(new Profit(totalReturnValue, order.getOrderDate()));
 
             addReturns(company, returnValue, returnPercent, buyValue);
             soldOrders.get(company).remove(0);
@@ -118,6 +120,7 @@ public class Portfolio {
             double returnValue = sellValue - buyValue;
             double returnPercent = returnValue / buyValue; //regular-selling - divide by buy
             totalReturnValue += returnValue;
+            profitList.add(new Profit(totalReturnValue, order.getOrderDate()));
 
             addReturns(company, returnValue, returnPercent, buyValue);
             boughtOrders.get(company).remove(0);
@@ -182,5 +185,9 @@ public class Portfolio {
 
     public double getTotalReturnValue() {
         return totalReturnValue;
+    }
+
+    public List<Profit> getProfitList() {
+        return profitList;
     }
 }

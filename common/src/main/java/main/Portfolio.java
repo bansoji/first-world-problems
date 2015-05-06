@@ -33,6 +33,7 @@ public class Portfolio {
         soldOrders = new HashMap<>();
         returns = new HashMap<>();
         assetValue = new HashMap<>();
+        profitList = new ArrayList<>();
         FillPortfolio();
     }
 

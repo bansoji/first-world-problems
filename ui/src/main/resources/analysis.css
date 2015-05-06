@@ -1,5 +1,5 @@
 .analysis-graph .chart-content {
-    -fx-padding: 15px 15px 15px 15px;
+    -fx-padding: 15px 0px 15px 15px;
 }
 
 .bar-profit {
@@ -24,4 +24,8 @@
 
 .loss-label {
     -fx-text-fill: red;
+}
+
+.toolbar-button {
+    -fx-background-color: transparent;
 }

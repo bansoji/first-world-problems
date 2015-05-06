@@ -40,3 +40,9 @@
     -fx-background-color: white;
     -fx-padding: 15px;
 }
+
+#run-button {
+    -fx-pref-height: 48px;
+    -fx-pref-width: 48px;
+    -fx-background-radius: 48px;
+}

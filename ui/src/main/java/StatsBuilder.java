@@ -1,3 +1,4 @@
+import format.FormatUtils;
 import graph.DateValueAxis;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;

@@ -1,7 +1,11 @@
 /**
  * Created by Gavin Tam on 1/05/15.
  */
+import format.FormatChecker;
+import format.FormatUtils;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -16,14 +20,14 @@ import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import main.Order;
 import main.OrderReader;
 import main.Portfolio;
+import tablecell.NumericEditableTableCell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -65,9 +69,9 @@ public class AnalysisBuilder {
         //restart param storage information
         prevParams = null;
         combination_ID = 0;
-        if (paramCombinations != null) paramCombinations.clear();
-        if (bestParams != null) bestParams.clear();
-        if (bestParamValues != null) bestParamValues.clear();
+        paramCombinations.clear();
+        bestParams.clear();
+        bestParamValues.clear();
         initParamTable();
     }
 
@@ -136,7 +140,6 @@ public class AnalysisBuilder {
         if (barChart == null || tableView == null) restart();
         HBox graphs = new HBox();
         HBox.setHgrow(barChart,Priority.ALWAYS);
-        graphs.setSpacing(50);
         graphs.getChildren().addAll(buildControls(), barChart);
         analysis.setCenter(graphs);
         this.runner = runner;
@@ -192,9 +195,14 @@ public class AnalysisBuilder {
     }
 
     private ToolBar buildControls() {
-        Button playButton = new Button("Play");
-        Button pauseButton = new Button("Pause");
-        Button settingsButton = new Button("Settings");
+        Button playButton = new Button("",new ImageView(getClass().getResource("icons/run.png").toExternalForm()));
+        playButton.getStyleClass().add("toolbar-button");
+        Button pauseButton = new Button("", new ImageView(getClass().getResource("icons/pause.png").toExternalForm()));
+        pauseButton.getStyleClass().add("toolbar-button");
+        Button clearButton = new Button("", new ImageView(getClass().getResource("icons/refresh.png").toExternalForm()));
+        clearButton.getStyleClass().add("toolbar-button");
+        Button settingsButton = new Button("",new ImageView(getClass().getResource("icons/spanner.png").toExternalForm()));
+        settingsButton.getStyleClass().add("toolbar-button");
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -217,8 +225,10 @@ public class AnalysisBuilder {
         pauseButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                t.interrupt();
-                runner.stop();
+                if (t != null) {
+                    t.interrupt();
+                    runner.stop();
+                }
             }
         });
         settingsButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -245,8 +255,18 @@ public class AnalysisBuilder {
                 dialog.show();
             }
         });
+        clearButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                tableView.getItems().clear();
+                barChart.getData().clear();
+                paramCombinations.clear();
+                bestParams.clear();
+                bestParamValues.clear();
+            }
+        });
 
-        ToolBar controls = new ToolBar(playButton, pauseButton, settingsButton);
+        ToolBar controls = new ToolBar(playButton, pauseButton, clearButton, settingsButton);
         controls.setOrientation(Orientation.VERTICAL);
         return controls;
     }
@@ -269,32 +289,39 @@ public class AnalysisBuilder {
 
         TableColumn valueCol = new TableColumn("Step Value");
         valueCol.setEditable(true);
-        valueCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
+        valueCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, Number>, ObservableValue<Number>>() {
             @Override
-            public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
+            public ObservableValue<Number> call(TableColumn.CellDataFeatures<Map.Entry, Number> param) {
                 if (param.getValue().getValue() instanceof Integer) {
                     int value = (int) param.getValue().getValue();
-                    return new SimpleStringProperty(String.valueOf(value));
+                    return new SimpleIntegerProperty(value);
                 } else {
                     double value = (double) param.getValue().getValue();
-                    return new SimpleStringProperty(String.valueOf(FormatUtils.round3dp(value)));
+                    return new SimpleDoubleProperty(FormatUtils.round3dp(value));
                 }
             }
         });
-        valueCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        valueCol.setCellFactory(
+        //A custom cell factory that creates cells that only accept numerical input.
+            new Callback<TableColumn, TableCell>() {
+            @Override
+            public TableCell call(TableColumn p) {
+                return new NumericEditableTableCell();
+            }
+        });
 
         valueCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent>() {
             @Override
             public void handle(TableColumn.CellEditEvent event) {
                 Map.Entry row = (Map.Entry)event.getRowValue();
-                String newValue = (String)event.getNewValue();
-                if (FormatChecker.isInteger(newValue)) {
+                String newValue = String.valueOf(event.getNewValue());
+
+                if (FormatChecker.isInteger(newValue) && manager.getParams().get(row.getKey()) instanceof Integer) {
                     paramStepValues.put((String) row.getKey(), Integer.parseInt(newValue));
                 } else if (FormatChecker.isDouble(newValue)) {
                     paramStepValues.put((String) row.getKey(), Double.parseDouble(newValue));
                 } else {
-                    //TODO make a popup instead
-                    logger.warning("Enter a numerical value.");
+                    logger.warning("Invalid parameter step value entered.");
                 }
             }
         });

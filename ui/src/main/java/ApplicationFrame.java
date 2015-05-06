@@ -19,6 +19,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import main.*;
 import org.joda.time.DateTime;
 
@@ -26,6 +27,7 @@ import javax.swing.*;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
@@ -283,7 +285,8 @@ public class ApplicationFrame extends Application {
         });
 
         //Run button
-        Button runButton = new Button("Run");
+        Button runButton = new Button("",new ImageView(getClass().getResource("icons/run.png").toExternalForm()));
+        runButton.setId("run-button");
         settings.getChildren().addAll(runButton);
 
         header.getChildren().add(settings);
@@ -370,7 +373,7 @@ public class ApplicationFrame extends Application {
         selector.getChildren().add(endDatePanel);
 
         DatePicker startDatePicker = new DatePicker();
-        startDatePicker.setMinHeight(20);
+        configureDatePicker(startDatePicker);
         startDatePanel.getChildren().add(startDatePicker);
         startDatePicker.setOnAction(new EventHandler() {
             public void handle(javafx.event.Event t) {
@@ -380,7 +383,7 @@ public class ApplicationFrame extends Application {
             }
         });
         DatePicker endDatePicker = new DatePicker();
-        endDatePicker.setMinHeight(20);
+        configureDatePicker(endDatePicker);
         endDatePanel.getChildren().add(endDatePicker);
         endDatePicker.setOnAction(new EventHandler() {
             public void handle(javafx.event.Event t) {
@@ -425,6 +428,32 @@ public class ApplicationFrame extends Application {
                     }
                 };
         startDatePicker.setDayCellFactory(startDayCellFactory);
+    }
+
+    private void configureDatePicker(DatePicker datePicker) {
+        datePicker.setMinHeight(20);
+        datePicker.setPromptText("dd/MM/yyyy");
+        datePicker.setConverter(new StringConverter<LocalDate>() {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            @Override
+            public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
     }
 
     private void addFilter(String name) {

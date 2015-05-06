@@ -457,6 +457,7 @@ public class XYBarChart extends XYChart<Long, Number> {
                                     top - bottom, barWidth);
                         }
                         bar.setVisible(true);
+                        installTooltip(item);
                         index++;
                     }
                     else
@@ -653,16 +654,19 @@ public class XYBarChart extends XYChart<Long, Number> {
             bar = new StackPane();
             item.setNode(bar);
         }
+        //installTooltip(item);
+        String defaultColorStyleClassValue = (String) ReflectionUtils.forceFieldCall(Series.class, "defaultColorStyleClass", series);
+        bar.getStyleClass().addAll("chart-bar", "series" + seriesIndex, "data" + itemIndex, /*series.defaultColorStyleClass*/ defaultColorStyleClassValue);
+        return bar;
+    }
+
+    private void installTooltip(Data item) {
+        Node bar = item.getNode();
         Tooltip tooltip = new Tooltip();
         TooltipContent content = new TooltipContent();
         tooltip.setGraphic(content);
         content.update(((XYBarExtraValues)item.getExtraValue()).getType(),(long)item.getXValue(),((Number)item.getYValue()).longValue());
         Tooltip.install(bar, tooltip);
-
-
-        String defaultColorStyleClassValue = (String) ReflectionUtils.forceFieldCall(Series.class, "defaultColorStyleClass", series);
-        bar.getStyleClass().addAll("chart-bar", "series" + seriesIndex, "data" + itemIndex, /*series.defaultColorStyleClass*/ defaultColorStyleClassValue);
-        return bar;
     }
 
     private Data<Long, Number> getDataItem(Series<Long, Number> series, Object category) {

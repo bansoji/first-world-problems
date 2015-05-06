@@ -17,3 +17,11 @@
 .bar-loss:hover {
     -fx-bar-fill: #990000;
 }
+
+.profit-label {
+    -fx-text-fill: #2CFC0E;
+}
+
+.loss-label {
+    -fx-text-fill: red;
+}

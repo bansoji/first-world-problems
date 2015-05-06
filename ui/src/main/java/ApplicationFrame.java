@@ -24,7 +24,6 @@ import org.joda.time.DateTime;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -38,10 +37,7 @@ public class ApplicationFrame extends Application {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    //TODO Remove values - only for TESTING
-    private String strategyFile = "out/artifacts/trading_jar/trading.jar";
-    private String dataFile = "common/src/main/resources/sampleDataSmall";
-    private String paramFile = "trading/resources/config.properties";
+    private StrategyRunner runner = new StrategyRunner();
 
     private Reader orderReader;
     private Reader priceReader;
@@ -57,11 +53,12 @@ public class ApplicationFrame extends Application {
     private HBox settings;
     private Label loadingInfo;
     private ProgressBar loading;
-    private ParameterManager manager = new ParameterManager();
+    private ParameterManager<String> manager = new ParameterManager();
     private TableView paramTable;
 
     private GraphBuilder g = new GraphBuilder();
     private AnalysisBuilder a = new AnalysisBuilder();
+    private StatsBuilder s = new StatsBuilder();
 
     private static String VERSION_NUMBER = "1.0.0";
     private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
@@ -134,6 +131,8 @@ public class ApplicationFrame extends Application {
         //TODO Remove hack - for some reason the graph doesn't load for the first time
         loadContent(new History<>(), new ArrayList<>(),new ArrayList<>());
         graph.setVisible(false);
+        stats.setVisible(false);
+        analysis.setVisible(false);
 
         body.getChildren().addAll(tabPane, new Separator());
 
@@ -170,13 +169,13 @@ public class ApplicationFrame extends Application {
                 {
                     try {
                         if (fileChooser.getButtonText().equals("Choose CSV")) {
-                            dataFile = file.getAbsolutePath();
+                            runner.setDataFile(file.getAbsolutePath());
                             updateParamTable();
                         } else if (fileChooser.getButtonText().equals("Choose strategy")) {
-                            strategyFile = file.getAbsolutePath();
+                            runner.setStrategyFile(file.getAbsolutePath());
                             updateParamTable();
                         } else if (fileChooser.getButtonText().equals("Choose parameters")) {
-                            paramFile = file.getAbsolutePath();
+                            runner.setParamFile(file.getAbsolutePath());
                             updateParamTable();
                         } else {
                             return;
@@ -218,9 +217,11 @@ public class ApplicationFrame extends Application {
             @Override
             public void run() {
                 g.buildGraph(graph, prices, orders, orderRecord);
-                StatsBuilder.build(stats, history, prices, orderRecord);
-                a.buildAnalysis(analysis, manager.getParams().keySet());
+                s.build(stats, history, prices, orderRecord);
+                a.buildAnalysis(runner, analysis, manager.getParams().keySet());
                 graph.setVisible(true);
+                stats.setVisible(true);
+                analysis.setVisible(true);
             }
         };
         if (Platform.isFxApplicationThread()) r.run();
@@ -292,66 +293,52 @@ public class ApplicationFrame extends Application {
             public void handle(ActionEvent event) {
                 new Thread() {
                     public void run() {
-                        if (strategyFile != null && dataFile != null && paramFile != null) {
-                            try {
-                                updateParams();
-                                Platform.runLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        loadingInfo.setText("Running strategy...");
-                                        loading.setProgress(0);
-                                    }
-                                });
-                                ProcessBuilder pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
-                                Process p = pb.start();
-                                try {
-                                    p.waitFor();
-                                } catch (InterruptedException ex) {
-                                    logger.severe("Failed to run module without errors.");
-                                    return;
+                        if (runner.validFiles()) {
+                            updateParams();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    loadingInfo.setText("Running strategy...");
+                                    loading.setProgress(0);
                                 }
-                                Platform.runLater(new Runnable() {
-                                    public void run() {
-                                        loadingInfo.setText("Updating prices and orders information...");
-                                        loading.setProgress(0.5);
-                                    }
-                                });
-
-                                priceReader = new PriceReader(dataFile);
-                                priceReader.readAll();
-                                Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
-                                ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
-
-                                //update list of companies in the selector
-                                if (companyListener != null) {
-                                    companySelector.valueProperty().removeListener(companyListener);
+                            });
+                            runner.run(true);
+                            Platform.runLater(new Runnable() {
+                                public void run() {
+                                    loadingInfo.setText("Updating prices and orders information...");
+                                    loading.setProgress(0.5);
                                 }
-                                companySelector.getSelectionModel().clearSelection();
-                                companySelector.setItems(priceCompanies);
-                                companySelector.getSelectionModel().selectFirst();
-                                addCompanySelectorListener();
+                            });
 
-                                List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
-                                selector.setVisible(true);
+                            priceReader = new PriceReader(runner.getDataFile());
+                            priceReader.readAll();
+                            Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
+                            ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
 
-                                orderReader = new OrderReader(OUTPUT_FILE_PATH);
-                                orderReader.readAll();
-                                List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
-
-                                a.addRow(manager.getParams(),new Portfolio(orderReader.getHistory()).getTotalReturnValue());
-                                loadContent(orderReader.getHistory(), prices, orders);
-                                Platform.runLater(new Runnable() {
-                                    public void run() {
-                                        loadingInfo.setText("");
-                                        loading.setProgress(1);
-                                    }
-                                });
-                            } catch (IOException ex) {
-                                JOptionPane.showMessageDialog(null,
-                                        "An unexpected error has occurred when running the given files." +
-                                                "Please check that the file content is in the correct format",
-                                        "Files could not be run", JOptionPane.ERROR_MESSAGE);
+                            //update list of companies in the selector
+                            if (companyListener != null) {
+                                companySelector.valueProperty().removeListener(companyListener);
                             }
+                            companySelector.getSelectionModel().clearSelection();
+                            companySelector.setItems(priceCompanies);
+                            companySelector.getSelectionModel().selectFirst();
+                            addCompanySelectorListener();
+
+                            List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
+                            selector.setVisible(true);
+
+                            orderReader = new OrderReader(OUTPUT_FILE_PATH);
+                            orderReader.readAll();
+                            List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
+
+                            a.addRow(manager.getParams(),new Portfolio(orderReader.getHistory()).getTotalReturnValue());
+                            loadContent(orderReader.getHistory(), prices, orders);
+                            Platform.runLater(new Runnable() {
+                                public void run() {
+                                    loadingInfo.setText("");
+                                    loading.setProgress(1);
+                                }
+                            });
                         } else {
                             JOptionPane.showMessageDialog(null,
                                     "Please check that you have selected all the required files.",
@@ -496,7 +483,7 @@ public class ApplicationFrame extends Application {
         manager.clear();
         a.restart();
 
-        Properties props = manager.getProperties(paramFile);
+        Properties props = manager.getProperties(runner.getParamFile());
         Enumeration properties = props.propertyNames();
         ObservableList<Map.Entry> data = FXCollections.observableArrayList(props.entrySet());
         paramTable.setItems(data);
@@ -515,6 +502,6 @@ public class ApplicationFrame extends Application {
 
     private void updateParams() {
         if (manager.getNumParams() == 0) return;
-        manager.updateParams(paramFile);
+        manager.updateParams(runner.getParamFile());
     }
 }

@@ -13,6 +13,7 @@ import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
@@ -28,7 +29,7 @@ import java.util.*;
  */
 public class StatsBuilder {
 
-    public static void build(GridPane stats, History<Order> history, List<Price> prices, Map<DateTime, OrderType> orders) {
+    public void build(GridPane stats, History<Order> history, List<Price> prices, Map<DateTime, OrderType> orders) {
         final VBox vbox = new VBox();
         vbox.setSpacing(15);
         Portfolio portfolio = new Portfolio(history);
@@ -42,8 +43,8 @@ public class StatsBuilder {
         VBox graphs = new VBox();
         vbox.setSpacing(30);
 
-        //TODO Add list of profit
-        graphs.getChildren().addAll(buildReturnChart(portfolio.getReturns()), buildProfitChart());
+        //TODO Add list of profit for graphing
+        graphs.getChildren().addAll(buildReturnChart(portfolio.getReturns(),portfolio.getTotalReturnValue()), buildProfitChart());
 
         stats.setConstraints(vbox, 0, 0);
         stats.setConstraints(returnTable,1,0);
@@ -55,7 +56,7 @@ public class StatsBuilder {
         stats.getChildren().setAll(vbox,returnTable,graphs);
     }
 
-    private static VBox buildPortfolioStats(Portfolio portfolio) {
+    private VBox buildPortfolioStats(Portfolio portfolio) {
 
         CategoryAxis yAxis = new CategoryAxis();
         NumberAxis xAxis = new NumberAxis();
@@ -74,10 +75,12 @@ public class StatsBuilder {
             totalPortfolioValue += portfolioValue.get(company);
         }
         XYChart.Data valuePortfolio = new XYChart.Data<Number,String>(totalPortfolioValue, "Portfolio");
+        final double total = totalPortfolioValue;
         valuePortfolio.nodeProperty().addListener(new ChangeListener<Node>() {
             @Override public void changed(ObservableValue<? extends Node> ov, Node oldNode, final Node node) {
                 if (node != null) {
                     displayLabelForData(valuePortfolio);
+                    valuePortfolio.getNode().getStyleClass().add(total > 0 ? "bar-positive" : "bar-negative");
                 }
             }
         });
@@ -90,6 +93,7 @@ public class StatsBuilder {
             @Override public void changed(ObservableValue<? extends Node> ov, Node oldNode, final Node node) {
                 if (node != null) {
                     displayLabelForData(valueEquity);
+                    valueEquity.getNode().getStyleClass().add(totalEquityValue > 0 ? "bar-positive" : "bar-negative");
                 }
             }
         });
@@ -106,28 +110,35 @@ public class StatsBuilder {
         GridPane totalReturns = new GridPane();
         totalReturns.setHgap(100);
         totalReturns.setId("returns");
+
         Label totalReturnAmountLabel = new Label("Total returns:");
         totalReturnAmountLabel.getStyleClass().add("sm-label");
-        Label totalReturnValue = new Label("$" + round2dp(totalPortfolioValue-totalEquityValue));
-        totalReturnValue.getStyleClass().add("lg-label");
+        double totalReturnValue = totalPortfolioValue-totalEquityValue;
+
+        Label totalReturnValueLabel = new Label(FormatUtils.formatPrice(totalReturnValue), getArrowIcon(totalReturnValue));
+        totalReturnValueLabel.getStyleClass().add("lg-label");
+
         Label percentReturnAmountLabel = new Label("% return:");
         percentReturnAmountLabel.getStyleClass().add("sm-label");
-        Label percentReturnValue = new Label(round2dp(portfolio.getTotalReturnValue()/(portfolio.getTotalBuyValue()-totalEquityValue)*100) + "%");
-        percentReturnValue.getStyleClass().add("lg-label");
+
+        double percentReturnValue = FormatUtils.round2dp(portfolio.getTotalReturnValue() / (portfolio.getTotalBuyValue() - totalEquityValue) * 100);
+        Label percentReturnValueLabel = new Label(percentReturnValue + "%", getArrowIcon(percentReturnValue));
+        percentReturnValueLabel.getStyleClass().add("lg-label");
+
         totalReturns.setConstraints(totalReturnAmountLabel,0,0);
-        totalReturns.setConstraints(totalReturnValue,0,1);
+        totalReturns.setConstraints(totalReturnValueLabel,0,1);
         totalReturns.setConstraints(percentReturnAmountLabel,1,0);
-        totalReturns.setConstraints(percentReturnValue,1,1);
-        totalReturns.getChildren().addAll(totalReturnAmountLabel,totalReturnValue,percentReturnAmountLabel,percentReturnValue);
+        totalReturns.setConstraints(percentReturnValueLabel,1,1);
+        totalReturns.getChildren().addAll(totalReturnAmountLabel,totalReturnValueLabel,percentReturnAmountLabel,percentReturnValueLabel);
 
         stats.getChildren().addAll(totalReturns, barChart);
         return stats;
     }
 
     /** places a text label with a bar's value above a bar node for a given XYChart.Data */
-    private static void displayLabelForData(XYChart.Data<Number, String> data) {
+    private void displayLabelForData(XYChart.Data<Number, String> data) {
         final Node node = data.getNode();
-        final Text dataText = new Text("$" + round2dp(data.getXValue().doubleValue()));
+        final Text dataText = new Text(FormatUtils.formatPrice(data.getXValue().doubleValue()));
         node.parentProperty().addListener(new ChangeListener<Parent>() {
             @Override public void changed(ObservableValue<? extends Parent> ov, Parent oldParent, Parent parent) {
                 Group parentGroup = (Group) parent;
@@ -147,14 +158,22 @@ public class StatsBuilder {
         });
     }
 
-    private static TableView buildTable(Map<String,List<Double>> returns) {
+    private ImageView getArrowIcon(double returnValue) {
+        if (returnValue > 0) {
+            return new ImageView(getClass().getResource("icons/up.png").toExternalForm());
+        } else {
+            return new ImageView(getClass().getResource("icons/down.png").toExternalForm());
+        }
+    }
+
+    private TableView buildTable(Map<String,List<Double>> returns) {
 
         ObservableList<Map> data = FXCollections.observableArrayList();
         for (String company: returns.keySet()) {
             Map<String,Object> row = new HashMap<String,Object>();
             row.put("Company",company);
-            row.put("Return", round2dp(returns.get(company).get(0)));
-            row.put("Return %", round2dp(returns.get(company).get(0)/returns.get(company).get(2)*100));
+            row.put("Return", FormatUtils.round2dp(returns.get(company).get(0)));
+            row.put("Return %", FormatUtils.round2dp(returns.get(company).get(0) / returns.get(company).get(2) * 100));
             data.add(row);
         }
 
@@ -210,11 +229,24 @@ public class StatsBuilder {
         return tableView;
     }
 
-    private static PieChart buildReturnChart (Map<String,List<Double>> returns) {
+    private Node buildReturnChart (Map<String,List<Double>> returns, double totalReturnValue) {
         List<PieChart.Data> returnData = new ArrayList<>();
-        for (String company: returns.keySet()) {
-            PieChart.Data companyData = new PieChart.Data(company,returns.get(company).get(0));
-            returnData.add(companyData);
+        if (totalReturnValue >= 0) {
+            for (String company : returns.keySet()) {
+                if (returns.get(company).get(0).doubleValue() >= 0) {
+                    PieChart.Data companyData = new PieChart.Data(company, returns.get(company).get(0));
+                    returnData.add(companyData);
+                }
+            }
+        } else {
+            VBox placeholder = new VBox();
+            placeholder.setId("piechart-placeholder");
+            Label title = new Label("Returns by company");
+            title.setId("placeholder-title");
+            Label placeholderText = new Label("No returns");
+            placeholder.getChildren().addAll(title, placeholderText);
+            VBox.setVgrow(placeholder,Priority.ALWAYS);
+            return placeholder;
         }
         ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(returnData);
         final PieChart chart = new PieChart(pieChartData);
@@ -224,11 +256,12 @@ public class StatsBuilder {
             tooltip.setGraphic(new TooltipContent(data.getName(),data.getPieValue()));
             Tooltip.install(data.getNode(), tooltip);
         }
+        chart.setLegendVisible(false);
         chart.setTitle("Returns by company");
         return chart;
     }
 
-    private static LineChart buildProfitChart () {
+    private LineChart buildProfitChart () {
         DateValueAxis xAxis = new DateValueAxis();
         NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("Date");
@@ -245,7 +278,7 @@ public class StatsBuilder {
         return lineChart;
     }
 
-    private static TableView buildEquityTable(Map<String,Double> equities) {
+    private TableView buildEquityTable(Map<String,Double> equities) {
         ObservableList<Map> data = FXCollections.observableArrayList();
         for (String company: equities.keySet()) {
             Map<String,Object> row = new HashMap<String,Object>();
@@ -297,7 +330,7 @@ public class StatsBuilder {
         return tableView;
     }
 
-    private static class TooltipContent extends GridPane {
+    private class TooltipContent extends GridPane {
         private Label company = new Label();
         private Label returns = new Label();
 
@@ -313,9 +346,5 @@ public class StatsBuilder {
             setConstraints(returns,1,1);
             getChildren().addAll(company,returnLabel,returns);
         }
-    }
-
-    private static double round2dp (double n) {
-        return (double)Math.round(n*100)/100;
     }
 }

@@ -2,22 +2,38 @@
  * Created by Gavin Tam on 1/05/15.
  */
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.layout.*;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.Callback;
+import main.Order;
+import main.OrderReader;
+import main.Portfolio;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by Gavin Tam on 25/03/15.
  */
 public class AnalysisBuilder {
+
+    private static final Logger logger = Logger.getLogger("log");
 
     private BarChart barChart;
     private TableView tableView;
@@ -27,6 +43,12 @@ public class AnalysisBuilder {
     private HashMap<String,Double> paramCombinations = new HashMap<>();
     private ObservableList<String> bestParams = FXCollections.observableList(new LinkedList<String>());
     private HashMap<String,Map<String,String>> bestParamValues = new HashMap<>();
+    private ParameterManager<Number> manager = new ParameterManager();
+    private HashMap<String,Number> paramStepValues = new HashMap<>();
+    private TableView paramStepTable;
+
+    private StrategyRunner runner;
+    private Thread t;
 
     public void restart() {
 
@@ -39,6 +61,14 @@ public class AnalysisBuilder {
         barChart.getStyleClass().add("analysis-graph");
         barChart.setLegendVisible(false);
         tableView = new TableView();
+
+        //restart param storage information
+        prevParams = null;
+        combination_ID = 0;
+        if (paramCombinations != null) paramCombinations.clear();
+        if (bestParams != null) bestParams.clear();
+        if (bestParamValues != null) bestParamValues.clear();
+        initParamTable();
     }
 
     private void updateChart(String paramCombination, Map<String,String> params, double profit) {
@@ -54,9 +84,9 @@ public class AnalysisBuilder {
             }
             bestParams.add(i,paramCombination);
             bestParamValues.put(paramCombination,params);
-        } else if (bestParams.size() < 5) {
+        } else if (bestParams.size() < 5 && !bestParams.contains(paramCombination)) {
             bestParams.add(paramCombination);
-            bestParamValues.put(paramCombination,params);
+            bestParamValues.put(paramCombination, params);
         } else {
             return;
         }
@@ -100,32 +130,36 @@ public class AnalysisBuilder {
         });
     }
 
-    public void buildAnalysis(BorderPane analysis, Set<String> params)
+    public void buildAnalysis(StrategyRunner runner, BorderPane analysis, Set<String> params)
     {
         //init if required
         if (barChart == null || tableView == null) restart();
         HBox graphs = new HBox();
         HBox.setHgrow(barChart,Priority.ALWAYS);
         graphs.setSpacing(50);
-        graphs.getChildren().addAll(barChart);
+        graphs.getChildren().addAll(buildControls(), barChart);
         analysis.setCenter(graphs);
+        this.runner = runner;
         if (prevParams != params) {
             buildTable(params);
             //new params means we clear all the previously recorded results
             paramCombinations.clear();
+            bestParams.clear();
+            bestParamValues.clear();
         }
+        if (runner.getParamFile() != null) updateParamTable();
         prevParams = params;
         analysis.setBottom(tableView);
     }
 
 
-    public void addRow(Map<String,String> params, double profit) {
+    public void addRow(Map<String,?> params, double profit) {
         Map<String,Object> row = new HashMap<>();
         Map<String,String> copy = new HashMap<>();
         String combination = String.valueOf(combination_ID++);
         for (String param: params.keySet()) {
             row.put(param, params.get(param));
-            copy.put(param, params.get(param));
+            copy.put(param, String.valueOf(params.get(param)));
         }
         row.put("Profit",profit);
         if (!paramCombinations.containsKey(combination)) {
@@ -157,6 +191,160 @@ public class AnalysisBuilder {
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
+    private ToolBar buildControls() {
+        Button playButton = new Button("Play");
+        Button pauseButton = new Button("Pause");
+        Button settingsButton = new Button("Settings");
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                while (runner.shouldRun()) {
+                    updateParamTable();
+                    runner.run(true);
+                    OrderReader orderReader = new OrderReader("orders.csv");
+                    orderReader.readAll();
+                    addRow(manager.getParams(), new Portfolio(orderReader.getHistory()).getTotalReturnValue());
+                }
+            }
+        };
+        playButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                t = new Thread(r);
+                t.start();
+            }
+        });
+        pauseButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                t.interrupt();
+                runner.stop();
+            }
+        });
+        settingsButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                final Stage dialog = new Stage();
+                dialog.setTitle("Parameters");
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(null);
+                VBox dialogVbox = new VBox();
+                dialogVbox.setPadding(new Insets(20));
+                dialogVbox.setSpacing(20);
+                dialogVbox.setAlignment(Pos.CENTER_RIGHT);
+                Button close = new Button("Close");
+                close.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        dialog.close();
+                    }
+                });
+                dialogVbox.getChildren().addAll(paramStepTable, close);
+                Scene dialogScene = new Scene(dialogVbox);
+                dialog.setScene(dialogScene);
+                dialog.show();
+            }
+        });
+
+        ToolBar controls = new ToolBar(playButton, pauseButton, settingsButton);
+        controls.setOrientation(Orientation.VERTICAL);
+        return controls;
+    }
+
+    private void initParamTable() {
+
+        paramStepTable = new TableView();
+        paramStepTable.setEditable(true);
+        paramStepTable.setPlaceholder(new Label("No parameters available."));
+
+        TableColumn keyCol = new TableColumn("Key");
+        keyCol.setMinWidth(100);
+        keyCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
+                String key = (String) param.getValue().getKey();
+                return new SimpleStringProperty(key);
+            }
+        });
+
+        TableColumn valueCol = new TableColumn("Step Value");
+        valueCol.setEditable(true);
+        valueCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
+                if (param.getValue().getValue() instanceof Integer) {
+                    int value = (int) param.getValue().getValue();
+                    return new SimpleStringProperty(String.valueOf(value));
+                } else {
+                    double value = (double) param.getValue().getValue();
+                    return new SimpleStringProperty(String.valueOf(FormatUtils.round3dp(value)));
+                }
+            }
+        });
+        valueCol.setCellFactory(TextFieldTableCell.forTableColumn());
+
+        valueCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent event) {
+                Map.Entry row = (Map.Entry)event.getRowValue();
+                String newValue = (String)event.getNewValue();
+                if (FormatChecker.isInteger(newValue)) {
+                    paramStepValues.put((String) row.getKey(), Integer.parseInt(newValue));
+                } else if (FormatChecker.isDouble(newValue)) {
+                    paramStepValues.put((String) row.getKey(), Double.parseDouble(newValue));
+                } else {
+                    //TODO make a popup instead
+                    logger.warning("Enter a numerical value.");
+                }
+            }
+        });
+
+        paramStepTable.getColumns().addAll(keyCol, valueCol);
+        //ensures extra space to given to existing columns
+        paramStepTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        paramStepTable.setMinWidth(300);
+
+        if (paramStepValues == null) {
+            paramStepValues = new HashMap<>();
+        } else {
+            paramStepValues.clear();
+        }
+    }
+
+    private void updateParamTable() {
+        //remove previously stored parameters
+        manager.clear();
+
+        Properties props = manager.getProperties(runner.getParamFile());
+        Enumeration properties = props.propertyNames();
+
+        boolean needsUpdate = false;
+        while (properties.hasMoreElements()) {
+            String key = (String)properties.nextElement();
+            //if the value of the property is not numerical, it is not a parameter
+            String value = props.getProperty(key);
+            if (!FormatChecker.isDouble(value)) continue;
+            if (paramStepValues.get(key) != null) {
+                if (FormatChecker.isInteger(value))
+                    manager.put(key, Integer.parseInt(value) + (int)paramStepValues.get(key));
+                else
+                    manager.put(key, FormatUtils.round3dp(Double.parseDouble(value) + (double) paramStepValues.get(key)));
+                needsUpdate = true;
+            } else {
+                if (FormatChecker.isInteger(value)) {
+                    paramStepValues.put(key, 0);
+                } else {
+                    paramStepValues.put(key,0.);
+                }
+            }
+        }
+        ObservableList<Map.Entry> data = FXCollections.observableArrayList(paramStepValues.entrySet());
+        paramStepTable.setItems(data);
+        if (needsUpdate) {
+            manager.updateParams(runner.getParamFile());
+        }
+    }
+
     private static class TooltipContent extends GridPane {
 
         private TooltipContent(Map<String,String> params, double profit) {
@@ -171,11 +359,17 @@ public class AnalysisBuilder {
                 Label value = new Label(params.get(param));
                 setConstraints(paramName,0,rowNum);
                 setConstraints(value,1,rowNum);
+                GridPane.setHalignment(value, HPos.RIGHT);
                 getChildren().addAll(paramName,value);
                 rowNum++;
             }
             Label profitLabel = new Label("PROFIT:");
-            Label profitValue = new Label(String.valueOf(profit));
+            Label profitValue = new Label(FormatUtils.formatPrice(profit));
+            if (profit > 0) {
+                profitValue.getStyleClass().add("profit-label");
+            } else {
+                profitValue.getStyleClass().add("loss-label");
+            }
             setConstraints(profitLabel,0,rowNum);
             setConstraints(profitValue,0,rowNum+1);
             getChildren().addAll(profitLabel, profitValue);

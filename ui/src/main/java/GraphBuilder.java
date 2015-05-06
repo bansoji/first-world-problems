@@ -268,7 +268,6 @@ public class GraphBuilder {
                     protected void updateItem(Price price, boolean empty) {
                         super.updateItem(price, empty);
                         if (price != null && !empty && orders.get(price.getDate()) != null) {
-                            setTextFill(Color.WHITE);
                             if (orders.get(price.getDate()).equals(OrderType.BUY)) {
                                 setStyle("-fx-control-inner-background: green");
                             } else if (orders.get(price.getDate()).equals(OrderType.SELL)) {

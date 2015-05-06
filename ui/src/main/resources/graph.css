@@ -80,3 +80,11 @@
 .bar-sell:hover {
     -fx-bar-fill: #990000;
 }
+
+.buy {
+    -fx-text-fill: green;
+}
+
+.sell {
+    -fx-text-fill: red;
+}

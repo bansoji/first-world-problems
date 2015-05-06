@@ -16,9 +16,6 @@ public class OrderManager {
 
     // Some class constants.
     public static final String VERSION = "1.1.0";
-    public static String OUTPUT_FILE = "orders.csv";
-    public static String LOG_FILE = "logfile.log";
-    public static final String LOG_NAME = "log";
 
     public static void main(String[] args) throws IOException {
         long startTime = System.currentTimeMillis();
@@ -37,7 +34,7 @@ public class OrderManager {
         ///////////////////////////////
         // Logger initialisation.
         Logger logger = Logger.getLogger("log");
-        FileHandler handler = new FileHandler(LOG_FILE);
+        FileHandler handler = new FileHandler(FileManager.LOG_FILE);
         SimpleFormatter formatter = new SimpleFormatter();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
@@ -47,8 +44,8 @@ public class OrderManager {
                 "MODULE NAME: BuyHard-Momentum-" + VERSION + ".jar\n" +
                 "MODULE VERSION: " + VERSION + "\n" +
                 "INPUT FILE: " + fileName + "\n" +
-                "OUTPUT FILE: " + OUTPUT_FILE + "\n" +
-                "LOG FILE: " + LOG_FILE);
+                "OUTPUT FILE: " + FileManager.OUTPUT_FILE + "\n" +
+                "LOG FILE: " + FileManager.LOG_FILE);
 
         // Load the csv file.
         Reader tReader = new PriceReader(fileName);
@@ -57,7 +54,7 @@ public class OrderManager {
         // Initialise the File and CSV Writer.
         BufferedWriter orderFile;
         try {
-            orderFile = new BufferedWriter(new FileWriter(OUTPUT_FILE));
+            orderFile = new BufferedWriter(new FileWriter(FileManager.OUTPUT_FILE));
         } catch (IOException e) {
             logger.severe(e.getMessage());
             return;

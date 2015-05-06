@@ -12,8 +12,8 @@ import java.util.logging.Logger;
  */
 public class OrderWriter {
 
-    private static final Logger logger = Logger.getLogger(OrderManager.LOG_NAME);
-    private static final String OUTPUT_FILE_NAME = OrderManager.OUTPUT_FILE;
+    private static final Logger logger = Logger.getLogger(FileManager.LOG_NAME);
+    private static final String OUTPUT_FILE_NAME = FileManager.OUTPUT_FILE;
     private CSVWriter writer;
     private int numOrdersGenerated;
 

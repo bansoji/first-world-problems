@@ -1,4 +1,5 @@
 package utils;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import java.util.List;
 
@@ -8,6 +9,11 @@ import java.util.List;
 public class GeometryUtils {
 
     public static Line createLine(List<Double> values) {
-        //Will use simpleRegression
+        SimpleRegression lineMaker = new SimpleRegression();
+        for (double point : values) {
+            lineMaker.addData(point); // WILL NEED TO FIX THIS
+        }
+        Line result = new Line(lineMaker.getIntercept(), lineMaker.getSlope());
+        return result;
     }
 }

@@ -7,14 +7,10 @@ import java.util.List;
  */
 public class Channel {
 
-    private List<Double> lows; //The list of lows from PriceChannelStrategy.
-    private List<Double> highs; //The list of highs from PriceChannelStrategy.
     private Line lowLine;
     private Line highLine;
 
     public Channel (List<Double> lows, List<Double> highs) {
-        this.lows = lows;
-        this.highs = highs;
         this.lowLine = GeometryUtils.createLine(lows);
         this.highLine = GeometryUtils.createLine(highs);
     }

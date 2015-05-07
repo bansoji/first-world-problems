@@ -1,16 +1,3 @@
-/*
-.default-color0.chart-series-line {
-    -fx-stroke: #3915AE;
-}
-
-.info-box {
-    -fx-text-alignment: center;
-    -fx-background-insets: -8;
-    -fx-font-size: 12;
-    -fx-background-color: #3915AE, white;
-}
-*/
-
 .graph .chart {
     -fx-padding: 10px 20px 10px 0px;
 }
@@ -79,4 +66,12 @@
 
 .bar-sell:hover {
     -fx-bar-fill: #990000;
+}
+
+.buy {
+    -fx-text-fill: green;
+}
+
+.sell {
+    -fx-text-fill: red;
 }

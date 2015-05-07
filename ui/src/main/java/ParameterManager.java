@@ -8,13 +8,14 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Created by Gavin Tam on 15/04/15.
  */
-public class ParameterManager {
+public class ParameterManager<T> {
 
-    private Map<String,String> params = new HashMap<>();
+    private Map<String,T> params = new HashMap<>();
 
     public boolean updateParams(String paramFile)
     {
@@ -61,7 +62,11 @@ public class ParameterManager {
         return params.size();
     }
 
-    public void put(String key, String value) {
+    public Map<String,T> getParams() {
+        return params;
+    }
+
+    public void put(String key, T value) {
         params.put(key,value);
     }
 

@@ -120,6 +120,7 @@ public class CandleStickChart extends XYChart<Long,Number> {
                 CandleStickExtraValues extra = (CandleStickExtraValues)item.getExtraValue();
 
                 if ((series.getNode() instanceof Path) && extra != null) {
+                    //only show candles when a 6 month period is shown
                     if (((ValueAxis)getXAxis()).getUpperBound()-((ValueAxis)getXAxis()).getLowerBound() < 15e9) {
                         Candle candle = (Candle)createCandle(seriesIndex,item,j++);
                         candle.setOpacity(1);

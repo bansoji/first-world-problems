@@ -12,6 +12,18 @@
     -fx-padding: 20px 0px 0px 0px;
 }
 
+.bar-positive {
+    -fx-bar-fill: #2CFC0E;
+}
+
+.bar-negative {
+    -fx-bar-fill: red;
+}
+
+#portfolio .default-color0.chart-bar .loss {
+    -fx-bar-fill: red;
+}
+
 .sm-label {
     -fx-font-size: 14px;
 }
@@ -23,4 +35,19 @@
 #returns {
     -fx-background-color: white;
     -fx-padding: 30px;
+}
+
+#profit-graph .default-color0.chart-series-line {
+    -fx-stroke: #106ece;
+    -fx-stroke-width: 2px;
+}
+
+/* Pie Chart */
+#piechart-placeholder {
+    -fx-alignment: center;
+    -fx-spacing: 80px;
+}
+
+#placeholder-title {
+    -fx-font-size: 18px;
 }

@@ -4,6 +4,8 @@
 .tab-pane
 {
     -fx-tab-min-width:150px;
+    -fx-tab-min-height: 50px;
+    -fx-tab-max-height: 50px;
     /*-fx-background-color: black;*/
 }
 
@@ -16,6 +18,7 @@
     -fx-text-fill: #828282;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
+    -fx-graphic-text-gap: 10px;
 }
 
 .tab:selected .tab-label {
@@ -34,17 +37,24 @@
 
 #footer-text {
     -fx-padding: 0px 15px 0px 0px;
+    -fx-spacing: 20px;
 }
 
 #header {
     -fx-background-color: white;
-    -fx-padding: 15px;
+    -fx-padding: 5px 0px 10px 20px;
 }
 
 #run-button {
     -fx-pref-height: 48px;
     -fx-pref-width: 48px;
-    -fx-background-radius: 48px;
+    /*-fx-background-radius: 48px;*/
+    -fx-background-color: transparent;
+    -fx-opacity: 0.8;
+}
+
+#run-button:hover {
+    -fx-opacity: 1;
 }
 
 .profit-label {
@@ -53,4 +63,16 @@
 
 .loss-label {
     -fx-text-fill: red;
+}
+
+.icon-button {
+    -fx-background-color: transparent;
+    -fx-graphic-text-gap: 10px;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-opacity: 0.8
+}
+
+.icon-button:hover {
+    -fx-opacity: 1.0;
 }

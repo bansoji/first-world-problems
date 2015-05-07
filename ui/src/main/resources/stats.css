@@ -37,9 +37,13 @@
     -fx-padding: 30px;
 }
 
-#profit-graph .default-color0.chart-series-line {
+#profit-graph .chart-series-line {
     -fx-stroke: #106ece;
     -fx-stroke-width: 2px;
+}
+
+#profit-graph .chart-line-symbol {
+    -fx-background-color: #106ece;
 }
 
 /* Pie Chart */

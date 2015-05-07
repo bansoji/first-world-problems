@@ -1,0 +1,23 @@
+.analysis-graph .chart-content {
+    -fx-padding: 15px 0px 15px 15px;
+}
+
+.bar-profit {
+    -fx-bar-fill: #2CFC0E;
+}
+
+.bar-loss {
+    -fx-bar-fill: red;
+}
+
+.bar-profit:hover {
+    -fx-bar-fill: green;
+}
+
+.bar-loss:hover {
+    -fx-bar-fill: #990000;
+}
+
+.toolbar-button {
+    -fx-background-color: transparent;
+}

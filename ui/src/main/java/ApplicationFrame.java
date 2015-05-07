@@ -1,4 +1,3 @@
-import com.sun.xml.internal.bind.v2.model.annotation.RuntimeAnnotationReader;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,14 +19,15 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import javafx.util.StringConverter;
 import main.*;
 import org.joda.time.DateTime;
 
 import javax.swing.*;
 import java.io.File;
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
@@ -39,10 +39,7 @@ public class ApplicationFrame extends Application {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    //TODO Remove values - only for TESTING
-    private String strategyFile = "out/artifacts/trading_jar/trading.jar";
-    private String dataFile = "common/src/main/resources/sampleDataSmall";
-    private String paramFile = "trading/resources/config.properties";
+    private StrategyRunner runner = new StrategyRunner();
 
     private Reader orderReader;
     private Reader priceReader;
@@ -51,18 +48,21 @@ public class ApplicationFrame extends Application {
     private BorderPane main;
     private BorderPane graph;
     private GridPane stats;
+    private BorderPane analysis;
     private ComboBox<String> companySelector;
     private ChangeListener companyListener;
     private HBox selector;
     private HBox settings;
     private Label loadingInfo;
     private ProgressBar loading;
-    private ParameterManager manager = new ParameterManager();
+    private ParameterManager<String> manager = new ParameterManager();
     private TableView paramTable;
 
     private GraphBuilder g = new GraphBuilder();
+    private AnalysisBuilder a = new AnalysisBuilder();
+    private StatsBuilder s = new StatsBuilder();
 
-    private static String VERSION_NUMBER = "1.0.0";
+    private static String VERSION_NUMBER = "1.1.0";
     private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
     private static String FOOTER_MESSAGE = "Get the latest release at our website.";
 
@@ -74,7 +74,7 @@ public class ApplicationFrame extends Application {
         primaryStage.setTitle("BuyHard Platform");
         main = new BorderPane();
         Scene scene = new Scene(main);
-        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css");
+        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css", "analysis.css");
         primaryStage.setScene(scene);
         primaryStage.setMinHeight(768);
         primaryStage.setMinWidth(1024);
@@ -113,6 +113,7 @@ public class ApplicationFrame extends Application {
 
         graph = new BorderPane();
         stats = new GridPane();
+        analysis = new BorderPane();
         addFilterSelector();
 
         TabPane tabPane = new TabPane();
@@ -124,10 +125,16 @@ public class ApplicationFrame extends Application {
         statsTab.setText("Portfolio");
         statsTab.setClosable(false);
         statsTab.setContent(stats);
-        tabPane.getTabs().addAll(tab,statsTab);
+        Tab analysisTab = new Tab();
+        analysisTab.setText("Analysis");
+        analysisTab.setClosable(false);
+        analysisTab.setContent(analysis);
+        tabPane.getTabs().addAll(tab,statsTab,analysisTab);
         //TODO Remove hack - for some reason the graph doesn't load for the first time
         loadContent(new History<>(), new ArrayList<>(),new ArrayList<>());
         graph.setVisible(false);
+        stats.setVisible(false);
+        analysis.setVisible(false);
 
         body.getChildren().addAll(tabPane, new Separator());
 
@@ -164,12 +171,14 @@ public class ApplicationFrame extends Application {
                 {
                     try {
                         if (fileChooser.getButtonText().equals("Choose CSV")) {
-                            dataFile = file.getAbsolutePath();
+                            runner.setDataFile(file.getAbsolutePath());
+                            updateParamTable();
                         } else if (fileChooser.getButtonText().equals("Choose strategy")) {
-                            strategyFile = file.getAbsolutePath();
+                            runner.setStrategyFile(file.getAbsolutePath());
+                            updateParamTable();
                         } else if (fileChooser.getButtonText().equals("Choose parameters")) {
-                            paramFile = file.getAbsolutePath();
-                            changeParamSelection();
+                            runner.setParamFile(file.getAbsolutePath());
+                            updateParamTable();
                         } else {
                             return;
                         }
@@ -210,8 +219,11 @@ public class ApplicationFrame extends Application {
             @Override
             public void run() {
                 g.buildGraph(graph, prices, orders, orderRecord);
-                StatsBuilder.build(stats, history, prices, orderRecord);
+                s.build(stats, history, prices, orderRecord);
+                a.buildAnalysis(runner, analysis, manager.getParams().keySet());
                 graph.setVisible(true);
+                stats.setVisible(true);
+                analysis.setVisible(true);
             }
         };
         if (Platform.isFxApplicationThread()) r.run();
@@ -246,6 +258,7 @@ public class ApplicationFrame extends Application {
 
         Button settingsButton = new Button("Change parameters");
         settings.getChildren().add(settingsButton);
+        initParamTable();
         settingsButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -257,7 +270,6 @@ public class ApplicationFrame extends Application {
                 dialogVbox.setPadding(new Insets(20));
                 dialogVbox.setSpacing(20);
                 dialogVbox.setAlignment(Pos.CENTER_RIGHT);
-                changeParamSelection();
                 Button close = new Button("Close");
                 close.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
@@ -273,7 +285,8 @@ public class ApplicationFrame extends Application {
         });
 
         //Run button
-        Button runButton = new Button("Run");
+        Button runButton = new Button("",new ImageView(getClass().getResource("icons/run.png").toExternalForm()));
+        runButton.setId("run-button");
         settings.getChildren().addAll(runButton);
 
         header.getChildren().add(settings);
@@ -283,64 +296,52 @@ public class ApplicationFrame extends Application {
             public void handle(ActionEvent event) {
                 new Thread() {
                     public void run() {
-                        if (strategyFile != null && dataFile != null && paramFile != null) {
-                            try {
-                                updateParams();
-                                Platform.runLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        loadingInfo.setText("Running strategy...");
-                                        loading.setProgress(0);
-                                    }
-                                });
-                                ProcessBuilder pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
-                                Process p = pb.start();
-                                try {
-                                    p.waitFor();
-                                } catch (InterruptedException ex) {
-                                    logger.severe("Failed to run module without errors.");
-                                    return;
+                        if (runner.validFiles()) {
+                            updateParams();
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    loadingInfo.setText("Running strategy...");
+                                    loading.setProgress(0);
                                 }
-                                Platform.runLater(new Runnable() {
-                                    public void run() {
-                                        loadingInfo.setText("Updating prices and orders information...");
-                                        loading.setProgress(0.5);
-                                    }
-                                });
-
-                                priceReader = new PriceReader(dataFile);
-                                priceReader.readAll();
-                                Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
-                                ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
-
-                                //update list of companies in the selector
-                                if (companyListener != null) {
-                                    companySelector.valueProperty().removeListener(companyListener);
+                            });
+                            runner.run(true);
+                            Platform.runLater(new Runnable() {
+                                public void run() {
+                                    loadingInfo.setText("Updating prices and orders information...");
+                                    loading.setProgress(0.5);
                                 }
-                                companySelector.getSelectionModel().clearSelection();
-                                companySelector.setItems(priceCompanies);
-                                companySelector.getSelectionModel().selectFirst();
-                                addCompanySelectorListener();
+                            });
 
-                                List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
-                                selector.setVisible(true);
+                            priceReader = new PriceReader(runner.getDataFile());
+                            priceReader.readAll();
+                            Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
+                            ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
 
-                                orderReader = new OrderReader(OUTPUT_FILE_PATH);
-                                orderReader.readAll();
-                                List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
-                                loadContent(orderReader.getHistory(), prices, orders);
-                                Platform.runLater(new Runnable() {
-                                    public void run() {
-                                        loadingInfo.setText("");
-                                        loading.setProgress(1);
-                                    }
-                                });
-                            } catch (IOException ex) {
-                                JOptionPane.showMessageDialog(null,
-                                        "An unexpected error has occurred when running the given files." +
-                                                "Please check that the file content is in the correct format",
-                                        "Files could not be run", JOptionPane.ERROR_MESSAGE);
+                            //update list of companies in the selector
+                            if (companyListener != null) {
+                                companySelector.valueProperty().removeListener(companyListener);
                             }
+                            companySelector.getSelectionModel().clearSelection();
+                            companySelector.setItems(priceCompanies);
+                            companySelector.getSelectionModel().selectFirst();
+                            addCompanySelectorListener();
+
+                            List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
+                            selector.setVisible(true);
+
+                            orderReader = new OrderReader(OUTPUT_FILE_PATH);
+                            orderReader.readAll();
+                            List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
+
+                            a.addRow(manager.getParams(),new Portfolio(orderReader.getHistory()).getTotalReturnValue());
+                            loadContent(orderReader.getHistory(), prices, orders);
+                            Platform.runLater(new Runnable() {
+                                public void run() {
+                                    loadingInfo.setText("");
+                                    loading.setProgress(1);
+                                }
+                            });
                         } else {
                             JOptionPane.showMessageDialog(null,
                                     "Please check that you have selected all the required files.",
@@ -372,21 +373,23 @@ public class ApplicationFrame extends Application {
         selector.getChildren().add(endDatePanel);
 
         DatePicker startDatePicker = new DatePicker();
-        startDatePicker.setMinHeight(20);
+        configureDatePicker(startDatePicker);
         startDatePanel.getChildren().add(startDatePicker);
         startDatePicker.setOnAction(new EventHandler() {
             public void handle(javafx.event.Event t) {
                 LocalDate date = startDatePicker.getValue();
+                if (date == null) return;
                 long startDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 g.updateLowerBound(startDate);
             }
         });
         DatePicker endDatePicker = new DatePicker();
-        endDatePicker.setMinHeight(20);
+        configureDatePicker(endDatePicker);
         endDatePanel.getChildren().add(endDatePicker);
         endDatePicker.setOnAction(new EventHandler() {
             public void handle(javafx.event.Event t) {
                 LocalDate date = endDatePicker.getValue();
+                if (date == null) return;
                 long endDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 g.updateUpperBound(endDate);
             }
@@ -429,6 +432,32 @@ public class ApplicationFrame extends Application {
         startDatePicker.setDayCellFactory(startDayCellFactory);
     }
 
+    private void configureDatePicker(DatePicker datePicker) {
+        datePicker.setMinHeight(20);
+        datePicker.setPromptText("dd/MM/yyyy");
+        datePicker.setConverter(new StringConverter<LocalDate>() {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+            @Override
+            public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+    }
+
     private void addFilter(String name) {
         HBox filter = new HBox();
         companySelector = new ComboBox<>();
@@ -437,11 +466,59 @@ public class ApplicationFrame extends Application {
         selector.getChildren().add(filter);
     }
 
-    private void changeParamSelection() {
+    private void initParamTable() {
+
+        paramTable = new TableView();
+        paramTable.setEditable(true);
+        paramTable.setPlaceholder(new Label("No parameters available."));
+
+        TableColumn keyCol = new TableColumn("Key");
+        keyCol.setMinWidth(100);
+        keyCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
+                String key = (String) param.getValue().getKey();
+                return new SimpleStringProperty(key);
+            }
+        });
+
+        TableColumn valueCol = new TableColumn("Value");
+        valueCol.setEditable(true);
+        valueCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
+            @Override
+            public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
+                String value = (String) param.getValue().getValue();
+                return new SimpleStringProperty(value);
+            }
+        });
+        valueCol.setCellFactory(TextFieldTableCell.forTableColumn());
+
+        valueCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent>() {
+            @Override
+            public void handle(TableColumn.CellEditEvent event) {
+                Map.Entry row = (Map.Entry)event.getRowValue();
+                String newValue = (String)event.getNewValue();
+                manager.put((String)row.getKey(), newValue);
+            }
+        });
+
+        paramTable.getColumns().addAll(keyCol, valueCol);
+        //ensures extra space to given to existing columns
+        paramTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        paramTable.setMinWidth(300);
+        updateParamTable();
+    }
+
+    private void updateParamTable() {
         //remove previously stored parameters
         manager.clear();
-        Properties props = manager.getProperties(paramFile);
+        a.restart();
+
+        Properties props = manager.getProperties(runner.getParamFile());
         Enumeration properties = props.propertyNames();
+        ObservableList<Map.Entry> data = FXCollections.observableArrayList(props.entrySet());
+        paramTable.setItems(data);
+
         while (properties.hasMoreElements()) {
             String key = (String)properties.nextElement();
             //if the value of the property is not numerical, it is not a parameter
@@ -450,51 +527,12 @@ public class ApplicationFrame extends Application {
             } catch (NumberFormatException e) {
                 continue;
             }
-            paramTable = new TableView();
-            paramTable.setEditable(true);
-            ObservableList<Map.Entry> data = FXCollections.observableArrayList(props.entrySet());
-            paramTable.setPlaceholder(new Label("No parameters available."));
-
-            TableColumn keyCol = new TableColumn("Key");
-            keyCol.setMinWidth(100);
-            keyCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
-                @Override
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
-                    String key = (String) param.getValue().getKey();
-                    return new SimpleStringProperty(key);
-                }
-            });
-
-            TableColumn valueCol = new TableColumn("Value");
-            valueCol.setEditable(true);
-            valueCol.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<Map.Entry, String>, ObservableValue<String>>() {
-                @Override
-                public ObservableValue<String> call(TableColumn.CellDataFeatures<Map.Entry, String> param) {
-                    String value = (String) param.getValue().getValue();
-                    return new SimpleStringProperty(value);
-                }
-            });
-            valueCol.setCellFactory(TextFieldTableCell.forTableColumn());
-
-            valueCol.setOnEditCommit(new EventHandler<TableColumn.CellEditEvent>() {
-                @Override
-                public void handle(TableColumn.CellEditEvent event) {
-                    Map.Entry row = (Map.Entry)event.getRowValue();
-                    String newValue = (String)event.getNewValue();
-                    manager.put((String)row.getKey(), newValue);
-                }
-            });
-
-            paramTable.getColumns().addAll(keyCol, valueCol);
-            //ensures extra space to given to existing columns
-            paramTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-            paramTable.setMinWidth(300);
-            paramTable.setItems(data);
+            manager.put(key,props.getProperty(key));
         }
     }
 
     private void updateParams() {
         if (manager.getNumParams() == 0) return;
-        manager.updateParams(paramFile);
+        manager.updateParams(runner.getParamFile());
     }
 }

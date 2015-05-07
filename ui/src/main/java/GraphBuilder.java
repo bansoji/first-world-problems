@@ -16,6 +16,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -268,7 +269,6 @@ public class GraphBuilder {
                     protected void updateItem(Price price, boolean empty) {
                         super.updateItem(price, empty);
                         if (price != null && !empty && orders.get(price.getDate()) != null) {
-                            setTextFill(Color.WHITE);
                             if (orders.get(price.getDate()).equals(OrderType.BUY)) {
                                 setStyle("-fx-control-inner-background: green");
                             } else if (orders.get(price.getDate()).equals(OrderType.SELL)) {
@@ -294,7 +294,7 @@ public class GraphBuilder {
     }
 
     private void addMenu() {
-        final MenuItem resetZoomItem = new MenuItem("Reset zoom");
+        final MenuItem resetZoomItem = new MenuItem("Reset zoom", new ImageView(getClass().getResource("icons/reset_zoom.png").toExternalForm()));
         resetZoomItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
                 lineChart.getXAxis().setAutoRanging(true);
@@ -302,7 +302,7 @@ public class GraphBuilder {
             }
         });
 
-        final MenuItem hideShowLineItem = new MenuItem("Hide Line");
+        final MenuItem hideShowLineItem = new MenuItem("Hide Line", new ImageView(getClass().getResource("icons/line_chart_hide.png").toExternalForm()));
         hideShowLineItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
                 for (int seriesIndex=0; seriesIndex < lineChart.getData().size(); seriesIndex++) {
@@ -311,9 +311,11 @@ public class GraphBuilder {
                         if (path.getOpacity() == 1) {
                             path.setOpacity(0);
                             hideShowLineItem.setText("Show Line");
+                            hideShowLineItem.setGraphic(new ImageView(getClass().getResource("icons/line_chart_show.png").toExternalForm()));
                         } else if (path.getOpacity() == 0) {
                             path.setOpacity(1);
                             hideShowLineItem.setText("Hide Line");
+                            hideShowLineItem.setGraphic(new ImageView(getClass().getResource("icons/line_chart_hide.png").toExternalForm()));
                         }
                     }
                 }
@@ -328,7 +330,11 @@ public class GraphBuilder {
         lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override public void handle(MouseEvent event) {
                 if (MouseButton.SECONDARY.equals(event.getButton())) {
-                    menu.show(lineChart, event.getScreenX(), event.getScreenY());
+                    if (menu.isShowing()) {
+                        menu.hide();
+                    } else {
+                        menu.show(lineChart, event.getScreenX(), event.getScreenY());
+                    }
                 }
             }
         });

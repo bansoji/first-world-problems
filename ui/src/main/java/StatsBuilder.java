@@ -4,24 +4,31 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
-import javafx.scene.CacheHint;
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.Parent;
+import javafx.geometry.Pos;
+import javafx.scene.*;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
 import main.*;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import java.util.*;
 
@@ -39,22 +46,20 @@ public class StatsBuilder {
         VBox.setVgrow(equity, Priority.ALWAYS);
 
         stats.setPadding(new Insets(50, 30, 50, 30));
-        TableView returnTable = buildTable(portfolio.getReturns());
 
+        TableView returnTable = buildTable(portfolio.getReturns(),portfolio.getTotalReturnValue());
         VBox graphs = new VBox();
         vbox.setSpacing(30);
+        graphs.getChildren().addAll(buildProfitChart(portfolio.getProfitList()), returnTable);
 
-        //TODO Add list of profit for graphing
-        graphs.getChildren().addAll(buildReturnChart(portfolio.getReturns(),portfolio.getTotalReturnValue()), buildProfitChart());
 
         stats.setConstraints(vbox, 0, 0);
-        stats.setConstraints(returnTable,1,0);
-        stats.setConstraints(graphs,2,0);
+        stats.setConstraints(graphs, 1, 0);
         stats.setHgap(50);
         GridPane.setVgrow(vbox, Priority.ALWAYS);
-        GridPane.setVgrow(returnTable, Priority.ALWAYS);
         GridPane.setVgrow(graphs, Priority.ALWAYS);
-        stats.getChildren().setAll(vbox,returnTable,graphs);
+        GridPane.setHgrow(graphs, Priority.ALWAYS);
+        stats.getChildren().setAll(vbox,graphs);
     }
 
     private VBox buildPortfolioStats(Portfolio portfolio) {
@@ -167,7 +172,7 @@ public class StatsBuilder {
         }
     }
 
-    private TableView buildTable(Map<String,List<Double>> returns) {
+    private TableView buildTable(Map<String,List<Double>> returns, double totalReturnValue) {
 
         ObservableList<Map> data = FXCollections.observableArrayList();
         for (String company: returns.keySet()) {
@@ -227,6 +232,47 @@ public class StatsBuilder {
         //ensures extra space to given to existing columns
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setMinWidth(300);
+
+        final MenuItem chartReturnsItem = new MenuItem("Chart", new ImageView(getClass().getResource("icons/graphs_pie.png").toExternalForm()));
+        chartReturnsItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                final Stage dialog = new Stage();
+                dialog.setTitle("Returns by Company");
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(null);
+                VBox dialogVbox = new VBox();
+                dialogVbox.setPadding(new Insets(20));
+                dialogVbox.setSpacing(20);
+                dialogVbox.setAlignment(Pos.CENTER);
+                Button close = new Button("Close");
+                close.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        dialog.close();
+                    }
+                });
+                dialogVbox.getChildren().addAll(buildReturnChart(returns,totalReturnValue), close);
+                Scene dialogScene = new Scene(dialogVbox);
+                dialog.setScene(dialogScene);
+                dialog.show();
+            }
+        });
+        final ContextMenu menu = new ContextMenu(
+                chartReturnsItem
+        );
+
+        tableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (MouseButton.SECONDARY.equals(event.getButton())) {
+                    if (menu.isShowing()) {
+                        menu.hide();
+                    } else {
+                        menu.show(tableView, event.getScreenX(), event.getScreenY());
+                    }
+                }
+            }
+        });
         return tableView;
     }
 
@@ -262,7 +308,7 @@ public class StatsBuilder {
         return chart;
     }
 
-    private LineChart buildProfitChart () {
+    private LineChart buildProfitChart (List<Profit> profitList) {
         DateValueAxis xAxis = new DateValueAxis();
         NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("Date");
@@ -274,8 +320,18 @@ public class StatsBuilder {
         lineChart.setCacheHint(CacheHint.SPEED);
 
         XYChart.Series<Long,Double> series = new XYChart.Series<>();
+        for (Profit p: profitList) {
+            series.getData().add(new XYChart.Data<>(p.getProfitDate().getMillis(),p.getProfitValue()));
+        }
         lineChart.getData().add(series);
         lineChart.setLegendVisible(false);
+        DateTimeFormatter df = DateTimeFormat.forPattern("dd-MMM-yyyy");
+        for (XYChart.Data data: series.getData()) {
+            Tooltip tooltip = new Tooltip();
+            tooltip.setGraphic(new TooltipForProfitGraph(df.print((long) data.getXValue()), (double) data.getYValue()));
+            Tooltip.install(data.getNode(),tooltip);
+        }
+
         return lineChart;
     }
 
@@ -340,12 +396,40 @@ public class StatsBuilder {
             getStyleClass().add("tooltip-content");
 
             company.setText(companyName);
-            returns.setText(Double.toString(returnAmount));
+            returns.setText(FormatUtils.formatPrice(returnAmount));
 
             setConstraints(company, 0, 0);
             setConstraints(returnLabel,0,1);
             setConstraints(returns,1,1);
             getChildren().addAll(company,returnLabel,returns);
+        }
+    }
+
+    private class TooltipForProfitGraph extends GridPane {
+        private Label dateValue = new Label();
+        private Label profitValue = new Label();
+
+        private TooltipForProfitGraph(String date, double profit) {
+            getStyleClass().add("tooltip-content");
+
+            Label dateLabel = new Label("DATE:");
+            Label profitLabel = new Label("PROFIT:");
+
+            dateValue.setText(date);
+            profitValue.setText(FormatUtils.formatPrice(profit));
+            if (profit >= 0) {
+                profitValue.getStyleClass().add("profit-label");
+            } else {
+                profitValue.getStyleClass().add("loss-label");
+            }
+
+            setConstraints(dateLabel, 0, 0);
+            setConstraints(dateValue,1,0);
+            setConstraints(profitLabel,0,1);
+            setConstraints(profitValue,1,1);
+            getChildren().addAll(dateLabel,dateValue,profitLabel,profitValue);
+            GridPane.setHalignment(profitValue, HPos.RIGHT);
+            GridPane.setHalignment(dateValue, HPos.RIGHT);
         }
     }
 }

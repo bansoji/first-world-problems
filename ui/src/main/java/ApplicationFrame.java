@@ -62,7 +62,7 @@ public class ApplicationFrame extends Application {
     private AnalysisBuilder a = new AnalysisBuilder();
     private StatsBuilder s = new StatsBuilder();
 
-    private static String VERSION_NUMBER = "1.0.0";
+    private static String VERSION_NUMBER = "1.1.0";
     private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
     private static String FOOTER_MESSAGE = "Get the latest release at our website.";
 
@@ -378,6 +378,7 @@ public class ApplicationFrame extends Application {
         startDatePicker.setOnAction(new EventHandler() {
             public void handle(javafx.event.Event t) {
                 LocalDate date = startDatePicker.getValue();
+                if (date == null) return;
                 long startDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 g.updateLowerBound(startDate);
             }
@@ -388,6 +389,7 @@ public class ApplicationFrame extends Application {
         endDatePicker.setOnAction(new EventHandler() {
             public void handle(javafx.event.Event t) {
                 LocalDate date = endDatePicker.getValue();
+                if (date == null) return;
                 long endDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
                 g.updateUpperBound(endDate);
             }

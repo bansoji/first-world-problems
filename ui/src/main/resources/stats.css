@@ -37,8 +37,9 @@
     -fx-padding: 30px;
 }
 
-#profit-graph {
-    -fx-padding: 15px;
+#profit-graph .default-color0.chart-series-line {
+    -fx-stroke: #106ece;
+    -fx-stroke-width: 2px;
 }
 
 /* Pie Chart */

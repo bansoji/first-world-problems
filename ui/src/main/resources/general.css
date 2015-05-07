@@ -46,3 +46,11 @@
     -fx-pref-width: 48px;
     -fx-background-radius: 48px;
 }
+
+.profit-label {
+    -fx-text-fill: #2CFC0E;
+}
+
+.loss-label {
+    -fx-text-fill: red;
+}

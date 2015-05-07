@@ -12,11 +12,11 @@ public class Point {
         this.price = price;
     }
 
-    public double getTime() {
+    public double getX() {
         return time;
     }
 
-    public double getPrice() {
+    public double getY() {
         return price;
     }
 }

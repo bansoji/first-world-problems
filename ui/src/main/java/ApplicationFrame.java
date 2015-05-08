@@ -1,3 +1,4 @@
+import alert.AlertManager;
 import format.FormatUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -16,8 +17,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -26,7 +25,6 @@ import javafx.util.StringConverter;
 import main.*;
 import org.joda.time.DateTime;
 
-import javax.swing.*;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -54,8 +52,6 @@ public class ApplicationFrame extends Application {
     private BorderPane analysis;
     private ComboBox<String> companySelector;
     private ChangeListener companyListener;
-    private HBox selector;
-    private HBox settings;
     private Label loadingInfo;
     private ProgressBar loading;
     private ParameterManager<String> manager = new ParameterManager();
@@ -146,7 +142,7 @@ public class ApplicationFrame extends Application {
         analysisTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()));
         analysisTab.setClosable(false);
         analysisTab.setContent(analysis);
-        tabPane.getTabs().addAll(tab,statsTab,analysisTab);
+        tabPane.getTabs().addAll(tab, statsTab, analysisTab);
         addTabLoadingAction(tabPane);
 
         body.getChildren().addAll(tabPane, new Separator());
@@ -312,7 +308,7 @@ public class ApplicationFrame extends Application {
     }
 
     private void addSettingsPanel(HBox header) {
-        settings = new HBox();
+        HBox settings = new HBox();
         settings.setAlignment(Pos.CENTER);
         settings.setSpacing(50);
 
@@ -346,9 +342,9 @@ public class ApplicationFrame extends Application {
         });
 
         //Run button
-        Button runButton = new Button("",new ImageView(getClass().getResource("icons/run.png").toExternalForm()));
+        Button runButton = new Button("",new ImageView(getClass().getResource("icons/run-circle.png").toExternalForm()));
         runButton.setId("run-button");
-        settings.getChildren().addAll(runButton);
+        settings.getChildren().add(runButton);
 
         header.getChildren().add(settings);
 
@@ -358,6 +354,7 @@ public class ApplicationFrame extends Application {
                 new Thread() {
                     public void run() {
                         if (runner.validFiles()) {
+                            runButton.setDisable(true);
                             tabPane.setDisable(true);
                             updateParams();
                             Platform.runLater(new Runnable() {
@@ -392,7 +389,6 @@ public class ApplicationFrame extends Application {
                             addCompanySelectorListener();
 
                             List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
-                            selector.setVisible(true);
 
                             orderReader = new OrderReader(OUTPUT_FILE_PATH);
                             orderReader.readAll();
@@ -407,11 +403,15 @@ public class ApplicationFrame extends Application {
                                     loading.setProgress(1);
                                 }
                             });
+                            runButton.setDisable(false);
                             tabPane.setDisable(false);
                         } else {
-                            JOptionPane.showMessageDialog(null,
-                                    "Please check that you have selected all the required files.",
-                                    "Missing files", JOptionPane.INFORMATION_MESSAGE);
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    AlertManager.info("Missing files", "Please check that you have selected all the required files.");
+                                }
+                            });
                         }
                     }
                 }.start();
@@ -420,17 +420,16 @@ public class ApplicationFrame extends Application {
     }
 
     private void addFilterSelector() {
-        selector = new HBox();
+        HBox selector = new HBox();
         selector.setSpacing(20);
         selector.setPadding(new javafx.geometry.Insets(15, 15, 0, 15));
-        addFilter("Company");
-        addDateFilters();
+        addFilter("Company", selector);
+        addDateFilters(selector);
 
-        selector.setVisible(false);
         graph.setTop(selector);
     }
 
-    private void addDateFilters() {
+    private void addDateFilters(HBox selector) {
         HBox startDatePanel = new HBox();
         startDatePanel.getChildren().add(new Label("Start Date: "));
         selector.getChildren().add(startDatePanel);
@@ -524,7 +523,7 @@ public class ApplicationFrame extends Application {
         });
     }
 
-    private void addFilter(String name) {
+    private void addFilter(String name, HBox selector) {
         HBox filter = new HBox();
         companySelector = new ComboBox<>();
         new AutoCompleteComboBoxListener<>(companySelector);

@@ -199,6 +199,7 @@ public class AnalysisBuilder {
         playButton.getStyleClass().add("toolbar-button");
         Button pauseButton = new Button("", new ImageView(getClass().getResource("icons/pause.png").toExternalForm()));
         pauseButton.getStyleClass().add("toolbar-button");
+        pauseButton.setDisable(true);
         Button clearButton = new Button("", new ImageView(getClass().getResource("icons/refresh.png").toExternalForm()));
         clearButton.getStyleClass().add("toolbar-button");
         Button settingsButton = new Button("",new ImageView(getClass().getResource("icons/spanner.png").toExternalForm()));
@@ -218,6 +219,8 @@ public class AnalysisBuilder {
         playButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                playButton.setDisable(true);
+                pauseButton.setDisable(false);
                 t = new Thread(r);
                 t.start();
             }
@@ -228,6 +231,8 @@ public class AnalysisBuilder {
                 if (t != null) {
                     t.interrupt();
                     runner.stop();
+                    playButton.setDisable(false);
+                    pauseButton.setDisable(true);
                 }
             }
         });

@@ -26,6 +26,7 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
 import main.*;
+import org.gillius.jfxutils.chart.JFXChartUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -258,9 +259,7 @@ public class StatsBuilder {
                 dialog.show();
             }
         });
-        final ContextMenu menu = new ContextMenu(
-                chartReturnsItem
-        );
+        final ContextMenu menu = new ContextMenu(chartReturnsItem);
 
         tableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -309,7 +308,7 @@ public class StatsBuilder {
         return chart;
     }
 
-    private LineChart buildProfitChart (List<Profit> profitList) {
+    private Region buildProfitChart (List<Profit> profitList) {
         DateValueAxis xAxis = new DateValueAxis();
         NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("Date");
@@ -342,8 +341,32 @@ public class StatsBuilder {
             tooltip.setGraphic(new TooltipForProfitGraph(df.print((long) data.getXValue()), (double) data.getYValue()));
             Tooltip.install(data.getNode(), tooltip);
         }
-
-        return lineChart;
+        final MenuItem resetZoomItem = new MenuItem("Reset zoom", new ImageView(getClass().getResource("icons/reset_zoom.png").toExternalForm()));
+        resetZoomItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                xAxis.setAutoRanging(true);
+                yAxis.setAutoRanging(true);
+            }
+        });
+        final ContextMenu menu = new ContextMenu(resetZoomItem);
+        lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getButton().equals(MouseButton.PRIMARY)) {
+                    if (event.getClickCount() == 2) {
+                        xAxis.setAutoRanging(true);
+                        yAxis.setAutoRanging(true);
+                    }
+                } else if (event.getButton().equals(MouseButton.SECONDARY)) {
+                    if (menu.isShowing()) {
+                        menu.hide();
+                    } else {
+                        menu.show(lineChart, event.getScreenX(), event.getScreenY());
+                    }
+                }
+            }
+        });
+        return JFXChartUtil.setupZooming(lineChart);
     }
 
     private TableView buildEquityTable(Map<String,Double> equities) {

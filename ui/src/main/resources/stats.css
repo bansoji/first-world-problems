@@ -46,6 +46,10 @@
     -fx-background-color: #106ece;
 }
 
+#profit-graph .chart-line-symbol:hover {
+    -fx-background-color: #000033;
+}
+
 /* Pie Chart */
 #piechart-placeholder {
     -fx-alignment: center;

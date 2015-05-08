@@ -1,6 +1,8 @@
+import date.DateUtils;
 import main.OrderType;
 import quickDate.Order;
 import quickDate.Price;
+import utils.Point;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,15 +77,15 @@ public class PriceChannelStrategy implements TradingStrategy {
     @Override
     public void generateOrders() {
         // This will trigger the pipeline to generate orders.
-        List<Double> priceInput = new ArrayList<Double>();
+        List<Point> priceInput = new ArrayList<>();
         for (Price p : prices) {
-            priceInput.add(p.getValue());       // TODO: This could potentially be optimised.
+            priceInput.add(new Point((double)DateUtils.parse(p.getDate()).getMillis(), p.getValue()));       // TODO: This could potentially be optimised.
         }
 
         //result.get(0) returns lows. result.get(1) returns highs.
-        List<List<Double>> result = calculateLowsAndHighs(priceInput, minWindowSize, variance);
-        List<Double> lows = result.get(0);
-        List<Double> highs = result.get(1);
+        List<List<Point>> result = calculateLowsAndHighs(priceInput, minWindowSize, variance);
+        List<Point> lows = result.get(0);
+        List<Point> highs = result.get(1);
         //TODO: Rest of method needs to be completed after Channel class is able to return 2 lines.
         //Channel channel = new Channel(lows, highs);
         //double lowGradient =
@@ -99,26 +101,26 @@ public class PriceChannelStrategy implements TradingStrategy {
         return ordersGenerated;
     }
 
-    public List<List<Double>> calculateLowsAndHighs(List<Double> priceInput, int minWindowSize, double variance) {
-        List<List<Double>> result = new ArrayList<List<Double>>();
-        ArrayList<Double> highs = new ArrayList<Double>();
-        ArrayList<Double> lows = new ArrayList<Double>();
+    public List<List<Point>> calculateLowsAndHighs(List<Point> priceInput, int minWindowSize, double variance) {
+        List<List<Point>> result = new ArrayList<>();
+        ArrayList<Point> highs = new ArrayList<>();
+        ArrayList<Point> lows = new ArrayList<>();
 
         int j;
         for (int i = 0; i < priceInput.size(); i += j) {
-            double min = Double.MAX_VALUE;
-            double max = Double.MIN_VALUE;
+            Point min = new Point (0.00, Double.MAX_VALUE);
+            Point max = new Point (0.00, Double.MIN_VALUE);
 
             boolean highsAndLowsAdded = false;
             for (j = 0; i + j < priceInput.size() && !highsAndLowsAdded; j++) {
-                Double price = priceInput.get(j + i);
-                if (price < min) {
+                Point price = priceInput.get(j + i);
+                if (price.getY() < min.getY()) {
                     min = price;
-                } else if (price > max) {
+                } else if (price.getY() > max.getY()) {
                     max = price;
                 }
 
-                if (j >= minWindowSize && max - min >= variance) {
+                if (j >= minWindowSize && max.getY() - min.getY() >= variance) {
                     highs.add(max);
                     lows.add(min);
                     highsAndLowsAdded = true;
@@ -134,7 +136,7 @@ public class PriceChannelStrategy implements TradingStrategy {
     //List<OrderType> l = new ArrayList<OrderType>();
     //  for (int i=1; i<priceInput.size(); i++){
     //  if point > highLine and lastMove == SELL, buy
-    //  if point < lowline and lastMove == BUY, sell
+    //  if point < lowLine and lastMove == BUY, sell
     //  }
     //  return l;
     //}

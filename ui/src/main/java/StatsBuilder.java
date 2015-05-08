@@ -1,4 +1,5 @@
 import format.FormatUtils;
+import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -26,6 +27,7 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
 import main.*;
+import org.gillius.jfxutils.chart.ChartPanManager;
 import org.gillius.jfxutils.chart.JFXChartUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -352,12 +354,11 @@ public class StatsBuilder {
         lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                if (event.getButton().equals(MouseButton.PRIMARY)) {
-                    if (event.getClickCount() == 2) {
-                        xAxis.setAutoRanging(true);
-                        yAxis.setAutoRanging(true);
-                    }
-                } else if (event.getButton().equals(MouseButton.SECONDARY)) {
+                if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+                    xAxis.setAutoRanging(true);
+                    yAxis.setAutoRanging(true);
+                } else if (event.getButton().equals(MouseButton.MIDDLE)
+                        || (event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY))) {
                     if (menu.isShowing()) {
                         menu.hide();
                     } else {
@@ -366,7 +367,8 @@ public class StatsBuilder {
                 }
             }
         });
-        return JFXChartUtil.setupZooming(lineChart);
+
+        return ChartPanZoomManager.setup(lineChart);
     }
 
     private TableView buildEquityTable(Map<String,Double> equities) {

@@ -62,6 +62,7 @@ public class ApplicationFrame extends Application {
     private TableView paramTable;
     private TabPane tabPane;
     private HashSet<Tab> loadedTabs = new HashSet<>();
+    private Portfolio portfolio = new Portfolio(new History<>());
 
     private GraphBuilder g = new GraphBuilder();
     private AnalysisBuilder a = new AnalysisBuilder();
@@ -87,6 +88,13 @@ public class ApplicationFrame extends Application {
         initHeader();
         initBody();
         initFooter();
+        //TODO Remove hack - for some reason the graph doesn't load for the first time
+        loadContent(new ArrayList<>(), new ArrayList<>(), true);
+
+        graph.setVisible(false);
+        stats.setVisible(false);
+        analysis.setVisible(false);
+
         primaryStage.show();
     }
 
@@ -115,7 +123,6 @@ public class ApplicationFrame extends Application {
     private void initBody()
     {
         final VBox body = new VBox();
-
         graph = new BorderPane();
         stats = new GridPane();
         analysis = new BorderPane();
@@ -127,11 +134,13 @@ public class ApplicationFrame extends Application {
         tab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-data-icon.png").toExternalForm()));
         tab.setClosable(false);
         tab.setContent(graph);
+
         Tab statsTab = new Tab();
         statsTab.setText("Portfolio");
         statsTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-portfolio-icon.png").toExternalForm()));
         statsTab.setClosable(false);
         statsTab.setContent(stats);
+
         Tab analysisTab = new Tab();
         analysisTab.setText("Analysis");
         analysisTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()));
@@ -139,11 +148,6 @@ public class ApplicationFrame extends Application {
         analysisTab.setContent(analysis);
         tabPane.getTabs().addAll(tab,statsTab,analysisTab);
         addTabLoadingAction(tabPane);
-        //TODO Remove hack - for some reason the graph doesn't load for the first time
-        loadContent(new History<>(), new ArrayList<>(), new ArrayList<>(), true);
-        graph.setVisible(false);
-        stats.setVisible(false);
-        analysis.setVisible(false);
 
         body.getChildren().addAll(tabPane, new Separator());
 
@@ -155,10 +159,12 @@ public class ApplicationFrame extends Application {
             @Override
             public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
                 if (!oldValue.equals(newValue)) {
+                    //select the new tab first cause this is not done by default
+                    tabPane.getSelectionModel().select(newValue.intValue());
                     if (orderReader == null || priceReader == null) return;
                     Set<String> companies = orderReader.getHistory().getAllCompanies();
                     String firstCompany = companies.iterator().next();
-                    loadContent(orderReader.getHistory(), priceReader.getCompanyHistory(firstCompany), orderReader.getCompanyHistory(firstCompany), false);
+                    loadContent(priceReader.getCompanyHistory(firstCompany), orderReader.getCompanyHistory(firstCompany), false);
                 }
             }
         });
@@ -231,14 +237,14 @@ public class ApplicationFrame extends Application {
                     List<Price> prices = priceReader.getCompanyHistory(companyName);
                     List<Order> orders = orderReader.getCompanyHistory(companyName);
                     loadedTabs.remove(tabPane.getSelectionModel().getSelectedItem());
-                    loadContent(orderReader.getHistory(), prices, orders, false);
+                    loadContent(prices, orders, false);
                 }
             };
         }
         companySelector.valueProperty().addListener(companyListener);
     }
 
-    private void loadContent(History<Order> history, List<Price> prices, List<Order> orders, boolean force)
+    private void loadContent(List<Price> prices, List<Order> orders, boolean force)
     {
         Map<DateTime, OrderType> orderRecord = new HashMap<>();
         if (orders != null) {
@@ -254,6 +260,8 @@ public class ApplicationFrame extends Application {
                 if (loaded && !force) {
                     return;
                 }
+                loadingInfo.setText("Refreshing content...");
+                loading.setProgress(0);
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Data") && !loaded) || force) {
                     graph.setVisible(false);
                     g.buildGraph(graph, prices, orders, orderRecord);
@@ -261,7 +269,7 @@ public class ApplicationFrame extends Application {
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Portfolio") && !loaded) || force) {
                     stats.setVisible(false);
-                    s.build(stats, history, prices, orderRecord);
+                    s.build(stats, portfolio, prices, orderRecord);
                     stats.setVisible(true);
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Analysis") && !loaded) || force) {
@@ -269,6 +277,8 @@ public class ApplicationFrame extends Application {
                     a.buildAnalysis(runner, analysis, manager.getParams().keySet());
                     analysis.setVisible(true);
                 }
+                loadingInfo.setText("Loaded.");
+                loading.setProgress(1.0);
                 if (force) {
                     loadedTabs.addAll(tabPane.getTabs());
                 } else {
@@ -388,8 +398,9 @@ public class ApplicationFrame extends Application {
                             orderReader.readAll();
                             List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
 
-                            a.addRow(manager.getParams(), FormatUtils.round2dp(new Portfolio(orderReader.getHistory()).getTotalReturnValue()));
-                            loadContent(orderReader.getHistory(), prices, orders, false);
+                            portfolio = new Portfolio(orderReader.getHistory());
+                            a.addRow(manager.getParams(), FormatUtils.round2dp(portfolio.getTotalReturnValue()));
+                            loadContent(prices, orders, false);
                             Platform.runLater(new Runnable() {
                                 public void run() {
                                     loadingInfo.setText("");

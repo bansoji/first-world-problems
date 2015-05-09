@@ -41,7 +41,7 @@ public class OrderManager {
 
         logger.info("====== Buy Hard =========\n" +
                 "Developer Team: Group 1\n" +
-                "MODULE NAME: BuyHard-Momentum-" + VERSION + ".jar\n" +
+                "MODULE NAME: BuyHard-Momentum-" + VERSION + ".jar\n" + /* NOTE: This should change */
                 "MODULE VERSION: " + VERSION + "\n" +
                 "INPUT FILE: " + fileName + "\n" +
                 "OUTPUT FILE: " + FileManager.OUTPUT_FILE + "\n" +
@@ -74,7 +74,9 @@ public class OrderManager {
             // PrintUtils.printPrices(companyHistory);
 
             // Initialise the trading strategy.
-            TradingStrategy strategy = new MomentumStrategy(companyHistory, input);
+            //TradingStrategy strategy = new MomentumStrategy(companyHistory, input);
+            TradingStrategy strategy = new MeanReversionStrategy(companyHistory, input);
+
 
             ///////////////////////////////
             // RUNNING.
@@ -84,6 +86,9 @@ public class OrderManager {
             strategy.generateOrders();
             List<Order> ordersGenerated = strategy.getOrders();
             csvOrderWriter.writeOrders(ordersGenerated);
+
+            // DEBUGGING:
+            printProfitability(ordersGenerated);
 
         }
 
@@ -111,6 +116,10 @@ public class OrderManager {
         logger.info("Module successful. No errors encountered.");
     }
 
+    /**
+     * A simple profit calculation (but does not account for the last buy.
+     * @param ordersGenerated A list of Orders that were generated.
+     */
     private static void printProfitability(List<Order> ordersGenerated){
         double profit = 0.0;
         for (Order oo : ordersGenerated){

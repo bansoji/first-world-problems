@@ -1,8 +1,12 @@
+package main;
+
 import com.opencsv.CSVReader;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -17,7 +21,7 @@ public abstract class Parser<T> {
 
     public Parser (String fileName) {
         try {
-            this.reader = new CSVReader(new FileReader(fileName));
+            this.reader = new CSVReader(new BufferedReader(new FileReader(fileName)));
             try {
                 //skip first line
                 reader.readNext();

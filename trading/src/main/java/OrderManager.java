@@ -1,3 +1,7 @@
+import quickDate.*;
+import main.Reader;
+
+import java.io.*;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -22,11 +26,13 @@ public class OrderManager {
     public static final String LOG_NAME = "log";
 
     public static void main(String[] args) throws IOException {
+        long startTime = System.currentTimeMillis();
         if (args.length != 2){
             System.out.println("Error: Incorrect program usage.");
             System.out.println("Usage: java -jar <BuyHardModule> <pricesFile> <paramFile>");
             return;
         }
+
         String fileName = args[0];
         String paramName = args[1]; // To use, go to "Run -> Edit Configurations" and add
         // "common/src/main/resources/sampleData trading/resources/config.properties" to program args
@@ -34,7 +40,6 @@ public class OrderManager {
         ///////////////////////////////
         // INITIALISATION.
         ///////////////////////////////
-
         // Logger initialisation.
         Logger logger = Logger.getLogger("log");
         FileHandler handler = new FileHandler(LOG_FILE);
@@ -55,9 +60,9 @@ public class OrderManager {
         tReader.readAll();
 
         // Initialise the File and CSV Writer.
-        FileWriter orderFile;
+        BufferedWriter orderFile;
         try {
-            orderFile = new FileWriter(OUTPUT_FILE);
+            orderFile = new BufferedWriter(new FileWriter(OUTPUT_FILE));
         } catch (IOException e) {
             logger.severe(e.getMessage());
             return;
@@ -68,12 +73,13 @@ public class OrderManager {
         Thread[] threads = new Thread[(tReader.getHistory().getAllCompanies()).size()];
         TradingStrategy[] strategies = new TradingStrategy[(tReader.getHistory().getAllCompanies()).size()];
 
+        //endTime = System.currentTimeMillis();
         // Initialise the timer.
-        long startTime = System.currentTimeMillis();
+        //startTime = System.currentTimeMillis();
 
         int i = 0;
         // Load the properties file.
-        InputStream input = new FileInputStream(paramName);
+        InputStream input = new BufferedInputStream(new FileInputStream(paramName));
 
         for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
             logger.info("Analysing prices for " + company);
@@ -117,6 +123,7 @@ public class OrderManager {
         // System.out.println("Time passed = " + elapsedTime + "ms");
         logger.info("Time Elapsed : " + elapsedTime + "ms");
 
+        startTime = System.currentTimeMillis();
         // Close the orders file and CSV Writer.
         csvOrderWriter.closeWriter();
         try {
@@ -126,7 +133,6 @@ public class OrderManager {
         }
         input.close();
         handler.close();
-
         // Log successful.
         logger.info("Module successful. No errors encountered.");
     }

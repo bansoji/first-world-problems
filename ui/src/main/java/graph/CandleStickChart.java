@@ -57,6 +57,7 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.util.Duration;
+import org.joda.time.DateTime;
 
 /**
  * A candlestick chart is a style of bar-chart used primarily to describe price movements of a security, derivative,
@@ -397,7 +398,7 @@ public class CandleStickChart extends XYChart<Long,Number> {
         }
 
         public void update(NodeType type, long date, double open, double close, double high, double low) {
-            dateValue.setText(DateUtils.formatMonthAbbr(new Date(date)));
+            dateValue.setText(DateUtils.formatMonthAbbr(new DateTime(date)));
             openValue.setText(Double.toString(open));
             closeValue.setText(Double.toString(close));
             highValue.setText(Double.toString(high));

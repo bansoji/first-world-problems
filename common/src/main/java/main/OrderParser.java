@@ -1,7 +1,9 @@
+package main;
+
 import date.DateUtils;
+import org.joda.time.DateTime;
 
 import java.io.IOException;
-import java.util.Date;
 
 /**
  * Created by jasonlim on 30/03/15.
@@ -27,7 +29,6 @@ public class OrderParser extends Parser<Order> {
             if (nextLine != null) {
                 String companyName = nextLine[ORDER_COMPANY_NAME];
                 double value;
-                Date date = null;
 
                 //get the next line with a price
                 while (nextLine[ORDER_PRICE].equals("")) {
@@ -37,7 +38,7 @@ public class OrderParser extends Parser<Order> {
                 }
                 numberOfFileLines += 1;
                 value = Double.parseDouble(nextLine[ORDER_PRICE]);
-                date = DateUtils.parse(nextLine[ORDER_DATE], "Incorrect date format in the input file.");
+                DateTime date = DateUtils.parseMonthAbbr(nextLine[ORDER_DATE]);
 
                 OrderType type;
                 if (nextLine[ORDER_SIGNAL].equals("B")) {

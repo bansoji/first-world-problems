@@ -1,3 +1,5 @@
+package main;
+
 import date.DateUtils;
 
 import java.util.List;
@@ -19,7 +21,7 @@ public class PrintUtils {
             double orderValue = order.getValue();
             OrderType orderType = order.getOrderType();
             String orderSignal = orderType.getSignal(orderType);
-            String orderDate = DateUtils.format(order.getOrderDate());
+            String orderDate = DateUtils.formatMonthAbbr(order.getOrderDate());
             System.out.println(orderCompany + " " + orderPrice + " " + orderValue + " " + orderSignal + " " + orderDate);
         }
     }
@@ -32,7 +34,7 @@ public class PrintUtils {
         }
         for (Price price: prices) {
             String priceCompany = price.getCompanyName();
-            String priceDate = DateUtils.format(price.getDate());
+            String priceDate = DateUtils.formatMonthAbbr(price.getDate());
             double priceValue = price.getValue();
             System.out.println(priceCompany + " " + priceDate + " " + priceValue);
         }

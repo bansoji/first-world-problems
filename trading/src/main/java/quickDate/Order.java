@@ -1,6 +1,9 @@
-import date.DateUtils;
+package quickDate;
 
-import java.util.Date;
+import date.DateUtils;
+import main.OrderType;
+import org.joda.time.DateTime;
+
 import java.util.logging.Logger;
 
 /**
@@ -12,7 +15,7 @@ public class Order {
     private String companyName; // RIC (Name) of the Order.
     private double price; // The price of the Order to place.
     private int volume; // The number of items to trade.
-    private Date date; // The date of the Order.
+    private String date; // The date of the Order.
 
     private static final Logger logger = Logger.getLogger("log");
 
@@ -24,7 +27,7 @@ public class Order {
      * @param volume            The number of shares to buy or sell.
      * @param date              The date of the order.
      */
-    public Order(OrderType signal, String companyName, double price, int volume, Date date){
+    public Order(OrderType signal, String companyName, double price, int volume, String date){
         this.signal = signal;
         this.companyName = companyName;
         this.price = price;
@@ -83,14 +86,14 @@ public class Order {
      * Returns the Order date.
      * @return a Date object corresponding to the date of the file.
      */
-    public Date getOrderDate(){
+    public String getOrderDate(){
         return this.date;
     }
 
     public String[] toStringArray() {
         String[] s = new String[6];
         s[0] = this.companyName;
-        s[1] = DateUtils.format(this.date);
+        s[1] = this.date;
         s[2] = String.valueOf(this.price);
         s[3] = String.valueOf(this.volume);
         s[4] = String.valueOf(this.getValue());

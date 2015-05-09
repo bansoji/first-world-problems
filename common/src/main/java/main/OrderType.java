@@ -1,3 +1,5 @@
+package main;
+
 /**
  * This enum represents an Order type.
  */

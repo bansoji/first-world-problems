@@ -1,6 +1,7 @@
 import com.opencsv.CSVWriter;
+import quickDate.Order;
 
-import java.io.FileWriter;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -16,7 +17,7 @@ public class OrderWriter {
     private CSVWriter writer;
     private int numOrdersGenerated;
 
-    public OrderWriter(FileWriter file){
+    public OrderWriter(BufferedWriter file){
         this.writer = new CSVWriter(file, ',', CSVWriter.NO_QUOTE_CHARACTER);
         String[] header = new String[] {"#RIC", "Date", "Price", "Volume", "Value", "Signal"};
         // Print the header.

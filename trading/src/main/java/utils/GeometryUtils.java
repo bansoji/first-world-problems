@@ -68,4 +68,15 @@ public class GeometryUtils {
         // b = y - mx
         return point.getY() - (slope * point.getX());
     }
+
+    /**
+     * Given a line, extrapolates a predicted price from a given date.
+     * @param line  The line to extrapolate from.
+     * @param time  The given date (in milliseconds).
+     * @return      The predicted price.
+     */
+    public static double predictedPrice (Line line, double time) {
+        //y = mx + b
+        return (line.getSlope() * time) + line.getIntercept();
+    }
 }

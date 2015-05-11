@@ -11,7 +11,9 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
- * An implementation of the Mean Reversion Strategy.
+ * BuyHard Vengeance
+ * Aka: The Mean Reversion Strategy.
+ * When the price goes below the mean, buy hard.
  */
 public class MeanReversionStrategy implements TradingStrategy {
     private List<Price> prices;

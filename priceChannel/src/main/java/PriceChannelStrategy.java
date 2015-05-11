@@ -2,6 +2,8 @@ import date.DateUtils;
 import main.OrderType;
 import quickDate.Order;
 import quickDate.Price;
+import utils.Channel;
+import utils.Line;
 import utils.Point;
 
 import java.io.IOException;
@@ -11,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import static utils.GeometryUtils.predictedPrice;
 
 /**
  * An implementation of the Price Channel Strategy.
@@ -80,11 +84,11 @@ public class PriceChannelStrategy implements TradingStrategy {
         // This will trigger the pipeline to generate orders.
         List<Point> priceInput = new ArrayList<>();
         for (Price p : prices) {
-            priceInput.add(new Point((double)DateUtils.parse(p.getDate().getMillis()), p.getValue()));       // TODO: This could potentially be optimised.
+            priceInput.add(new Point((double)DateUtils.parse(p.getDate()).getMillis(), p.getValue()));       // TODO: This could potentially be optimised.
         }
 
         // result.get(0) returns low points.
-        // result.get(1) returns high points.
+        // result.get(1) returns high points.gg
         List<List<Point>> result = calculateLowsAndHighs(priceInput, minWindowSize, variance); //Need to handle case where method does not return enough values.
         Channel channel = new Channel(result.get(0), result.get(1));
         Line lowLine = channel.getLowLine();    //Returns a line of best fit given low points.
@@ -103,7 +107,7 @@ public class PriceChannelStrategy implements TradingStrategy {
                     continue;
 
                 // Skip if the date given is out of the simulation date range.
-                Price tradePrice = prices.get(i + movingAvgTimeWindow);
+                Price tradePrice = prices.get(i);
 
                 if (startDate != null && DateUtils.before(tradePrice.getDate(), startDate)) continue;
                 if (endDate != null && DateUtils.after(tradePrice.getDate(), endDate)) continue;
@@ -120,7 +124,7 @@ public class PriceChannelStrategy implements TradingStrategy {
 
             if (tradeSignals.get(i).equals(nextStatus)) {
                 // Create an order using this ith day.
-                // Get the price for that day. Offset by moving average.
+                // Get the price for that day.
                 Price tradePrice = prices.get(i);
 
                 // Skip if the date given is out of the simulation date range.
@@ -148,7 +152,6 @@ public class PriceChannelStrategy implements TradingStrategy {
         List<List<Point>> result = new ArrayList<>();
         ArrayList<Point> highs = new ArrayList<>();
         ArrayList<Point> lows = new ArrayList<>();
-        Point firstPrice = priceInput.get(0);   //Need to handle case where priceInput.size() == 0
 
         int j;
         for (int i=0; i < priceInput.size(); i+=j) {
@@ -183,8 +186,8 @@ public class PriceChannelStrategy implements TradingStrategy {
         for (int i=1; i<priceInput.size(); i++){
             double pDate = priceInput.get(i).getX();
             double pPrice = priceInput.get(i).getY();
-            double predictedLowPrice(low, pDate);
-            double predictedHighPrice(high, pDate);
+            double predictedLowPrice = predictedPrice(low, pDate);
+            double predictedHighPrice = predictedPrice(high, pDate);
 
             if (pPrice >= predictedHighPrice-threshold) {
                 l.add(OrderType.SELL);

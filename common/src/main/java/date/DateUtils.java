@@ -18,9 +18,12 @@ public class DateUtils {
 
     private static final DateTimeFormatter df = DateTimeFormat.forPattern("dd-MM-yyyy");
     private static final DateTimeFormatter monthAbbrFormat = DateTimeFormat.forPattern("dd-MMM-yyyy");
+    private static final DateTimeFormatter yearFirstFormat = DateTimeFormat.forPattern("yyyy-MM-dd");
     private static final Logger logger = Logger.getLogger("log");
     private static final String dd_MM_yyyy = "\\d{1,2}-\\d{1,2}-\\d{4}";
     private static final String dd_MMM_yyyy = "\\d{1,2}-[a-zA-Z]{1,3}-\\d{4}";
+    private static final String yyyy_MM_dd = "\\d{4}-\\d{1,2}-\\d{1,2}";
+
 
     public static String format(DateTime date)
     {
@@ -30,6 +33,10 @@ public class DateUtils {
     public static String formatMonthAbbr(DateTime date)
     {
         return monthAbbrFormat.print(date);
+    }
+
+    public static String formatYearFirst(DateTime date) {
+        return yearFirstFormat.print(date);
     }
 
     public static DateTime parse(String string, String parseErrorMessage)
@@ -62,10 +69,26 @@ public class DateUtils {
         return parseMonthAbbr(string, "Error parsing date.");
     }
 
+    public static DateTime parseYearFirst(String string, String parseErrorMessage)
+    {
+        try {
+            return yearFirstFormat.parseDateTime(string).withZone(DateTimeZone.getDefault());
+        } catch (Exception e) {
+            logger.warning(parseErrorMessage);
+            return null;
+        }
+    }
+
+    public static DateTime parseYearFirst(String string)
+    {
+        return parseYearFirst(string, "Error parsing date.");
+    }
+
+
     //compare two date strings
     public static Boolean before(String s1, String s2) {
-        if (!(s1.matches(dd_MMM_yyyy) && s1.matches(dd_MM_yyyy))
-                && !(s2.matches(dd_MMM_yyyy) && s2.matches(dd_MM_yyyy)))
+        if (!(s1.matches(dd_MMM_yyyy) && s1.matches(dd_MM_yyyy) && s1.matches(yyyy_MM_dd))
+                && !(s2.matches(dd_MMM_yyyy) && s2.matches(dd_MM_yyyy) && s2.matches(yyyy_MM_dd)))
             return null;
 
         String[] tokens1 = s1.split("-");

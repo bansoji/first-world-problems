@@ -1,10 +1,9 @@
+import quickDate.*;
 import main.Reader;
-import quickDate.Order;
-import quickDate.Price;
-import quickDate.PriceReader;
 
 import java.io.*;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
@@ -22,8 +21,8 @@ public class OrderManager {
     public static void main(String[] args) throws IOException {
         long startTime = System.currentTimeMillis();
         if (args.length != 2){
-            System.out.println("Error: Incorrect program usage.");
-            System.out.println("Usage: java -jar <BuyHardModule> <pricesFile> <paramFile>");
+            System.err.println("Error: Incorrect program usage.");
+            System.err.println("Usage: java -jar <BuyHardModule> <pricesFile> <paramFile>");
             return;
         }
 
@@ -35,19 +34,36 @@ public class OrderManager {
         // INITIALISATION.
         ///////////////////////////////
         // Logger initialisation.
-        Logger logger = Logger.getLogger("log");
-        FileHandler handler = new FileHandler(FileManager.LOG_FILE);
+        Logger logger = Logger.getLogger(FileManager.LOG_NAME);
+        logger.setUseParentHandlers(false);
+
+        // Load the properties file.
+        InputStream config = new FileInputStream(paramName);
+        Properties prop = new Properties();
+
+        try {
+            prop.load(config);
+        } catch (IOException e) {
+            logger.severe("Invalid Parameters File.");
+            e.printStackTrace();
+        }
+        config.close();
+
+        String outputFileName = prop.getProperty("outputFileName", FileManager.OUTPUT_FILE);
+        String logFileName = prop.getProperty("outputLogName", FileManager.LOG_FILE);
+
+        FileHandler handler = new FileHandler(logFileName);
         SimpleFormatter formatter = new SimpleFormatter();
         handler.setFormatter(formatter);
         logger.addHandler(handler);
 
         logger.info("====== Buy Hard =========\n" +
                 "Developer Team: Group 1\n" +
-                "MODULE NAME: BuyHard-MeanReversion-" + VERSION + ".jar\n" +
+                "MODULE NAME: BuyHard-Vengeance-" + VERSION + ".jar\n" +
                 "MODULE VERSION: " + VERSION + "\n" +
                 "INPUT FILE: " + fileName + "\n" +
-                "OUTPUT FILE: " + FileManager.OUTPUT_FILE + "\n" +
-                "LOG FILE: " + FileManager.LOG_FILE);
+                "OUTPUT FILE: " + outputFileName + "\n" +
+                "LOG FILE: " + logFileName);
 
         // Load the csv file.
         Reader tReader = new PriceReader(fileName);
@@ -56,7 +72,7 @@ public class OrderManager {
         // Initialise the File and CSV Writer.
         BufferedWriter orderFile;
         try {
-            orderFile = new BufferedWriter(new FileWriter(FileManager.OUTPUT_FILE));
+            orderFile = new BufferedWriter(new FileWriter(outputFileName));
         } catch (IOException e) {
             logger.severe(e.getMessage());
             return;
@@ -99,7 +115,7 @@ public class OrderManager {
         // System.out.println("Time passed = " + elapsedTime + "ms");
         logger.info("Time Elapsed : " + elapsedTime + "ms");
 
-        startTime = System.currentTimeMillis();
+        //startTime = System.currentTimeMillis();
         // Close the orders file and CSV Writer.
         csvOrderWriter.closeWriter();
         try {

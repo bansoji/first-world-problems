@@ -458,7 +458,11 @@ public class ApplicationFrame extends Application {
 
                             List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
 
-                            orderReader = new OrderReader(OUTPUT_FILE_PATH);
+                            if (FileUtils.matches(runner.getStrategyFile(),"aurora.jar")) {
+                                orderReader = new OrderReaderKoK(OUTPUT_FILE_PATH);
+                            } else {
+                                orderReader = new OrderReader(OUTPUT_FILE_PATH);
+                            }
                             orderReader.readAll();
                             List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
 

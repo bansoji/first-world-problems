@@ -69,10 +69,26 @@ public class DateUtils {
         return parseMonthAbbr(string, "Error parsing date.");
     }
 
+    public static DateTime parseYearFirst(String string, String parseErrorMessage)
+    {
+        try {
+            return yearFirstFormat.parseDateTime(string).withZone(DateTimeZone.getDefault());
+        } catch (Exception e) {
+            logger.warning(parseErrorMessage);
+            return null;
+        }
+    }
+
+    public static DateTime parseYearFirst(String string)
+    {
+        return parseYearFirst(string, "Error parsing date.");
+    }
+
+
     //compare two date strings
     public static Boolean before(String s1, String s2) {
-        if (!(s1.matches(dd_MMM_yyyy) && s1.matches(dd_MM_yyyy))
-                && !(s2.matches(dd_MMM_yyyy) && s2.matches(dd_MM_yyyy)))
+        if (!(s1.matches(dd_MMM_yyyy) && s1.matches(dd_MM_yyyy) && s1.matches(yyyy_MM_dd))
+                && !(s2.matches(dd_MMM_yyyy) && s2.matches(dd_MM_yyyy) && s2.matches(yyyy_MM_dd)))
             return null;
 
         String[] tokens1 = s1.split("-");

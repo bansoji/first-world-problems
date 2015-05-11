@@ -6,7 +6,9 @@ import org.joda.time.DateTime;
 import java.io.IOException;
 
 /**
- * Created by addo on 11/05/15.
+ * Order Parser Integration.
+ *
+ * Used to integrate with another module that uses the format of yyyy-MM-dd
  */
 public class OrderParserIntegration extends OrderParser{
     //Column numbers for output order prices data file.
@@ -37,7 +39,7 @@ public class OrderParserIntegration extends OrderParser{
                 }
                 numberOfFileLines += 1;
                 value = Double.parseDouble(nextLine[ORDER_PRICE]);
-                DateTime date = DateUtils.parseMonthAbbr(nextLine[ORDER_DATE]);
+                DateTime date = DateUtils.parseYearFirst(nextLine[ORDER_DATE]);
 
                 OrderType type;
                 if (nextLine[ORDER_SIGNAL].equals("B")) {

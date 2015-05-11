@@ -6,6 +6,7 @@ import utils.Point;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.Double;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -79,20 +80,62 @@ public class PriceChannelStrategy implements TradingStrategy {
         // This will trigger the pipeline to generate orders.
         List<Point> priceInput = new ArrayList<>();
         for (Price p : prices) {
-            priceInput.add(new Point((double)DateUtils.parse(p.getDate()).getMillis(), p.getValue()));       // TODO: This could potentially be optimised.
+            priceInput.add(new Point((double)DateUtils.parse(p.getDate().getMillis()), p.getValue()));       // TODO: This could potentially be optimised.
         }
 
-        //result.get(0) returns lows. result.get(1) returns highs.
-        List<List<Point>> result = calculateLowsAndHighs(priceInput, minWindowSize, variance);
-        List<Point> lows = result.get(0);
-        List<Point> highs = result.get(1);
-        //TODO: Rest of method needs to be completed after Channel class is able to return 2 lines.
-        //Channel channel = new Channel(lows, highs);
-        //double lowGradient =
-        //double lowB =
-        //double highGradient =
-        //double highB =
+        // result.get(0) returns low points.
+        // result.get(1) returns high points.
+        List<List<Point>> result = calculateLowsAndHighs(priceInput, minWindowSize, variance); //Need to handle case where method does not return enough values.
+        Channel channel = new Channel(result.get(0), result.get(1));
+        Line lowLine = channel.getLowLine();    //Returns a line of best fit given low points.
+        Line highLine = channel.getHighLine();  //Returns a line of best fit given high points.
 
+        // Calculate trade signals.
+        List<OrderType> tradeSignals = generateTradeSignals(priceInput, lowLine, highLine, threshold);
+
+        // Generate orders.
+        OrderType nextStatus = OrderType.NOTHING; // The next status to look for.
+
+        for (int i=0; i<tradeSignals.size(); i++) {
+            if (ordersGenerated.size() == 0){
+                // Starting case.
+                if (tradeSignals.get(i).equals(OrderType.NOTHING))
+                    continue;
+
+                // Skip if the date given is out of the simulation date range.
+                Price tradePrice = prices.get(i + movingAvgTimeWindow);
+
+                if (startDate != null && DateUtils.before(tradePrice.getDate(), startDate)) continue;
+                if (endDate != null && DateUtils.after(tradePrice.getDate(), endDate)) continue;
+
+                // Create a new Order.
+                OrderType currentSignal = tradeSignals.get(i);
+                Order o = new Order(currentSignal, tradePrice.getCompanyName(), tradePrice.getValue(),
+                        volume, tradePrice.getDate());
+                ordersGenerated.add(o);
+
+                // Toggle the nextStatus.
+                nextStatus = currentSignal.getOppositeOrderType();
+            }
+
+            if (tradeSignals.get(i).equals(nextStatus)) {
+                // Create an order using this ith day.
+                // Get the price for that day. Offset by moving average.
+                Price tradePrice = prices.get(i);
+
+                // Skip if the date given is out of the simulation date range.
+                if (startDate != null && DateUtils.before(tradePrice.getDate(), startDate)) continue;
+                if (endDate != null && DateUtils.after(tradePrice.getDate(), endDate)) continue;
+
+                // Create a new Order.
+                Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(),
+                        volume, tradePrice.getDate());
+                ordersGenerated.add(o);
+
+                // Toggle the nextStatus.
+                nextStatus = nextStatus.getOppositeOrderType();
+            }
+        }
 
     }
 
@@ -101,28 +144,29 @@ public class PriceChannelStrategy implements TradingStrategy {
         return ordersGenerated;
     }
 
-    public List<List<Point>> calculateLowsAndHighs(List<Point> priceInput, int minWindowSize, double variance) {
+    private List<List<Point>> calculateLowsAndHighs(List<Point> priceInput, int minWindowSize, double variance) {
         List<List<Point>> result = new ArrayList<>();
         ArrayList<Point> highs = new ArrayList<>();
         ArrayList<Point> lows = new ArrayList<>();
+        Point firstPrice = priceInput.get(0);   //Need to handle case where priceInput.size() == 0
 
         int j;
-        for (int i = 0; i < priceInput.size(); i += j) {
-            Point min = new Point (0.00, Double.MAX_VALUE);
-            Point max = new Point (0.00, Double.MIN_VALUE);
+        for (int i=0; i < priceInput.size(); i+=j) {
+            Point min = new Point (-1, Double.MAX_VALUE);
+            Point max = new Point (-1, Double.MIN_VALUE);
 
             boolean highsAndLowsAdded = false;
-            for (j = 0; i + j < priceInput.size() && !highsAndLowsAdded; j++) {
-                Point price = priceInput.get(j + i);
+            for (j=0; i+j < priceInput.size() && !highsAndLowsAdded; j++) {
+                Point price = priceInput.get(i+j);
                 if (price.getY() < min.getY()) {
                     min = price;
                 } else if (price.getY() > max.getY()) {
                     max = price;
                 }
 
-                if (j >= minWindowSize && max.getY() - min.getY() >= variance) {
-                    highs.add(max);
+                if (j >= minWindowSize && max.getY()-min.getY() >= variance) {
                     lows.add(min);
+                    highs.add(max);
                     highsAndLowsAdded = true;
                 }
             }
@@ -132,12 +176,24 @@ public class PriceChannelStrategy implements TradingStrategy {
         return result;
     }
 
-    //private List<OrderType> generateTradeSignals(List<Double priceInput, Line high, Line low, double threshold){
-    //List<OrderType> l = new ArrayList<OrderType>();
-    //  for (int i=1; i<priceInput.size(); i++){
-    //  if point > highLine and lastMove == SELL, buy
-    //  if point < lowLine and lastMove == BUY, sell
-    //  }
-    //  return l;
-    //}
+    private List<OrderType> generateTradeSignals(List<Point> priceInput, Line low, Line high, double threshold){
+        List<OrderType> l = new ArrayList<OrderType>();
+        l.add(OrderType.NOTHING); // First day is always NOTHING.
+
+        for (int i=1; i<priceInput.size(); i++){
+            double pDate = priceInput.get(i).getX();
+            double pPrice = priceInput.get(i).getY();
+            double predictedLowPrice(low, pDate);
+            double predictedHighPrice(high, pDate);
+
+            if (pPrice >= predictedHighPrice-threshold) {
+                l.add(OrderType.SELL);
+            } else if (pPrice <= predictedLowPrice+threshold) {
+                l.add(OrderType.BUY);
+            } else {
+                l.add(OrderType.NOTHING);
+            }
+        }
+        return l;
+    }
 }

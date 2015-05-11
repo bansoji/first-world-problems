@@ -49,7 +49,7 @@ public class StatsBuilder {
         vbox.getChildren().addAll(buildPortfolioStats(portfolio),equity);
         VBox.setVgrow(equity, Priority.ALWAYS);
 
-        stats.setPadding(new Insets(50, 30, 50, 30));
+        stats.setPadding(new Insets(30, 30, 30, 30));
 
         TableView returnTable = buildTable(portfolio.getReturns(),portfolio.getTotalReturnValue());
         VBox graphs = new VBox();

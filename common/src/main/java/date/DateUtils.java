@@ -64,8 +64,9 @@ public class DateUtils {
 
     //compare two date strings
     public static Boolean before(String s1, String s2) {
-        if (!(s1.matches(dd_MMM_yyyy) && s1.matches(dd_MM_yyyy))
-                && !(s2.matches(dd_MMM_yyyy) && s2.matches(dd_MM_yyyy)))
+        //if one of the strings is not in the required date formats
+        if (!(s1.matches(dd_MMM_yyyy) || s1.matches(dd_MM_yyyy))
+                || !(s2.matches(dd_MMM_yyyy) || s2.matches(dd_MM_yyyy)))
             return null;
 
         String[] tokens1 = s1.split("-");

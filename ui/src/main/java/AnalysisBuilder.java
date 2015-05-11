@@ -29,6 +29,7 @@ import main.OrderReader;
 import main.Portfolio;
 import tablecell.NumericEditableTableCell;
 
+import java.lang.management.PlatformManagedObject;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -37,13 +38,11 @@ import java.util.logging.Logger;
  */
 public class AnalysisBuilder {
 
-    private static final Logger logger = Logger.getLogger("log");
+    private static final Logger logger = Logger.getLogger("application_log");
 
     private BarChart barChart;
     private TableView tableView;
     private Set<String> prevParams;
-    //identifier for param combinations
-    private static int combination_ID = 0;
     private HashMap<String,Double> paramCombinations = new HashMap<>();
     private ObservableList<String> bestParams = FXCollections.observableList(new LinkedList<String>());
     private HashMap<String,Map<String,String>> bestParamValues = new HashMap<>();
@@ -68,7 +67,6 @@ public class AnalysisBuilder {
 
         //restart param storage information
         prevParams = null;
-        combination_ID = 0;
         paramCombinations.clear();
         bestParams.clear();
         bestParamValues.clear();
@@ -102,36 +100,31 @@ public class AnalysisBuilder {
                 return 0;
             }
         });
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                XYChart.Series<String, Double> series = new XYChart.Series<>();
-                int rank = 1;
-                for (String combinationId : bestParams) {
-                    XYChart.Data data = new XYChart.Data<>(String.valueOf(rank++), paramCombinations.get(combinationId));
-                    data.setExtraValue(combinationId);
-                    series.getData().add(data);
-                }
-                //always shows 5 rankings, even if there is no value yet, just put zero
-                for (int i = rank; i <= 5; i++) {
-                    XYChart.Data data = new XYChart.Data<>(String.valueOf(i),(double)0);
-                    series.getData().add(data);
-                }
-                barChart.getData().setAll(series);
-                for (XYChart.Data data : series.getData()) {
-                    if ((double)data.getYValue() == 0) continue;
-                    String combinationId = (String) data.getExtraValue();
-                    Tooltip tooltip = new Tooltip();
-                    tooltip.setGraphic(new TooltipContent(bestParamValues.get(combinationId), paramCombinations.get(combinationId)));
-                    Tooltip.install(data.getNode(), tooltip);
-                    if (paramCombinations.get(combinationId) > 0) {
-                        data.getNode().getStyleClass().add("bar-profit");
-                    } else {
-                        data.getNode().getStyleClass().add("bar-loss");
-                    }
-                }
+        XYChart.Series<String, Double> series = new XYChart.Series<>();
+        int rank = 1;
+        for (String combinationId : bestParams) {
+            XYChart.Data data = new XYChart.Data<>(String.valueOf(rank++), paramCombinations.get(combinationId));
+            data.setExtraValue(combinationId);
+            series.getData().add(data);
+        }
+        //always shows 5 rankings, even if there is no value yet, just put zero
+        for (int i = rank; i <= 5; i++) {
+            XYChart.Data data = new XYChart.Data<>(String.valueOf(i),(double)0);
+            series.getData().add(data);
+        }
+        barChart.getData().setAll(series);
+        for (XYChart.Data data : series.getData()) {
+            if ((double)data.getYValue() == 0) continue;
+            String combinationId = (String) data.getExtraValue();
+            Tooltip tooltip = new Tooltip();
+            tooltip.setGraphic(new TooltipContent(bestParamValues.get(combinationId), paramCombinations.get(combinationId)));
+            Tooltip.install(data.getNode(), tooltip);
+            if (paramCombinations.get(combinationId) > 0) {
+                data.getNode().getStyleClass().add("bar-profit");
+            } else {
+                data.getNode().getStyleClass().add("bar-loss");
             }
-        });
+        }
     }
 
     public void buildAnalysis(StrategyRunner runner, BorderPane analysis, Set<String> params)
@@ -149,6 +142,7 @@ public class AnalysisBuilder {
             paramCombinations.clear();
             bestParams.clear();
             bestParamValues.clear();
+            paramStepValues.clear();
         }
         if (runner.getParamFile() != null) updateParamTable();
         prevParams = params;
@@ -157,19 +151,32 @@ public class AnalysisBuilder {
 
 
     public void addRow(Map<String,?> params, double profit) {
+        if (params == null || params.size() == 0) return;
         Map<String,Object> row = new HashMap<>();
         Map<String,String> copy = new HashMap<>();
-        String combination = String.valueOf(combination_ID++);
+        String combination = "";
         for (String param: params.keySet()) {
             row.put(param, params.get(param));
             copy.put(param, String.valueOf(params.get(param)));
+            combination += params.get(param) + "-";
         }
         row.put("Profit",profit);
         if (!paramCombinations.containsKey(combination)) {
             paramCombinations.put(combination, profit);
-            tableView.getItems().add(row);
-            final String paramCombination = combination;
-            updateChart(paramCombination, copy, profit);
+            if (!Platform.isFxApplicationThread()) {
+                final String paramCombination = combination;
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        tableView.getItems().add(row);
+                        updateChart(paramCombination, copy, profit);
+                    }
+                });
+
+            } else {
+                tableView.getItems().add(row);
+                updateChart(combination, copy, profit);
+            }
         }
     }
 
@@ -212,7 +219,7 @@ public class AnalysisBuilder {
                     runner.run(true);
                     OrderReader orderReader = new OrderReader("orders.csv");
                     orderReader.readAll();
-                    addRow(manager.getParams(), new Portfolio(orderReader.getHistory()).getTotalReturnValue());
+                    addRow(manager.getParams(), FormatUtils.round2dp(new Portfolio(orderReader.getHistory()).getTotalReturnValue()));
                 }
             }
         };
@@ -221,6 +228,8 @@ public class AnalysisBuilder {
             public void handle(ActionEvent event) {
                 playButton.setDisable(true);
                 pauseButton.setDisable(false);
+                clearButton.setDisable(true);
+                settingsButton.setDisable(true);
                 t = new Thread(r);
                 t.start();
             }
@@ -233,6 +242,8 @@ public class AnalysisBuilder {
                     runner.stop();
                     playButton.setDisable(false);
                     pauseButton.setDisable(true);
+                    clearButton.setDisable(false);
+                    settingsButton.setDisable(false);
                 }
             }
         });
@@ -268,6 +279,7 @@ public class AnalysisBuilder {
                 paramCombinations.clear();
                 bestParams.clear();
                 bestParamValues.clear();
+                paramStepValues.clear();
             }
         });
 

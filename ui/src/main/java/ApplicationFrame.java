@@ -10,12 +10,15 @@ import javafx.collections.ObservableList;
 import javafx.event.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -26,19 +29,23 @@ import main.*;
 import org.joda.time.DateTime;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+import java.util.logging.FileHandler;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Created by Gavin Tam on 17/03/15.
  */
 public class ApplicationFrame extends Application {
 
-    private static final Logger logger = Logger.getLogger("log");
+    private static final String LOG_FILE = "application_log";
+    private static final Logger logger = Logger.getLogger(LOG_FILE);
 
     private StrategyRunner runner = new StrategyRunner();
 
@@ -52,8 +59,7 @@ public class ApplicationFrame extends Application {
     private BorderPane analysis;
     private ComboBox<String> companySelector;
     private ChangeListener companyListener;
-    private Label loadingInfo;
-    private ProgressBar loading;
+    private Loader loader;
     private ParameterManager<String> manager = new ParameterManager();
     private TableView paramTable;
     private TabPane tabPane;
@@ -73,6 +79,7 @@ public class ApplicationFrame extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         //primaryStage.setFullScreen(true);
+        initLogger();
         primaryStage.setTitle("BuyHard Platform");
         main = new BorderPane();
         Scene scene = new Scene(main);
@@ -92,6 +99,24 @@ public class ApplicationFrame extends Application {
         analysis.setVisible(false);
 
         primaryStage.show();
+    }
+
+    private void initLogger() {
+        logger.setUseParentHandlers(false);
+        try {
+            FileHandler handler = new FileHandler(LOG_FILE);
+            SimpleFormatter formatter = new SimpleFormatter();
+            handler.setFormatter(formatter);
+            logger.addHandler(handler);
+
+            logger.info("====== Buy Hard =========\n" +
+                    "Developer Team: Group 1\n" +
+                    "APPLICATION NAME: BuyHard-Platform-" + VERSION_NUMBER + ".jar\n" +
+                    "APPLICATION VERSION: " + VERSION_NUMBER + "\n" +
+                    "LOG FILE: " + LOG_FILE);
+        } catch (IOException e) {
+            System.err.println("Logger could not be initialised.");
+        }
     }
 
     private void initHeader()
@@ -130,6 +155,7 @@ public class ApplicationFrame extends Application {
         tab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-data-icon.png").toExternalForm()));
         tab.setClosable(false);
         tab.setContent(graph);
+        addHelpModal(tab,new ImageView(getClass().getResource("images/mouse-graph.jpeg").toExternalForm()));
 
         Tab statsTab = new Tab();
         statsTab.setText("Portfolio");
@@ -148,6 +174,47 @@ public class ApplicationFrame extends Application {
         body.getChildren().addAll(tabPane, new Separator());
 
         main.setCenter(body);
+    }
+
+    private void addHelpModal(Tab tab, Node node) {
+        final MenuItem helpItem = new MenuItem("Help", new ImageView(getClass().getResource("icons/help.png").toExternalForm()));
+        helpItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                final Stage dialog = new Stage();
+                dialog.setTitle("Tutorial");
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(stage);
+                VBox dialogVbox = new VBox();
+                dialogVbox.getStyleClass().add("tutorial-modal");
+                dialogVbox.setAlignment(Pos.CENTER_RIGHT);
+                Button close = new Button("Close");
+                close.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        dialog.close();
+                    }
+                });
+                dialogVbox.getChildren().add(node);
+                Scene dialogScene = new Scene(dialogVbox);
+                dialog.setScene(dialogScene);
+                dialog.show();
+            }
+        });
+        final ContextMenu menu = new ContextMenu(helpItem);
+        tab.setContextMenu(menu);
+        tab.getContent().setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getButton().equals(MouseButton.MIDDLE)
+                        || (event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY))) {
+                    if (menu.isShowing()) {
+                        menu.hide();
+                    } else {
+                        menu.show(tab.getContent(), event.getScreenX(), event.getScreenY());
+                    }
+                }
+            }
+        });
     }
 
     private void addTabLoadingAction(TabPane tabPane) {
@@ -171,7 +238,6 @@ public class ApplicationFrame extends Application {
         HBox footerPanel = new HBox();
         footerPanel.setAlignment(Pos.CENTER_LEFT);
         footerPanel.setId("footer");
-        footerPanel.setSpacing(20);
         HBox footerText = new HBox();
         footerText.setId("footer-text");
         HBox.setHgrow(footerText,Priority.ALWAYS);
@@ -185,9 +251,8 @@ public class ApplicationFrame extends Application {
             }
         });
         footerText.getChildren().addAll(appInfo, websiteLink);
-        loading = new ProgressBar(0);
-        loadingInfo = new Label();
-        footerPanel.getChildren().addAll(loading, loadingInfo,footerText);
+        loader = new Loader();
+        footerPanel.getChildren().addAll(loader,footerText);
         main.setBottom(footerPanel);
     }
 
@@ -256,8 +321,8 @@ public class ApplicationFrame extends Application {
                 if (loaded && !force) {
                     return;
                 }
-                loadingInfo.setText("Refreshing content...");
-                loading.setProgress(0);
+                loader.setText("Refreshing content...");
+                loader.setProgress(0);
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Data") && !loaded) || force) {
                     graph.setVisible(false);
                     g.buildGraph(graph, prices, orders, orderRecord);
@@ -273,13 +338,16 @@ public class ApplicationFrame extends Application {
                     a.buildAnalysis(runner, analysis, manager.getParams().keySet());
                     analysis.setVisible(true);
                 }
-                loadingInfo.setText("Loaded.");
-                loading.setProgress(1.0);
+                if (!portfolio.isEmpty()) {
+                    a.addRow(manager.getParams(), FormatUtils.round2dp(portfolio.getTotalReturnValue()));
+                }
                 if (force) {
                     loadedTabs.addAll(tabPane.getTabs());
                 } else {
                     loadedTabs.add(selectedTab);
                 }
+                loader.setText("Loaded.");
+                loader.setProgress(1.0);
             }
         };
         if (Platform.isFxApplicationThread()) r.run();
@@ -360,8 +428,8 @@ public class ApplicationFrame extends Application {
                             Platform.runLater(new Runnable() {
                                 @Override
                                 public void run() {
-                                    loadingInfo.setText("Running strategy...");
-                                    loading.setProgress(0);
+                                    loader.setText("Running strategy...");
+                                    loader.setProgress(0);
                                 }
                             });
                             //new run means no tabs will have loaded
@@ -369,8 +437,8 @@ public class ApplicationFrame extends Application {
                             runner.run(true);
                             Platform.runLater(new Runnable() {
                                 public void run() {
-                                    loadingInfo.setText("Updating prices and orders information...");
-                                    loading.setProgress(0.5);
+                                    loader.setText("Updating prices and orders information...");
+                                    loader.setProgress(0.5);
                                 }
                             });
 
@@ -395,12 +463,11 @@ public class ApplicationFrame extends Application {
                             List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
 
                             portfolio = new Portfolio(orderReader.getHistory());
-                            a.addRow(manager.getParams(), FormatUtils.round2dp(portfolio.getTotalReturnValue()));
                             loadContent(prices, orders, false);
                             Platform.runLater(new Runnable() {
                                 public void run() {
-                                    loadingInfo.setText("");
-                                    loading.setProgress(1);
+                                    loader.setText("");
+                                    loader.setProgress(1);
                                 }
                             });
                             runButton.setDisable(false);
@@ -571,28 +638,31 @@ public class ApplicationFrame extends Application {
         //ensures extra space to given to existing columns
         paramTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         paramTable.setMinWidth(300);
-        updateParamTable();
+        //TODO Remove - only for testing
+        //updateParamTable();
     }
 
     private void updateParamTable() {
-        //remove previously stored parameters
-        manager.clear();
-        a.restart();
+        if (runner.getParamFile() != null) {
+            //remove previously stored parameters
+            manager.clear();
+            a.restart();
 
-        Properties props = manager.getProperties(runner.getParamFile());
-        Enumeration properties = props.propertyNames();
-        ObservableList<Map.Entry> data = FXCollections.observableArrayList(props.entrySet());
-        paramTable.setItems(data);
+            Properties props = manager.getProperties(runner.getParamFile());
+            Enumeration properties = props.propertyNames();
+            ObservableList<Map.Entry> data = FXCollections.observableArrayList(props.entrySet());
+            paramTable.setItems(data);
 
-        while (properties.hasMoreElements()) {
-            String key = (String)properties.nextElement();
-            //if the value of the property is not numerical, it is not a parameter
-            try {
-                Double.parseDouble(props.getProperty(key));
-            } catch (NumberFormatException e) {
-                continue;
+            while (properties.hasMoreElements()) {
+                String key = (String) properties.nextElement();
+                //if the value of the property is not numerical, it is not a parameter
+                try {
+                    Double.parseDouble(props.getProperty(key));
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+                manager.put(key, props.getProperty(key));
             }
-            manager.put(key,props.getProperty(key));
         }
     }
 

@@ -158,7 +158,7 @@ public class GraphBuilder {
         pane.setBottom(ChartPanZoomManager.setup(barChart));
 
         final VBox table = new VBox();
-        table.setPadding(new javafx.geometry.Insets(20, 20, 20, 20));
+        table.setPadding(new javafx.geometry.Insets(0, 30, 30, 30));
         TableView tableView = buildTable(prices,orderSummary);
         table.getChildren().add(tableView);
         VBox.setVgrow(tableView,Priority.ALWAYS);

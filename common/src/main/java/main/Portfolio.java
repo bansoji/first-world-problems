@@ -191,4 +191,8 @@ public class Portfolio {
     public List<Profit> getProfitList() {
         return profitList;
     }
+
+    public boolean isEmpty() {
+        return (orderHistory.getAllCompanies().size() == 0);
+    }
 }

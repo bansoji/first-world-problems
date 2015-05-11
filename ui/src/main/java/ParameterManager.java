@@ -5,17 +5,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Gavin Tam on 15/04/15.
  */
 public class ParameterManager<T> {
 
-    private Map<String,T> params = new HashMap<>();
+    //order of parameters is important and used in AnalysisBuilder
+    private Map<String,T> params = new LinkedHashMap<>();
 
     public boolean updateParams(String paramFile)
     {

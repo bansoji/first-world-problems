@@ -84,7 +84,7 @@ public class PriceChannelStrategy implements TradingStrategy {
         // This will trigger the pipeline to generate orders.
         List<Point> priceInput = new ArrayList<>();
         for (Price p : prices) {
-            priceInput.add(new Point((double)DateUtils.parse(p.getDate()).getMillis(), p.getValue()));       // TODO: This could potentially be optimised.
+            priceInput.add(new Point((double)DateUtils.parseMonthAbbr(p.getDate()).getMillis(), p.getValue()));       // TODO: This could potentially be optimised.
         }
 
         // result.get(0) returns low points.

@@ -205,8 +205,7 @@ public class ApplicationFrame extends Application {
         tab.getContent().setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                if (event.getButton().equals(MouseButton.MIDDLE)
-                        || (event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY))) {
+                if (event.isControlDown() && event.getButton().equals(MouseButton.PRIMARY)) {
                     if (menu.isShowing()) {
                         menu.hide();
                     } else {

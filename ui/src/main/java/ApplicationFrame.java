@@ -290,14 +290,20 @@ public class ApplicationFrame extends Application {
     }
 
     private void addCompanySelectorListener() {
+        new AutoCompleteComboBoxListener<>(companySelector);
         if (companyListener == null) {
             companyListener = new ChangeListener<String>() {
                 @Override
                 public void changed(ObservableValue v, String old, String companyName) {
-                    List<Price> prices = priceReader.getCompanyHistory(companyName);
-                    List<Order> orders = orderReader.getCompanyHistory(companyName);
-                    loadedTabs.remove(tabPane.getSelectionModel().getSelectedItem());
-                    loadContent(prices, orders, false);
+                    //user may type in invalid company name so we have to check whether or not
+                    //a valid company name has been selected. Also, don't reload if the selected company
+                    //is the same as the previously selected one.
+                    if (companyName != null && !companyName.equals(old) && priceReader.getCompanyHistory(companyName) != null) {
+                        List<Price> prices = priceReader.getCompanyHistory(companyName);
+                        List<Order> orders = orderReader.getCompanyHistory(companyName);
+                        loadedTabs.remove(tabPane.getSelectionModel().getSelectedItem());
+                        loadContent(prices, orders, false);
+                    }
                 }
             };
         }
@@ -642,7 +648,7 @@ public class ApplicationFrame extends Application {
         paramTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         paramTable.setMinWidth(300);
         //TODO Remove - only for testing
-        //updateParamTable();
+        updateParamTable();
     }
 
     private void updateParamTable() {

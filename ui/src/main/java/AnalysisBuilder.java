@@ -219,7 +219,7 @@ public class AnalysisBuilder {
                     runner.run(true);
                     OrderReader orderReader = new OrderReader("orders.csv");
                     orderReader.readAll();
-                    addRow(manager.getParams(), FormatUtils.round2dp(new Portfolio(orderReader.getHistory()).getTotalReturnValue()));
+                    addRow(manager.getParams(), FormatUtils.round2dp(new Portfolio(orderReader.getHistory(),null,null).getTotalReturnValue()));
                 }
             }
         };

@@ -6,8 +6,12 @@ import java.nio.file.Paths;
  */
 public class FileUtils {
     public static boolean matches(String absolutePath, String filename) {
-        Path p = Paths.get(absolutePath);
-        String file = p.getFileName().toString();
+        String file = extractFilename(absolutePath);
         return filename.equals(file);
+    }
+
+    public static String extractFilename(String absolutePath) {
+        Path p = Paths.get(absolutePath);
+        return p.getFileName().toString();
     }
 }

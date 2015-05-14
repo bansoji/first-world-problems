@@ -42,7 +42,7 @@ public class StatsBuilder {
 
     private static int MAX_NODES = 200;
 
-    public void build(GridPane stats, Portfolio portfolio, List<Price> prices, Map<DateTime, OrderType> orders) {
+    public void build(GridPane stats, Portfolio portfolio) {
         final VBox vbox = new VBox();
         vbox.setSpacing(15);
         TableView equity = buildEquityTable(portfolio.getAssetValue());

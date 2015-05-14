@@ -57,18 +57,23 @@ public class ApplicationFrame extends Application {
     private BorderPane graph;
     private GridPane stats;
     private BorderPane analysis;
+    private BorderPane comparison;
+    private TabPane tabPane;
+
     private ComboBox<String> companySelector;
     private ChangeListener companyListener;
+
     private Loader loader;
+
     private ParameterManager<String> manager = new ParameterManager();
     private TableView paramTable;
-    private TabPane tabPane;
     private HashSet<Tab> loadedTabs = new HashSet<>();
-    private Portfolio portfolio = new Portfolio(new History<>());
+    private Portfolio portfolio = new Portfolio(new History<>(),null,null);
 
     private GraphBuilder g = new GraphBuilder();
     private AnalysisBuilder a = new AnalysisBuilder();
     private StatsBuilder s = new StatsBuilder();
+    private ComparisonBuilder c = new ComparisonBuilder();
 
     private static String VERSION_NUMBER = "1.1.0";
     private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
@@ -97,6 +102,7 @@ public class ApplicationFrame extends Application {
         graph.setVisible(false);
         stats.setVisible(false);
         analysis.setVisible(false);
+        comparison.setVisible(false);
 
         primaryStage.show();
     }
@@ -147,6 +153,7 @@ public class ApplicationFrame extends Application {
         graph = new BorderPane();
         stats = new GridPane();
         analysis = new BorderPane();
+        comparison = new BorderPane();
         addFilterSelector();
 
         tabPane = new TabPane();
@@ -168,7 +175,14 @@ public class ApplicationFrame extends Application {
         analysisTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()));
         analysisTab.setClosable(false);
         analysisTab.setContent(analysis);
-        tabPane.getTabs().addAll(tab, statsTab, analysisTab);
+
+        Tab comparisonTab = new Tab();
+        comparisonTab.setText("Comparison");
+        //comparisonTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()));
+        comparisonTab.setClosable(false);
+        comparisonTab.setContent(comparison);
+
+        tabPane.getTabs().addAll(tab, statsTab, analysisTab, comparisonTab);
         addTabLoadingAction(tabPane);
 
         body.getChildren().addAll(tabPane, new Separator());
@@ -224,7 +238,7 @@ public class ApplicationFrame extends Application {
                     //select the new tab first cause this is not done by default
                     tabPane.getSelectionModel().select(newValue.intValue());
                     if (orderReader == null || priceReader == null) return;
-                    Set<String> companies = orderReader.getHistory().getAllCompanies();
+                    Set<String> companies = priceReader.getHistory().getAllCompanies();
                     String firstCompany = companies.iterator().next();
                     loadContent(priceReader.getCompanyHistory(firstCompany), orderReader.getCompanyHistory(firstCompany), false);
                 }
@@ -312,12 +326,6 @@ public class ApplicationFrame extends Application {
 
     private void loadContent(List<Price> prices, List<Order> orders, boolean force)
     {
-        Map<DateTime, OrderType> orderRecord = new HashMap<>();
-        if (orders != null) {
-            for (Order order : orders) {
-                orderRecord.put(order.getOrderDate(), order.getOrderType());
-            }
-        }
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -330,18 +338,29 @@ public class ApplicationFrame extends Application {
                 loader.setProgress(0);
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Data") && !loaded) || force) {
                     graph.setVisible(false);
+                    Map<DateTime, OrderType> orderRecord = new HashMap<>();
+                    if (orders != null) {
+                        for (Order order : orders) {
+                            orderRecord.put(order.getOrderDate(), order.getOrderType());
+                        }
+                    }
                     g.buildGraph(graph, prices, orders, orderRecord);
                     graph.setVisible(true);
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Portfolio") && !loaded) || force) {
                     stats.setVisible(false);
-                    s.build(stats, portfolio, prices, orderRecord);
+                    s.build(stats, portfolio);
                     stats.setVisible(true);
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Analysis") && !loaded) || force) {
                     analysis.setVisible(false);
                     a.buildAnalysis(runner, analysis, manager.getParams().keySet());
                     analysis.setVisible(true);
+                }
+                if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Comparison") && !loaded) || force) {
+                    comparison.setVisible(false);
+                    c.buildComparison(runner, comparison, portfolio);
+                    comparison.setVisible(true);
                 }
                 if (!portfolio.isEmpty()) {
                     a.addRow(manager.getParams(), FormatUtils.round2dp(portfolio.getTotalReturnValue()));
@@ -449,6 +468,18 @@ public class ApplicationFrame extends Application {
 
                             priceReader = new PriceReader(runner.getDataFile());
                             priceReader.readAll();
+                            //find the start and end date of the prices data
+                            DateTime startDate = null, endDate = null;
+                            for (String company: (Set<String>)priceReader.getHistory().getAllCompanies()) {
+                                for (Price price: (List<Price>)priceReader.getCompanyHistory(company)) {
+                                    if (startDate == null || price.getDate().isBefore(startDate)) {
+                                        startDate = price.getDate();
+                                    }
+                                    if (endDate == null || price.getDate().isAfter(endDate)) {
+                                        endDate = price.getDate();
+                                    }
+                                }
+                            }
                             Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
                             ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
 
@@ -471,7 +502,7 @@ public class ApplicationFrame extends Application {
                             orderReader.readAll();
                             List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
 
-                            portfolio = new Portfolio(orderReader.getHistory());
+                            portfolio = new Portfolio(orderReader.getHistory(), startDate, endDate);
                             loadContent(prices, orders, false);
                             Platform.runLater(new Runnable() {
                                 public void run() {

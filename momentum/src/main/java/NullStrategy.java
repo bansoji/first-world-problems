@@ -53,14 +53,7 @@ public class NullStrategy implements TradingStrategy {
      *             the strategy module.
      */
     private void configureStrategy(Properties prop) {
-        // Configure the strategy using parameters config properties file.
-        // Defaults are the same as in MSM spec.
-        this.movingAvgTimeWindow = Integer.parseInt(prop.getProperty("movingAvgTimeWindow", "4"));
-        this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.001"));
-        this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
-
-        startDate = prop.getProperty("startDate");
-        endDate = prop.getProperty("endDate");
+		return; 
     }
 
     /**
@@ -68,74 +61,7 @@ public class NullStrategy implements TradingStrategy {
      */
     @Override
     public void generateOrders() {
-        // This will trigger the pipeline to generate orders.
-        List<Double> priceInput = new ArrayList<Double>();
-        for (Price p : prices){
-            priceInput.add(p.getValue());       // TODO: This could potentially be optimised.
-            //System.out.println(p.getValue());
-        }
-
-        List<Double> sma = FinanceUtils.calcAllSimpleMovingAvg(priceInput, movingAvgTimeWindow);
-
-        // Calculate Trade Signals.
-        List<OrderType> tradeSignals = generateTradeSignals(sma, threshold);
-
-        /*
-        for (Double d : sma){
-            System.out.println(d);
-        }
-
-        for (OrderType s : tradeSignals){
-            System.out.println(s);
-        }
-        */
-
-
-        // Generate the orders.
-        OrderType nextStatus = OrderType.NOTHING; // The next status to look for.
-
-        for (int i=0; i<tradeSignals.size(); i++) {
-            if (ordersGenerated.size() == 0){
-                // Starting case.
-                if (tradeSignals.get(i).equals(OrderType.NOTHING))
-                    continue;
-
-                // Skip if the date given is out of the simulation date range.
-                Price tradePrice = prices.get(i + movingAvgTimeWindow);
-
-                if (startDate != null && DateUtils.before(tradePrice.getDate(), startDate)) continue;
-                if (endDate != null && DateUtils.after(tradePrice.getDate(), endDate)) continue;
-
-                // Create a new Order.
-                OrderType currentSignal = tradeSignals.get(i);
-                Order o = new Order(currentSignal, tradePrice.getCompanyName(), tradePrice.getValue(),
-                        volume, tradePrice.getDate());
-                //System.out.println("Out");
-                ordersGenerated.add(o);
-
-                // Toggle the nextStatus.
-                nextStatus = currentSignal.getOppositeOrderType();
-            }
-
-            if (tradeSignals.get(i).equals(nextStatus)) {
-                // Create an order using this ith day.
-                // Get the price for that day. Offset by moving average.
-                Price tradePrice = prices.get(i + movingAvgTimeWindow);
-
-                // Skip if the date given is out of the simulation date range.
-                if (startDate != null && DateUtils.before(tradePrice.getDate(), startDate)) continue;
-                if (endDate != null && DateUtils.after(tradePrice.getDate(), endDate)) continue;
-
-                // Create a new Order.
-                Order o = new Order(nextStatus, tradePrice.getCompanyName(), tradePrice.getValue(),
-                        volume, tradePrice.getDate());
-                //System.out.println("Out");
-                ordersGenerated.add(o);
-
-                // Toggle the nextStatus.
-                nextStatus = nextStatus.getOppositeOrderType();
-            }
-        }
+        return;
     }
 
     /**
@@ -144,7 +70,7 @@ public class NullStrategy implements TradingStrategy {
      */
     @Override
     public List<Order> getOrders() {
-        return ordersGenerated;
+        return new List<Order>();
     }
 
     /**

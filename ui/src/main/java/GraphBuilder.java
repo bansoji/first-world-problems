@@ -271,11 +271,14 @@ public class GraphBuilder {
                         if (price != null && !empty && orders.get(price.getDate()) != null) {
                             if (orders.get(price.getDate()).equals(OrderType.BUY)) {
                                 setStyle("-fx-control-inner-background: green");
+                                //getStyleClass().add("buy-row");
                             } else if (orders.get(price.getDate()).equals(OrderType.SELL)) {
                                 setStyle("-fx-control-inner-background: red");
+                                //getStyleClass().add("sell-row");
                             }
                         } else {
                             setStyle("-fx-control-inner-background: white");
+                            //getStyleClass().add("normal-row");
                         }
                     }
                 };

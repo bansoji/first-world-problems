@@ -26,6 +26,7 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
 import main.*;
+import org.gillius.jfxutils.chart.JFXChartUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -37,10 +38,11 @@ import java.util.*;
  */
 public class StatsBuilder {
 
-    public void build(GridPane stats, History<Order> history, List<Price> prices, Map<DateTime, OrderType> orders) {
+    private static int MAX_NODES = 200;
+
+    public void build(GridPane stats, Portfolio portfolio, List<Price> prices, Map<DateTime, OrderType> orders) {
         final VBox vbox = new VBox();
         vbox.setSpacing(15);
-        Portfolio portfolio = new Portfolio(history);
         TableView equity = buildEquityTable(portfolio.getAssetValue());
         vbox.getChildren().addAll(buildPortfolioStats(portfolio),equity);
         VBox.setVgrow(equity, Priority.ALWAYS);
@@ -257,9 +259,7 @@ public class StatsBuilder {
                 dialog.show();
             }
         });
-        final ContextMenu menu = new ContextMenu(
-                chartReturnsItem
-        );
+        final ContextMenu menu = new ContextMenu(chartReturnsItem);
 
         tableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -308,7 +308,7 @@ public class StatsBuilder {
         return chart;
     }
 
-    private LineChart buildProfitChart (List<Profit> profitList) {
+    private Region buildProfitChart (List<Profit> profitList) {
         DateValueAxis xAxis = new DateValueAxis();
         NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("Date");
@@ -320,19 +320,53 @@ public class StatsBuilder {
         lineChart.setCacheHint(CacheHint.SPEED);
 
         XYChart.Series<Long,Double> series = new XYChart.Series<>();
-        for (Profit p: profitList) {
-            series.getData().add(new XYChart.Data<>(p.getProfitDate().getMillis(),p.getProfitValue()));
+        Iterator<Profit> i = profitList.iterator();
+        int step = Math.max(profitList.size()/MAX_NODES,1);
+
+        int j = 0;
+        while (i.hasNext()) {
+            Profit p = i.next();
+            //add node if it's every (step)th node or if last node
+            if (j % step == 0 || !i.hasNext()) {
+                series.getData().add(new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue()));
+            }
+            j++;
         }
         lineChart.getData().add(series);
         lineChart.setLegendVisible(false);
+
         DateTimeFormatter df = DateTimeFormat.forPattern("dd-MMM-yyyy");
-        for (XYChart.Data data: series.getData()) {
+        for (XYChart.Data data : series.getData()) {
             Tooltip tooltip = new Tooltip();
             tooltip.setGraphic(new TooltipForProfitGraph(df.print((long) data.getXValue()), (double) data.getYValue()));
-            Tooltip.install(data.getNode(),tooltip);
+            Tooltip.install(data.getNode(), tooltip);
         }
-
-        return lineChart;
+        final MenuItem resetZoomItem = new MenuItem("Reset zoom", new ImageView(getClass().getResource("icons/reset_zoom.png").toExternalForm()));
+        resetZoomItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                xAxis.setAutoRanging(true);
+                yAxis.setAutoRanging(true);
+            }
+        });
+        final ContextMenu menu = new ContextMenu(resetZoomItem);
+        lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getButton().equals(MouseButton.PRIMARY)) {
+                    if (event.getClickCount() == 2) {
+                        xAxis.setAutoRanging(true);
+                        yAxis.setAutoRanging(true);
+                    }
+                } else if (event.getButton().equals(MouseButton.SECONDARY)) {
+                    if (menu.isShowing()) {
+                        menu.hide();
+                    } else {
+                        menu.show(lineChart, event.getScreenX(), event.getScreenY());
+                    }
+                }
+            }
+        });
+        return JFXChartUtil.setupZooming(lineChart);
     }
 
     private TableView buildEquityTable(Map<String,Double> equities) {

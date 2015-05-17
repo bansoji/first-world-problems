@@ -31,20 +31,20 @@
     -fx-background-insets: 0,1,2;
 }
 .candlestick-line.close-above-open {
-     -fx-stroke: #2CFC0E;
+     -fx-stroke: green;
  }
 .candlestick-line.open-above-close {
     -fx-stroke: red;
 }
 .candlestick-bar.close-above-open {
-    -fx-background-color: #2CFC0E;
+    -fx-background-color: green;
 }
 .candlestick-bar.open-above-close {
     -fx-background-color: red;
 }
 
 .candlestick-bar.close-above-open:hover {
-    -fx-background-color: green;
+    -fx-background-color: #193300;
 }
 .candlestick-bar.open-above-close:hover {
     -fx-background-color: #990000;
@@ -74,4 +74,16 @@
 
 .sell {
     -fx-text-fill: red;
+}
+
+.buy-row .table-cell {
+    -fx-text-fill: green;
+}
+
+.sell-row .table-cell {
+    -fx-text-fill: red;
+}
+
+.normal-row .table-cell {
+    -fx-text-fill: black;
 }

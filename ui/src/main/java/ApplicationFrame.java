@@ -1,3 +1,5 @@
+import alert.AlertManager;
+import format.FormatUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -23,7 +25,6 @@ import javafx.util.StringConverter;
 import main.*;
 import org.joda.time.DateTime;
 
-import javax.swing.*;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -51,12 +52,13 @@ public class ApplicationFrame extends Application {
     private BorderPane analysis;
     private ComboBox<String> companySelector;
     private ChangeListener companyListener;
-    private HBox selector;
-    private HBox settings;
     private Label loadingInfo;
     private ProgressBar loading;
     private ParameterManager<String> manager = new ParameterManager();
     private TableView paramTable;
+    private TabPane tabPane;
+    private HashSet<Tab> loadedTabs = new HashSet<>();
+    private Portfolio portfolio = new Portfolio(new History<>());
 
     private GraphBuilder g = new GraphBuilder();
     private AnalysisBuilder a = new AnalysisBuilder();
@@ -82,6 +84,13 @@ public class ApplicationFrame extends Application {
         initHeader();
         initBody();
         initFooter();
+        //TODO Remove hack - for some reason the graph doesn't load for the first time
+        loadContent(new ArrayList<>(), new ArrayList<>(), true);
+
+        graph.setVisible(false);
+        stats.setVisible(false);
+        analysis.setVisible(false);
+
         primaryStage.show();
     }
 
@@ -96,10 +105,10 @@ public class ApplicationFrame extends Application {
         HBox appInfo = new HBox();
         appInfo.setSpacing(50);
         appInfo.setId("app-info");
-        ImageView logo = new ImageView(getClass().getResource("logosizes/BuyHardLogo_Small.png").toExternalForm());
-        Label info = new Label(APPLICATION_INFO);
+        ImageView logo = new ImageView(getClass().getResource("logosizes/BuyHard2Logo_Small.png").toExternalForm());
+        //Label info = new Label(APPLICATION_INFO);
         appInfo.setAlignment(Pos.CENTER_LEFT);
-        appInfo.getChildren().addAll(logo, info);
+        appInfo.getChildren().addAll(logo);
         header.getChildren().addAll(appInfo);
         main.setTop(header);
 
@@ -110,35 +119,51 @@ public class ApplicationFrame extends Application {
     private void initBody()
     {
         final VBox body = new VBox();
-
         graph = new BorderPane();
         stats = new GridPane();
         analysis = new BorderPane();
         addFilterSelector();
 
-        TabPane tabPane = new TabPane();
+        tabPane = new TabPane();
         Tab tab = new Tab();
         tab.setText("Data");
+        tab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-data-icon.png").toExternalForm()));
         tab.setClosable(false);
         tab.setContent(graph);
+
         Tab statsTab = new Tab();
         statsTab.setText("Portfolio");
+        statsTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-portfolio-icon.png").toExternalForm()));
         statsTab.setClosable(false);
         statsTab.setContent(stats);
+
         Tab analysisTab = new Tab();
         analysisTab.setText("Analysis");
+        analysisTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()));
         analysisTab.setClosable(false);
         analysisTab.setContent(analysis);
-        tabPane.getTabs().addAll(tab,statsTab,analysisTab);
-        //TODO Remove hack - for some reason the graph doesn't load for the first time
-        loadContent(new History<>(), new ArrayList<>(),new ArrayList<>());
-        graph.setVisible(false);
-        stats.setVisible(false);
-        analysis.setVisible(false);
+        tabPane.getTabs().addAll(tab, statsTab, analysisTab);
+        addTabLoadingAction(tabPane);
 
         body.getChildren().addAll(tabPane, new Separator());
 
         main.setCenter(body);
+    }
+
+    private void addTabLoadingAction(TabPane tabPane) {
+        tabPane.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
+            @Override
+            public void changed(ObservableValue<? extends Number> ov, Number oldValue, Number newValue) {
+                if (!oldValue.equals(newValue)) {
+                    //select the new tab first cause this is not done by default
+                    tabPane.getSelectionModel().select(newValue.intValue());
+                    if (orderReader == null || priceReader == null) return;
+                    Set<String> companies = orderReader.getHistory().getAllCompanies();
+                    String firstCompany = companies.iterator().next();
+                    loadContent(priceReader.getCompanyHistory(firstCompany), orderReader.getCompanyHistory(firstCompany), false);
+                }
+            }
+        });
     }
 
     private void initFooter()
@@ -151,8 +176,15 @@ public class ApplicationFrame extends Application {
         footerText.setId("footer-text");
         HBox.setHgrow(footerText,Priority.ALWAYS);
         footerText.setAlignment(Pos.CENTER_RIGHT);
-        Label text = new Label(FOOTER_MESSAGE);
-        footerText.getChildren().add(text);
+        Label appInfo = new Label(APPLICATION_INFO);
+        Hyperlink websiteLink = new Hyperlink(FOOTER_MESSAGE);
+        websiteLink.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent e) {
+                getHostServices().showDocument("http://cgi.cse.unsw.edu.au/~awondo/se3011/web/");
+            }
+        });
+        footerText.getChildren().addAll(appInfo, websiteLink);
         loading = new ProgressBar(0);
         loadingInfo = new Label();
         footerPanel.getChildren().addAll(loading, loadingInfo,footerText);
@@ -170,13 +202,13 @@ public class ApplicationFrame extends Application {
                 if (file != null)
                 {
                     try {
-                        if (fileChooser.getButtonText().equals("Choose CSV")) {
+                        if (fileChooser.getButtonId().equals("Choose CSV")) {
                             runner.setDataFile(file.getAbsolutePath());
                             updateParamTable();
-                        } else if (fileChooser.getButtonText().equals("Choose strategy")) {
+                        } else if (fileChooser.getButtonId().equals("Choose strategy")) {
                             runner.setStrategyFile(file.getAbsolutePath());
                             updateParamTable();
-                        } else if (fileChooser.getButtonText().equals("Choose parameters")) {
+                        } else if (fileChooser.getButtonId().equals("Choose parameters")) {
                             runner.setParamFile(file.getAbsolutePath());
                             updateParamTable();
                         } else {
@@ -200,14 +232,15 @@ public class ApplicationFrame extends Application {
                 public void changed(ObservableValue v, String old, String companyName) {
                     List<Price> prices = priceReader.getCompanyHistory(companyName);
                     List<Order> orders = orderReader.getCompanyHistory(companyName);
-                    loadContent(orderReader.getHistory(), prices, orders);
+                    loadedTabs.remove(tabPane.getSelectionModel().getSelectedItem());
+                    loadContent(prices, orders, false);
                 }
             };
         }
         companySelector.valueProperty().addListener(companyListener);
     }
 
-    private void loadContent(History<Order> history, List<Price> prices, List<Order> orders)
+    private void loadContent(List<Price> prices, List<Order> orders, boolean force)
     {
         Map<DateTime, OrderType> orderRecord = new HashMap<>();
         if (orders != null) {
@@ -218,12 +251,35 @@ public class ApplicationFrame extends Application {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                g.buildGraph(graph, prices, orders, orderRecord);
-                s.build(stats, history, prices, orderRecord);
-                a.buildAnalysis(runner, analysis, manager.getParams().keySet());
-                graph.setVisible(true);
-                stats.setVisible(true);
-                analysis.setVisible(true);
+                Tab selectedTab = tabPane.getSelectionModel().getSelectedItem();
+                boolean loaded = loadedTabs.contains(selectedTab);
+                if (loaded && !force) {
+                    return;
+                }
+                loadingInfo.setText("Refreshing content...");
+                loading.setProgress(0);
+                if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Data") && !loaded) || force) {
+                    graph.setVisible(false);
+                    g.buildGraph(graph, prices, orders, orderRecord);
+                    graph.setVisible(true);
+                }
+                if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Portfolio") && !loaded) || force) {
+                    stats.setVisible(false);
+                    s.build(stats, portfolio, prices, orderRecord);
+                    stats.setVisible(true);
+                }
+                if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Analysis") && !loaded) || force) {
+                    analysis.setVisible(false);
+                    a.buildAnalysis(runner, analysis, manager.getParams().keySet());
+                    analysis.setVisible(true);
+                }
+                loadingInfo.setText("Loaded.");
+                loading.setProgress(1.0);
+                if (force) {
+                    loadedTabs.addAll(tabPane.getTabs());
+                } else {
+                    loadedTabs.add(selectedTab);
+                }
             }
         };
         if (Platform.isFxApplicationThread()) r.run();
@@ -235,15 +291,15 @@ public class ApplicationFrame extends Application {
         fileChoosers.setSpacing(50);
 
         //Choose csv file button
-        AppFileChooser dataFileChooser = new AppFileChooser("Choose CSV");
+        AppFileChooser dataFileChooser = new AppFileChooser("Choose CSV", new ImageView(getClass().getResource("app-icons/choose-csv.png").toExternalForm()));
         addFileChooserListener(dataFileChooser);
 
         //Choose strategy module file button
-        AppFileChooser strategyFileChooser = new AppFileChooser("Choose strategy");
+        AppFileChooser strategyFileChooser = new AppFileChooser("Choose strategy", new ImageView(getClass().getResource("app-icons/choose-strat.png").toExternalForm()));
         addFileChooserListener(strategyFileChooser);
 
         //Choose parameters file button
-        AppFileChooser paramFileChooser = new AppFileChooser("Choose parameters");
+        AppFileChooser paramFileChooser = new AppFileChooser("Choose parameters", new ImageView(getClass().getResource("app-icons/choose-settings.png").toExternalForm()));
         addFileChooserListener(paramFileChooser);
 
         fileChoosers.getChildren().addAll(dataFileChooser,strategyFileChooser,paramFileChooser);
@@ -252,11 +308,12 @@ public class ApplicationFrame extends Application {
     }
 
     private void addSettingsPanel(HBox header) {
-        settings = new HBox();
+        HBox settings = new HBox();
         settings.setAlignment(Pos.CENTER);
         settings.setSpacing(50);
 
-        Button settingsButton = new Button("Change parameters");
+        Button settingsButton = new Button("CHANGE\nPARAMETERS", new ImageView(getClass().getResource("app-icons/change-settings.png").toExternalForm()));
+        settingsButton.getStyleClass().add("icon-button");
         settings.getChildren().add(settingsButton);
         initParamTable();
         settingsButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -285,9 +342,9 @@ public class ApplicationFrame extends Application {
         });
 
         //Run button
-        Button runButton = new Button("",new ImageView(getClass().getResource("icons/run.png").toExternalForm()));
+        Button runButton = new Button("",new ImageView(getClass().getResource("icons/run-circle.png").toExternalForm()));
         runButton.setId("run-button");
-        settings.getChildren().addAll(runButton);
+        settings.getChildren().add(runButton);
 
         header.getChildren().add(settings);
 
@@ -297,6 +354,8 @@ public class ApplicationFrame extends Application {
                 new Thread() {
                     public void run() {
                         if (runner.validFiles()) {
+                            runButton.setDisable(true);
+                            tabPane.setDisable(true);
                             updateParams();
                             Platform.runLater(new Runnable() {
                                 @Override
@@ -305,6 +364,8 @@ public class ApplicationFrame extends Application {
                                     loading.setProgress(0);
                                 }
                             });
+                            //new run means no tabs will have loaded
+                            loadedTabs.clear();
                             runner.run(true);
                             Platform.runLater(new Runnable() {
                                 public void run() {
@@ -328,24 +389,29 @@ public class ApplicationFrame extends Application {
                             addCompanySelectorListener();
 
                             List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
-                            selector.setVisible(true);
 
                             orderReader = new OrderReader(OUTPUT_FILE_PATH);
                             orderReader.readAll();
                             List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
 
-                            a.addRow(manager.getParams(),new Portfolio(orderReader.getHistory()).getTotalReturnValue());
-                            loadContent(orderReader.getHistory(), prices, orders);
+                            portfolio = new Portfolio(orderReader.getHistory());
+                            a.addRow(manager.getParams(), FormatUtils.round2dp(portfolio.getTotalReturnValue()));
+                            loadContent(prices, orders, false);
                             Platform.runLater(new Runnable() {
                                 public void run() {
                                     loadingInfo.setText("");
                                     loading.setProgress(1);
                                 }
                             });
+                            runButton.setDisable(false);
+                            tabPane.setDisable(false);
                         } else {
-                            JOptionPane.showMessageDialog(null,
-                                    "Please check that you have selected all the required files.",
-                                    "Missing files", JOptionPane.INFORMATION_MESSAGE);
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    AlertManager.info("Missing files", "Please check that you have selected all the required files.");
+                                }
+                            });
                         }
                     }
                 }.start();
@@ -354,17 +420,16 @@ public class ApplicationFrame extends Application {
     }
 
     private void addFilterSelector() {
-        selector = new HBox();
+        HBox selector = new HBox();
         selector.setSpacing(20);
         selector.setPadding(new javafx.geometry.Insets(15, 15, 0, 15));
-        addFilter("Company");
-        addDateFilters();
+        addFilter("Company", selector);
+        addDateFilters(selector);
 
-        selector.setVisible(false);
         graph.setTop(selector);
     }
 
-    private void addDateFilters() {
+    private void addDateFilters(HBox selector) {
         HBox startDatePanel = new HBox();
         startDatePanel.getChildren().add(new Label("Start Date: "));
         selector.getChildren().add(startDatePanel);
@@ -458,7 +523,7 @@ public class ApplicationFrame extends Application {
         });
     }
 
-    private void addFilter(String name) {
+    private void addFilter(String name, HBox selector) {
         HBox filter = new HBox();
         companySelector = new ComboBox<>();
         new AutoCompleteComboBoxListener<>(companySelector);

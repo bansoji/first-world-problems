@@ -199,6 +199,7 @@ public class AnalysisBuilder {
         playButton.getStyleClass().add("toolbar-button");
         Button pauseButton = new Button("", new ImageView(getClass().getResource("icons/pause.png").toExternalForm()));
         pauseButton.getStyleClass().add("toolbar-button");
+        pauseButton.setDisable(true);
         Button clearButton = new Button("", new ImageView(getClass().getResource("icons/refresh.png").toExternalForm()));
         clearButton.getStyleClass().add("toolbar-button");
         Button settingsButton = new Button("",new ImageView(getClass().getResource("icons/spanner.png").toExternalForm()));
@@ -218,6 +219,8 @@ public class AnalysisBuilder {
         playButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                playButton.setDisable(true);
+                pauseButton.setDisable(false);
                 t = new Thread(r);
                 t.start();
             }
@@ -228,6 +231,8 @@ public class AnalysisBuilder {
                 if (t != null) {
                     t.interrupt();
                     runner.stop();
+                    playButton.setDisable(false);
+                    pauseButton.setDisable(true);
                 }
             }
         });
@@ -351,18 +356,30 @@ public class AnalysisBuilder {
             //if the value of the property is not numerical, it is not a parameter
             String value = props.getProperty(key);
             if (!FormatChecker.isDouble(value)) continue;
-            if (paramStepValues.get(key) != null) {
-                if (FormatChecker.isInteger(value))
-                    manager.put(key, Integer.parseInt(value) + (int)paramStepValues.get(key));
+            boolean isInteger = FormatChecker.isInteger(value);
+            if (isInteger) {
+                if (paramStepValues.get(key) == null)
+                    paramStepValues.put(key, 0);
+                else
+                    needsUpdate = true;
+            } else {
+                if (paramStepValues.get(key) == null)
+                    paramStepValues.put(key,0.);
+                else
+                    needsUpdate = true;
+            }
+            if (manager.getParams().get(key) == null) {
+                if (isInteger) {
+                    manager.put(key, Integer.parseInt(value));
+                } else {
+                    manager.put(key, Double.parseDouble(value));
+                }
+            }
+            if (!paramStepValues.get(key).equals(0)) {
+                if (isInteger)
+                    manager.put(key, Integer.parseInt(value) + (int) paramStepValues.get(key));
                 else
                     manager.put(key, FormatUtils.round3dp(Double.parseDouble(value) + (double) paramStepValues.get(key)));
-                needsUpdate = true;
-            } else {
-                if (FormatChecker.isInteger(value)) {
-                    paramStepValues.put(key, 0);
-                } else {
-                    paramStepValues.put(key,0.);
-                }
             }
         }
         ObservableList<Map.Entry> data = FXCollections.observableArrayList(paramStepValues.entrySet());

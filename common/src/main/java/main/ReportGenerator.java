@@ -21,7 +21,14 @@ import java.util.*;
 import java.util.List;
 
 /**
+ * Created by Addo Wondo and Banson Tong on 17/5/2015.
  * This class is responsible for generating reports.
+ *
+ * READ THIS ADDO:
+ *
+ * NOTE: At the moment the trigger to this code is temporarily inserted
+ * into StatsBuilder so it shows the pdf after u select the Portfolio tab.
+ *
  */
 public class ReportGenerator {
 
@@ -29,10 +36,9 @@ public class ReportGenerator {
 
     public ReportGenerator(Portfolio p){
         this.portfolioData = p;
-        System.out.println(portfolioData.getReturns().get(0)); // seeing if the report has anything
     }
 
-    public static void generateReport(){
+    public static void generateReport(){ // was made static for testing purposes eg. was using main before
         //  Create styles
         StyleBuilder tableHeader = DynamicReports.stl.style()
                 .bold()
@@ -46,8 +52,13 @@ public class ReportGenerator {
                 .setPadding(3);
         StyleBuilder titleStyle = DynamicReports.stl.style()
                 .setFontSize(30)
-                .setBottomPadding(20)
                 .bold();
+        StyleBuilder subtitleStyle = DynamicReports.stl.style()
+                .setFontSize(20)
+                .setBottomPadding(20)
+                .setTopPadding(20)
+                .bold();
+
 
         //  Create Columns
         TextColumnBuilder<String> companyNameColumn = DynamicReports.col.column("Company", "company", DynamicReports.type.stringType());
@@ -55,30 +66,46 @@ public class ReportGenerator {
         TextColumnBuilder<Double> returnValueColumn = DynamicReports.col.column("Return", "returnValue", DynamicReports.type.doubleType());
         TextColumnBuilder<Double> returnPercentageColumn = DynamicReports.col.column("Return %", "returnPercentage", DynamicReports.type.doubleType());
 
+        TextFieldBuilder<String> subtitle;
+
+        // Total Summary subReport
+        JasperReportBuilder totalSummary = DynamicReports.report();
+        subtitle = DynamicReports.cmp.text("Summary");
+        totalSummary.title(subtitle.setStyle(subtitleStyle));
+        totalSummary.addTitle(DynamicReports.cmp.text("Total return: " + portfolioData.getTotalReturnValue() + "\nTotal return %: "));
+
 
 
         // Asset value subReport
-        JRDataSource db = createDataSource();
+        subtitle = DynamicReports.cmp.text("Equities");
+        JRDataSource assetData = createDataSource();
         JasperReportBuilder assetReport = DynamicReports.report();
+        assetReport.title(subtitle.setStyle(subtitleStyle));
         assetReport.columns(companyNameColumn, equityValueColumn);
         assetReport.setColumnHeaderStyle(tableHeader);
         assetReport.setColumnStyle(tableBody);
-        assetReport.setDataSource(db);
+        assetReport.setDataSource(assetData);
 
 
         // Return value subReport
-        JRDataSource db1 = createDataSource();
+        subtitle = DynamicReports.cmp.text("Returns");
+        JRDataSource resultsData = createDataSource();
         JasperReportBuilder returnsReport = DynamicReports.report();
+        returnsReport.title(subtitle.setStyle(subtitleStyle));
         returnsReport.columns(companyNameColumn, returnValueColumn, returnPercentageColumn);
         returnsReport.setColumnHeaderStyle(tableHeader);
         returnsReport.setColumnStyle(tableBody);
-        returnsReport.setDataSource(db1);
+        returnsReport.setDataSource(resultsData);
 
         // Main Report
         JasperReportBuilder report = DynamicReports.report();
         TextFieldBuilder<String> title = DynamicReports.cmp.text("BuyHard Report - Overview");
         report.title(title.setStyle(titleStyle));
-        report.title(DynamicReports.cmp.verticalList(DynamicReports.cmp.subreport(assetReport), DynamicReports.cmp.subreport(returnsReport)));
+        report.title(DynamicReports.cmp.multiPageList(
+                DynamicReports.cmp.subreport(totalSummary),
+                DynamicReports.cmp.subreport(assetReport),
+                DynamicReports.cmp.subreport(returnsReport))
+        );
         report.setPageMargin(DynamicReports.margin(20));
 
         // report.setPageFormat(PageType.A4, PageOrientation.LANDSCAPE);

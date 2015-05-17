@@ -522,11 +522,7 @@ public class ApplicationFrame extends Application {
                         }
                     }
                 }.start();
-                ////////////////////////
-                //TODO Put this somewhere useful!
-                ReportGenerator reporter = new ReportGenerator(portfolio);
-                reporter.generateReport();
-                //////////////////////////////////////////////////
+
             }
         });
     }

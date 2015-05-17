@@ -1,3 +1,12 @@
 #comparison-graph .chart-series-line {
-    -fx-stroke-width: 2px;
+    -fx-stroke-width: 4px;
+    -fx-opacity: 0.8;
+}
+
+#comparison-graph .chart-series-line:hover {
+    -fx-opacity: 1.0;
+}
+
+#comparison-charts {
+    -fx-padding: 10px 20px 10px 10px;
 }

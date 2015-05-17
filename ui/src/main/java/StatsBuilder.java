@@ -7,10 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
@@ -262,19 +259,8 @@ public class StatsBuilder {
             }
         });
         final ContextMenu menu = new ContextMenu(chartReturnsItem);
-
-        tableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (MouseButton.SECONDARY.equals(event.getButton())) {
-                    if (menu.isShowing()) {
-                        menu.hide();
-                    } else {
-                        menu.show(tableView, event.getScreenX(), event.getScreenY());
-                    }
-                }
-            }
-        });
+        //tableView.setContextMenu(menu);
+        installMenuOptions(tableView,menu);
         return tableView;
     }
 
@@ -421,6 +407,26 @@ public class StatsBuilder {
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setPrefHeight(150);
         return tableView;
+    }
+
+    private void installMenuOptions(TableView tableView, ContextMenu menu) {
+        tableView.setTableMenuButtonVisible(true);
+        // *Register event filter to show or hide the custom show/hide context menu*
+        final Node showHideColumnsButton = tableView.lookup(".show-hide-columns-button");
+        if (showHideColumnsButton != null) {
+            showHideColumnsButton.addEventFilter(MouseEvent.MOUSE_PRESSED,
+                    new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent event) {
+                            if (menu.isShowing()) {
+                                menu.hide();
+                            } else {
+                                menu.show(showHideColumnsButton, Side.BOTTOM, 0, 0);
+                            }
+                            event.consume();
+                        }
+                    });
+        }
     }
 
     private class TooltipContent extends GridPane {

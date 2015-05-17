@@ -88,7 +88,7 @@ public class ApplicationFrame extends Application {
         primaryStage.setTitle("BuyHard Platform");
         main = new BorderPane();
         Scene scene = new Scene(main);
-        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css", "analysis.css");
+        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css", "analysis.css", "comparison.css");
         primaryStage.setScene(scene);
         primaryStage.setMinHeight(768);
         primaryStage.setMinWidth(1024);
@@ -178,7 +178,7 @@ public class ApplicationFrame extends Application {
 
         Tab comparisonTab = new Tab();
         comparisonTab.setText("Comparison");
-        //comparisonTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()));
+        comparisonTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-comparison-icon.png").toExternalForm()));
         comparisonTab.setClosable(false);
         comparisonTab.setContent(comparison);
 
@@ -359,7 +359,7 @@ public class ApplicationFrame extends Application {
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Comparison") && !loaded) || force) {
                     comparison.setVisible(false);
-                    c.buildComparison(runner, comparison, portfolio);
+                    c.buildComparison(runner, comparison, portfolio, manager.getParams());
                     comparison.setVisible(true);
                 }
                 if (!portfolio.isEmpty()) {

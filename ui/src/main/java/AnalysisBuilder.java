@@ -53,6 +53,8 @@ public class AnalysisBuilder {
     private StrategyRunner runner;
     private Thread t;
 
+    private static final int NUM_RESULTS = 5;
+
     public void restart() {
 
         CategoryAxis xAxisParam = new CategoryAxis();
@@ -75,18 +77,18 @@ public class AnalysisBuilder {
 
     private void updateChart(String paramCombination, Map<String,String> params, double profit) {
         //if we already have our top 5 results and this one is more profitable than one of them
-        if (bestParams.size() >= 5 && paramCombinations.get(bestParams.get(4)) < profit) {
-            String old = bestParams.remove(4);
+        if (bestParams.size() >= NUM_RESULTS && paramCombinations.get(bestParams.get(NUM_RESULTS-1)) < profit) {
+            String old = bestParams.remove(NUM_RESULTS-1);
             bestParamValues.remove(old);
             int i;
-            for (i = 0; i < 4; i++) {
+            for (i = 0; i < NUM_RESULTS-1; i++) {
                 if (paramCombinations.get(bestParams.get(i)) < profit) {
                     break;
                 }
             }
             bestParams.add(i,paramCombination);
             bestParamValues.put(paramCombination,params);
-        } else if (bestParams.size() < 5 && !bestParams.contains(paramCombination)) {
+        } else if (bestParams.size() < NUM_RESULTS && !bestParams.contains(paramCombination)) {
             bestParams.add(paramCombination);
             bestParamValues.put(paramCombination, params);
         } else {

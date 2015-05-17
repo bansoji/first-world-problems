@@ -253,7 +253,7 @@ public class ApplicationFrame extends Application {
         footerPanel.setId("footer");
         HBox footerText = new HBox();
         footerText.setId("footer-text");
-        HBox.setHgrow(footerText,Priority.ALWAYS);
+        HBox.setHgrow(footerText, Priority.ALWAYS);
         footerText.setAlignment(Pos.CENTER_RIGHT);
         Label appInfo = new Label(APPLICATION_INFO);
         Hyperlink websiteLink = new Hyperlink(FOOTER_MESSAGE);
@@ -350,6 +350,11 @@ public class ApplicationFrame extends Application {
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Portfolio") && !loaded) || force) {
                     stats.setVisible(false);
                     s.build(stats, portfolio);
+                    ////////////////////////
+                    //TODO Put this somewhere useful!
+                    ReportGenerator reporter = new ReportGenerator(portfolio);
+                    reporter.generateReport();
+                    //////////////////////////////////////////////////
                     stats.setVisible(true);
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Analysis") && !loaded) || force) {

@@ -23,6 +23,8 @@ public class NullStrategy implements TradingStrategy {
     public NullStrategy(List<Price> historicalPrices, InputStream config) {
        
         // Initialise the config according to the parameters.
+		// For consistency with the other strategies, still take in a config file.
+		// Here it does not matter what you pass in. 
         Properties prop = new Properties();
         try {
             prop.load(config);
@@ -34,16 +36,8 @@ public class NullStrategy implements TradingStrategy {
         configureStrategy(prop);
 
         String parameters = "Parameters Used:\n" +
-                "Moving Average Time Window: " + this.movingAvgTimeWindow + "\n" +
-                "Threshold: " + this.threshold + "\n" +
-                "Volume: " + this.volume;
+                "N/A For this strategy.\n";
 
-        if (startDate != null) {
-            parameters += "\nStart Date: " + this.startDate;
-        }
-        if (endDate != null) {
-            parameters += "\nEnd Date: " + this.endDate;
-        }
         logger.info(parameters);
     }
 

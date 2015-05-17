@@ -15,6 +15,12 @@ import java.io.FileOutputStream;
  */
 public class ReportGenerator {
 
+    private Portfolio portfolioData;
+
+    public ReportGenerator(Portfolio p){
+        this.portfolioData = p;
+    }
+
     public static void main(String[] args) {
 
         JasperReportBuilder report = DynamicReports.report();
@@ -30,7 +36,6 @@ public class ReportGenerator {
         } catch (DRException | FileNotFoundException e) {
             e.printStackTrace();
         }
-
     }
 
 }

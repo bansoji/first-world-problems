@@ -73,42 +73,5 @@ public class NullStrategy implements TradingStrategy {
         return new List<Order>();
     }
 
-    /**
-     * Generate the trade signals.
-     * @param sma A List of Doubles containing the simple moving average.
-     * @param threshold A threshold to filter when to create a buy or sell signal.
-     * @return a List containing OrderTypes.
-     */
-    private List<OrderType> generateTradeSignals(List<Double> sma, double threshold){
-
-        List<OrderType> l = new ArrayList<OrderType>();
-        l.add(OrderType.NOTHING); // First day is always NOTHING.
-
-        for (int i=1; i<sma.size(); i++){
-            Double difference = sma.get(i) - sma.get(i-1);
-            if (difference > threshold){
-                l.add(OrderType.BUY);
-            } else if (difference < (threshold * -1)) {
-                l.add(OrderType.SELL);
-            } else {
-                l.add(OrderType.NOTHING);
-            }
-        }
-
-        return l;
-    }
-
-    public void setMovingAvgTimeWindow(int movingAvgTimeWindow) {
-        this.movingAvgTimeWindow = movingAvgTimeWindow;
-    }
-
-    public void setVolume(int volume) {
-        this.volume = volume;
-    }
-
-    public void setThreshold(double threshold) {
-        this.threshold = threshold;
-    }
-
 
 }

@@ -1,8 +1,5 @@
 import date.DateUtils;
-import graph.CandleStickChart;
-import graph.DateValueAxis;
-import graph.NodeType;
-import graph.XYBarChart;
+import graph.*;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -147,23 +144,21 @@ public class GraphBuilder {
         pane.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent mouseEvent) {
-                if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
-                    if (mouseEvent.getClickCount() == 2) {
-                        xAxis.setAutoRanging(true);
-                        yAxis.setAutoRanging(true);
-                        xAxisVolume.setAutoRanging(true);
-                        yAxisVolume.setAutoRanging(true);
-                    }
+                if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && mouseEvent.getClickCount() == 2) {
+                    xAxis.setAutoRanging(true);
+                    yAxis.setAutoRanging(true);
+                    xAxisVolume.setAutoRanging(true);
+                    yAxisVolume.setAutoRanging(true);
                 }
             }
         });
         if (prices != null && prices.size() > 0) syncGraphZooming();
         addMenu();
-        pane.setCenter(JFXChartUtil.setupZooming(lineChart));
-        pane.setBottom(JFXChartUtil.setupZooming(barChart));
+        pane.setCenter(ChartPanZoomManager.setup(lineChart));
+        pane.setBottom(ChartPanZoomManager.setup(barChart));
 
         final VBox table = new VBox();
-        table.setPadding(new javafx.geometry.Insets(20, 20, 20, 20));
+        table.setPadding(new javafx.geometry.Insets(0, 30, 30, 30));
         TableView tableView = buildTable(prices,orderSummary);
         table.getChildren().add(tableView);
         VBox.setVgrow(tableView,Priority.ALWAYS);
@@ -271,11 +266,14 @@ public class GraphBuilder {
                         if (price != null && !empty && orders.get(price.getDate()) != null) {
                             if (orders.get(price.getDate()).equals(OrderType.BUY)) {
                                 setStyle("-fx-control-inner-background: green");
+                                //getStyleClass().add("buy-row");
                             } else if (orders.get(price.getDate()).equals(OrderType.SELL)) {
                                 setStyle("-fx-control-inner-background: red");
+                                //getStyleClass().add("sell-row");
                             }
                         } else {
                             setStyle("-fx-control-inner-background: white");
+                            //getStyleClass().add("normal-row");
                         }
                     }
                 };
@@ -329,7 +327,8 @@ public class GraphBuilder {
 
         lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override public void handle(MouseEvent event) {
-                if (MouseButton.SECONDARY.equals(event.getButton())) {
+                if (event.getButton().equals(MouseButton.MIDDLE)
+                        || (event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY))) {
                     if (menu.isShowing()) {
                         menu.hide();
                     } else {

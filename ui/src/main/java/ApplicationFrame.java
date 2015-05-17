@@ -350,11 +350,6 @@ public class ApplicationFrame extends Application {
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Portfolio") && !loaded) || force) {
                     stats.setVisible(false);
                     s.build(stats, portfolio);
-                    ////////////////////////
-                    //TODO Put this somewhere useful!
-                    ReportGenerator reporter = new ReportGenerator(portfolio);
-                    reporter.generateReport();
-                    //////////////////////////////////////////////////
                     stats.setVisible(true);
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Analysis") && !loaded) || force) {
@@ -527,6 +522,11 @@ public class ApplicationFrame extends Application {
                         }
                     }
                 }.start();
+                ////////////////////////
+                //TODO Put this somewhere useful!
+                ReportGenerator reporter = new ReportGenerator(portfolio);
+                reporter.generateReport();
+                //////////////////////////////////////////////////
             }
         });
     }

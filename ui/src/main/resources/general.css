@@ -31,6 +31,14 @@
     -fx-padding: 0;
 }
 
+.tutorial-modal {
+    -fx-background-color: white;
+}
+
+.loader {
+    -fx-spacing: 20px;
+}
+
 #footer {
     -fx-padding: 5px 0px 5px 15px;
 }

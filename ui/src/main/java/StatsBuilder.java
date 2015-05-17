@@ -1,4 +1,5 @@
 import format.FormatUtils;
+import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -6,10 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.geometry.*;
 import javafx.scene.*;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
@@ -26,6 +24,7 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
 import main.*;
+import org.gillius.jfxutils.chart.ChartPanManager;
 import org.gillius.jfxutils.chart.JFXChartUtil;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -40,14 +39,14 @@ public class StatsBuilder {
 
     private static int MAX_NODES = 200;
 
-    public void build(GridPane stats, Portfolio portfolio, List<Price> prices, Map<DateTime, OrderType> orders) {
+    public void build(GridPane stats, Portfolio portfolio) {
         final VBox vbox = new VBox();
         vbox.setSpacing(15);
         TableView equity = buildEquityTable(portfolio.getAssetValue());
         vbox.getChildren().addAll(buildPortfolioStats(portfolio),equity);
         VBox.setVgrow(equity, Priority.ALWAYS);
 
-        stats.setPadding(new Insets(50, 30, 50, 30));
+        stats.setPadding(new Insets(30, 30, 30, 30));
 
         TableView returnTable = buildTable(portfolio.getReturns(),portfolio.getTotalReturnValue());
         VBox graphs = new VBox();
@@ -260,19 +259,8 @@ public class StatsBuilder {
             }
         });
         final ContextMenu menu = new ContextMenu(chartReturnsItem);
-
-        tableView.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (MouseButton.SECONDARY.equals(event.getButton())) {
-                    if (menu.isShowing()) {
-                        menu.hide();
-                    } else {
-                        menu.show(tableView, event.getScreenX(), event.getScreenY());
-                    }
-                }
-            }
-        });
+        //tableView.setContextMenu(menu);
+        installMenuOptions(tableView,menu);
         return tableView;
     }
 
@@ -352,12 +340,11 @@ public class StatsBuilder {
         lineChart.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
             public void handle(MouseEvent event) {
-                if (event.getButton().equals(MouseButton.PRIMARY)) {
-                    if (event.getClickCount() == 2) {
-                        xAxis.setAutoRanging(true);
-                        yAxis.setAutoRanging(true);
-                    }
-                } else if (event.getButton().equals(MouseButton.SECONDARY)) {
+                if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+                    xAxis.setAutoRanging(true);
+                    yAxis.setAutoRanging(true);
+                } else if (event.getButton().equals(MouseButton.MIDDLE)
+                        || (event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY))) {
                     if (menu.isShowing()) {
                         menu.hide();
                     } else {
@@ -366,7 +353,8 @@ public class StatsBuilder {
                 }
             }
         });
-        return JFXChartUtil.setupZooming(lineChart);
+
+        return ChartPanZoomManager.setup(lineChart);
     }
 
     private TableView buildEquityTable(Map<String,Double> equities) {
@@ -419,6 +407,26 @@ public class StatsBuilder {
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setPrefHeight(150);
         return tableView;
+    }
+
+    private void installMenuOptions(TableView tableView, ContextMenu menu) {
+        tableView.setTableMenuButtonVisible(true);
+        // *Register event filter to show or hide the custom show/hide context menu*
+        final Node showHideColumnsButton = tableView.lookup(".show-hide-columns-button");
+        if (showHideColumnsButton != null) {
+            showHideColumnsButton.addEventFilter(MouseEvent.MOUSE_PRESSED,
+                    new EventHandler<MouseEvent>() {
+                        @Override
+                        public void handle(MouseEvent event) {
+                            if (menu.isShowing()) {
+                                menu.hide();
+                            } else {
+                                menu.show(showHideColumnsButton, Side.BOTTOM, 0, 0);
+                            }
+                            event.consume();
+                        }
+                    });
+        }
     }
 
     private class TooltipContent extends GridPane {

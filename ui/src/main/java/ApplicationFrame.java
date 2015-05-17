@@ -10,12 +10,15 @@ import javafx.collections.ObservableList;
 import javafx.event.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -26,19 +29,23 @@ import main.*;
 import org.joda.time.DateTime;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
+import java.util.logging.FileHandler;
 import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 /**
  * Created by Gavin Tam on 17/03/15.
  */
 public class ApplicationFrame extends Application {
 
-    private static final Logger logger = Logger.getLogger("log");
+    private static final String LOG_FILE = "application_log";
+    private static final Logger logger = Logger.getLogger(LOG_FILE);
 
     private StrategyRunner runner = new StrategyRunner();
 
@@ -50,19 +57,23 @@ public class ApplicationFrame extends Application {
     private BorderPane graph;
     private GridPane stats;
     private BorderPane analysis;
+    private BorderPane comparison;
+    private TabPane tabPane;
+
     private ComboBox<String> companySelector;
     private ChangeListener companyListener;
-    private Label loadingInfo;
-    private ProgressBar loading;
+
+    private Loader loader;
+
     private ParameterManager<String> manager = new ParameterManager();
     private TableView paramTable;
-    private TabPane tabPane;
     private HashSet<Tab> loadedTabs = new HashSet<>();
-    private Portfolio portfolio = new Portfolio(new History<>());
+    private Portfolio portfolio = new Portfolio(new History<>(),null,null);
 
     private GraphBuilder g = new GraphBuilder();
     private AnalysisBuilder a = new AnalysisBuilder();
     private StatsBuilder s = new StatsBuilder();
+    private ComparisonBuilder c = new ComparisonBuilder();
 
     private static String VERSION_NUMBER = "1.1.0";
     private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
@@ -73,10 +84,11 @@ public class ApplicationFrame extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         //primaryStage.setFullScreen(true);
+        initLogger();
         primaryStage.setTitle("BuyHard Platform");
         main = new BorderPane();
         Scene scene = new Scene(main);
-        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css", "analysis.css");
+        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css", "analysis.css", "comparison.css");
         primaryStage.setScene(scene);
         primaryStage.setMinHeight(768);
         primaryStage.setMinWidth(1024);
@@ -90,8 +102,27 @@ public class ApplicationFrame extends Application {
         graph.setVisible(false);
         stats.setVisible(false);
         analysis.setVisible(false);
+        comparison.setVisible(false);
 
         primaryStage.show();
+    }
+
+    private void initLogger() {
+        logger.setUseParentHandlers(false);
+        try {
+            FileHandler handler = new FileHandler(LOG_FILE);
+            SimpleFormatter formatter = new SimpleFormatter();
+            handler.setFormatter(formatter);
+            logger.addHandler(handler);
+
+            logger.info("====== Buy Hard =========\n" +
+                    "Developer Team: Group 1\n" +
+                    "APPLICATION NAME: BuyHard-Platform-" + VERSION_NUMBER + ".jar\n" +
+                    "APPLICATION VERSION: " + VERSION_NUMBER + "\n" +
+                    "LOG FILE: " + LOG_FILE);
+        } catch (IOException e) {
+            System.err.println("Logger could not be initialised.");
+        }
     }
 
     private void initHeader()
@@ -122,6 +153,7 @@ public class ApplicationFrame extends Application {
         graph = new BorderPane();
         stats = new GridPane();
         analysis = new BorderPane();
+        comparison = new BorderPane();
         addFilterSelector();
 
         tabPane = new TabPane();
@@ -130,6 +162,7 @@ public class ApplicationFrame extends Application {
         tab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-data-icon.png").toExternalForm()));
         tab.setClosable(false);
         tab.setContent(graph);
+        addHelpModal(tab,new ImageView(getClass().getResource("images/mouse-graph.jpeg").toExternalForm()));
 
         Tab statsTab = new Tab();
         statsTab.setText("Portfolio");
@@ -142,12 +175,59 @@ public class ApplicationFrame extends Application {
         analysisTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()));
         analysisTab.setClosable(false);
         analysisTab.setContent(analysis);
-        tabPane.getTabs().addAll(tab, statsTab, analysisTab);
+
+        Tab comparisonTab = new Tab();
+        comparisonTab.setText("Comparison");
+        comparisonTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-comparison-icon.png").toExternalForm()));
+        comparisonTab.setClosable(false);
+        comparisonTab.setContent(comparison);
+
+        tabPane.getTabs().addAll(tab, statsTab, analysisTab, comparisonTab);
         addTabLoadingAction(tabPane);
 
         body.getChildren().addAll(tabPane, new Separator());
 
         main.setCenter(body);
+    }
+
+    private void addHelpModal(Tab tab, Node node) {
+        final MenuItem helpItem = new MenuItem("Help", new ImageView(getClass().getResource("icons/help.png").toExternalForm()));
+        helpItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                final Stage dialog = new Stage();
+                dialog.setTitle("Tutorial");
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(stage);
+                VBox dialogVbox = new VBox();
+                dialogVbox.getStyleClass().add("tutorial-modal");
+                dialogVbox.setAlignment(Pos.CENTER_RIGHT);
+                Button close = new Button("Close");
+                close.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        dialog.close();
+                    }
+                });
+                dialogVbox.getChildren().add(node);
+                Scene dialogScene = new Scene(dialogVbox);
+                dialog.setScene(dialogScene);
+                dialog.show();
+            }
+        });
+        final ContextMenu menu = new ContextMenu(helpItem);
+        tab.setContextMenu(menu);
+        tab.getContent().setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.isControlDown() && event.getButton().equals(MouseButton.PRIMARY)) {
+                    if (menu.isShowing()) {
+                        menu.hide();
+                    } else {
+                        menu.show(tab.getContent(), event.getScreenX(), event.getScreenY());
+                    }
+                }
+            }
+        });
     }
 
     private void addTabLoadingAction(TabPane tabPane) {
@@ -158,7 +238,7 @@ public class ApplicationFrame extends Application {
                     //select the new tab first cause this is not done by default
                     tabPane.getSelectionModel().select(newValue.intValue());
                     if (orderReader == null || priceReader == null) return;
-                    Set<String> companies = orderReader.getHistory().getAllCompanies();
+                    Set<String> companies = priceReader.getHistory().getAllCompanies();
                     String firstCompany = companies.iterator().next();
                     loadContent(priceReader.getCompanyHistory(firstCompany), orderReader.getCompanyHistory(firstCompany), false);
                 }
@@ -171,7 +251,6 @@ public class ApplicationFrame extends Application {
         HBox footerPanel = new HBox();
         footerPanel.setAlignment(Pos.CENTER_LEFT);
         footerPanel.setId("footer");
-        footerPanel.setSpacing(20);
         HBox footerText = new HBox();
         footerText.setId("footer-text");
         HBox.setHgrow(footerText,Priority.ALWAYS);
@@ -185,9 +264,8 @@ public class ApplicationFrame extends Application {
             }
         });
         footerText.getChildren().addAll(appInfo, websiteLink);
-        loading = new ProgressBar(0);
-        loadingInfo = new Label();
-        footerPanel.getChildren().addAll(loading, loadingInfo,footerText);
+        loader = new Loader();
+        footerPanel.getChildren().addAll(loader,footerText);
         main.setBottom(footerPanel);
     }
 
@@ -226,14 +304,20 @@ public class ApplicationFrame extends Application {
     }
 
     private void addCompanySelectorListener() {
+        new AutoCompleteComboBoxListener<>(companySelector);
         if (companyListener == null) {
             companyListener = new ChangeListener<String>() {
                 @Override
                 public void changed(ObservableValue v, String old, String companyName) {
-                    List<Price> prices = priceReader.getCompanyHistory(companyName);
-                    List<Order> orders = orderReader.getCompanyHistory(companyName);
-                    loadedTabs.remove(tabPane.getSelectionModel().getSelectedItem());
-                    loadContent(prices, orders, false);
+                    //user may type in invalid company name so we have to check whether or not
+                    //a valid company name has been selected. Also, don't reload if the selected company
+                    //is the same as the previously selected one.
+                    if (companyName != null && !companyName.equals(old) && priceReader.getCompanyHistory(companyName) != null) {
+                        List<Price> prices = priceReader.getCompanyHistory(companyName);
+                        List<Order> orders = orderReader.getCompanyHistory(companyName);
+                        loadedTabs.remove(tabPane.getSelectionModel().getSelectedItem());
+                        loadContent(prices, orders, false);
+                    }
                 }
             };
         }
@@ -242,12 +326,6 @@ public class ApplicationFrame extends Application {
 
     private void loadContent(List<Price> prices, List<Order> orders, boolean force)
     {
-        Map<DateTime, OrderType> orderRecord = new HashMap<>();
-        if (orders != null) {
-            for (Order order : orders) {
-                orderRecord.put(order.getOrderDate(), order.getOrderType());
-            }
-        }
         Runnable r = new Runnable() {
             @Override
             public void run() {
@@ -256,16 +334,22 @@ public class ApplicationFrame extends Application {
                 if (loaded && !force) {
                     return;
                 }
-                loadingInfo.setText("Refreshing content...");
-                loading.setProgress(0);
+                loader.setText("Refreshing content...");
+                loader.setProgress(0);
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Data") && !loaded) || force) {
                     graph.setVisible(false);
+                    Map<DateTime, OrderType> orderRecord = new HashMap<>();
+                    if (orders != null) {
+                        for (Order order : orders) {
+                            orderRecord.put(order.getOrderDate(), order.getOrderType());
+                        }
+                    }
                     g.buildGraph(graph, prices, orders, orderRecord);
                     graph.setVisible(true);
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Portfolio") && !loaded) || force) {
                     stats.setVisible(false);
-                    s.build(stats, portfolio, prices, orderRecord);
+                    s.build(stats, portfolio);
                     stats.setVisible(true);
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Analysis") && !loaded) || force) {
@@ -273,13 +357,21 @@ public class ApplicationFrame extends Application {
                     a.buildAnalysis(runner, analysis, manager.getParams().keySet());
                     analysis.setVisible(true);
                 }
-                loadingInfo.setText("Loaded.");
-                loading.setProgress(1.0);
+                if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Comparison") && !loaded) || force) {
+                    comparison.setVisible(false);
+                    c.buildComparison(runner, comparison, portfolio, manager.getParams());
+                    comparison.setVisible(true);
+                }
+                if (!portfolio.isEmpty()) {
+                    a.addRow(manager.getParams(), FormatUtils.round2dp(portfolio.getTotalReturnValue()));
+                }
                 if (force) {
                     loadedTabs.addAll(tabPane.getTabs());
                 } else {
                     loadedTabs.add(selectedTab);
                 }
+                loader.setText("Loaded.");
+                loader.setProgress(1.0);
             }
         };
         if (Platform.isFxApplicationThread()) r.run();
@@ -360,8 +452,8 @@ public class ApplicationFrame extends Application {
                             Platform.runLater(new Runnable() {
                                 @Override
                                 public void run() {
-                                    loadingInfo.setText("Running strategy...");
-                                    loading.setProgress(0);
+                                    loader.setText("Running strategy...");
+                                    loader.setProgress(0);
                                 }
                             });
                             //new run means no tabs will have loaded
@@ -369,13 +461,25 @@ public class ApplicationFrame extends Application {
                             runner.run(true);
                             Platform.runLater(new Runnable() {
                                 public void run() {
-                                    loadingInfo.setText("Updating prices and orders information...");
-                                    loading.setProgress(0.5);
+                                    loader.setText("Updating prices and orders information...");
+                                    loader.setProgress(0.5);
                                 }
                             });
 
                             priceReader = new PriceReader(runner.getDataFile());
                             priceReader.readAll();
+                            //find the start and end date of the prices data
+                            DateTime startDate = null, endDate = null;
+                            for (String company: (Set<String>)priceReader.getHistory().getAllCompanies()) {
+                                for (Price price: (List<Price>)priceReader.getCompanyHistory(company)) {
+                                    if (startDate == null || price.getDate().isBefore(startDate)) {
+                                        startDate = price.getDate();
+                                    }
+                                    if (endDate == null || price.getDate().isAfter(endDate)) {
+                                        endDate = price.getDate();
+                                    }
+                                }
+                            }
                             Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
                             ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
 
@@ -390,17 +494,20 @@ public class ApplicationFrame extends Application {
 
                             List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
 
-                            orderReader = new OrderReader(OUTPUT_FILE_PATH);
+                            if (FileUtils.matches(runner.getStrategyFile(),"aurora.jar")) {
+                                orderReader = new OrderReaderKoK(OUTPUT_FILE_PATH);
+                            } else {
+                                orderReader = new OrderReader(OUTPUT_FILE_PATH);
+                            }
                             orderReader.readAll();
                             List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
 
-                            portfolio = new Portfolio(orderReader.getHistory());
-                            a.addRow(manager.getParams(), FormatUtils.round2dp(portfolio.getTotalReturnValue()));
+                            portfolio = new Portfolio(orderReader.getHistory(), startDate, endDate);
                             loadContent(prices, orders, false);
                             Platform.runLater(new Runnable() {
                                 public void run() {
-                                    loadingInfo.setText("");
-                                    loading.setProgress(1);
+                                    loader.setText("");
+                                    loader.setProgress(1);
                                 }
                             });
                             runButton.setDisable(false);
@@ -571,28 +678,31 @@ public class ApplicationFrame extends Application {
         //ensures extra space to given to existing columns
         paramTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         paramTable.setMinWidth(300);
+        //TODO Remove - only for testing
         updateParamTable();
     }
 
     private void updateParamTable() {
-        //remove previously stored parameters
-        manager.clear();
-        a.restart();
+        if (runner.getParamFile() != null) {
+            //remove previously stored parameters
+            manager.clear();
+            a.restart();
 
-        Properties props = manager.getProperties(runner.getParamFile());
-        Enumeration properties = props.propertyNames();
-        ObservableList<Map.Entry> data = FXCollections.observableArrayList(props.entrySet());
-        paramTable.setItems(data);
+            Properties props = manager.getProperties(runner.getParamFile());
+            Enumeration properties = props.propertyNames();
+            ObservableList<Map.Entry> data = FXCollections.observableArrayList(props.entrySet());
+            paramTable.setItems(data);
 
-        while (properties.hasMoreElements()) {
-            String key = (String)properties.nextElement();
-            //if the value of the property is not numerical, it is not a parameter
-            try {
-                Double.parseDouble(props.getProperty(key));
-            } catch (NumberFormatException e) {
-                continue;
+            while (properties.hasMoreElements()) {
+                String key = (String) properties.nextElement();
+                //if the value of the property is not numerical, it is not a parameter
+                try {
+                    Double.parseDouble(props.getProperty(key));
+                } catch (NumberFormatException e) {
+                    continue;
+                }
+                manager.put(key, props.getProperty(key));
             }
-            manager.put(key,props.getProperty(key));
         }
     }
 

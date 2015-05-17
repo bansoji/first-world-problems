@@ -1,6 +1,7 @@
-package main;
-
 import date.DateUtils;
+import main.Order;
+import main.OrderType;
+import main.Parser;
 import org.joda.time.DateTime;
 
 import java.io.IOException;
@@ -10,7 +11,7 @@ import java.io.IOException;
  *
  * Used to integrate with another module that uses the format of yyyy-MM-dd
  */
-public class OrderParserIntegration extends OrderParser{
+public class OrderParserKoK extends Parser<Order> {
     //Column numbers for output order prices data file.
     private static final int ORDER_COMPANY_NAME = 0;
     private static final int ORDER_DATE = 1;
@@ -18,7 +19,7 @@ public class OrderParserIntegration extends OrderParser{
     private static final int ORDER_VOLUME = 3;
     private static final int ORDER_SIGNAL = 5;
 
-    public OrderParserIntegration(String filename){
+    public OrderParserKoK(String filename){
         super(filename);
     }
 

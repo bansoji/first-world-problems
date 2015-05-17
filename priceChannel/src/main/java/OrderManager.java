@@ -1,5 +1,7 @@
-import quickDate.*;
 import main.Reader;
+import quickDate.Order;
+import quickDate.Price;
+import quickDate.PriceReader;
 
 import java.io.*;
 import java.util.List;
@@ -16,7 +18,7 @@ import java.util.logging.SimpleFormatter;
 public class OrderManager {
 
     // Some class constants.
-    public static final String VERSION = "1.1.0";
+    public static final String VERSION = "1.0.0";
 
     public static void main(String[] args) throws IOException {
         long startTime = System.currentTimeMillis();
@@ -59,7 +61,7 @@ public class OrderManager {
 
         logger.info("====== Buy Hard =========\n" +
                 "Developer Team: Group 1\n" +
-                "MODULE NAME: BuyHard-Momentum-" + VERSION + ".jar\n" +
+                "MODULE NAME: BuyHarder-" + VERSION + ".jar\n" +
                 "MODULE VERSION: " + VERSION + "\n" +
                 "INPUT FILE: " + fileName + "\n" +
                 "OUTPUT FILE: " + outputFileName + "\n" +
@@ -93,7 +95,7 @@ public class OrderManager {
 
             // Initialise the trading strategy.
             //TradingStrategy strategy = new MomentumStrategy(companyHistory, input);
-            TradingStrategy strategy = new MomentumStrategy(companyHistory, input);
+            TradingStrategy strategy = new PriceChannelStrategy(companyHistory, input);
 
             ///////////////////////////////
             // RUNNING.

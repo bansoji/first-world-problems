@@ -5,6 +5,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.CacheHint;
@@ -17,6 +18,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -159,7 +161,7 @@ public class GraphBuilder {
 
         final VBox table = new VBox();
         table.setPadding(new javafx.geometry.Insets(0, 30, 30, 30));
-        TableView tableView = buildTable(prices,orderSummary);
+        Pane tableView = buildTable(prices,orderSummary);
         table.getChildren().add(tableView);
         VBox.setVgrow(tableView,Priority.ALWAYS);
 
@@ -216,7 +218,7 @@ public class GraphBuilder {
     }
 
 
-    private static TableView buildTable(List<Price> prices, Map<DateTime,OrderType> orders) {
+    private Pane buildTable(List<Price> prices, Map<DateTime,OrderType> orders) {
         TableView tableView = new TableView();
 
         TableColumn dateCol = new TableColumn("Date");
@@ -281,14 +283,52 @@ public class GraphBuilder {
             }
         });
 
+        final FilteredList<Price> filterableData;
         if (prices != null) {
             ObservableList<Price> data = FXCollections.observableArrayList(prices);
-            tableView.setItems(data);
+            filterableData = new FilteredList<>(data);
+            tableView.setItems(filterableData);
+        } else {
+            filterableData = null;
         }
         tableView.getColumns().addAll(dateCol, priceCol);
         //ensures extra space to given to existing columns
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        return tableView;
+
+        ToolBar toolbar = new ToolBar();
+        toolbar.setId("prices-table-filters");
+        ImageView filterBuys = new ImageView(getClass().getResource("icons/buy.png").toExternalForm());
+        filterBuys.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (filterableData != null)
+                    filterableData.setPredicate(price -> orders.containsKey(price.getDate()) && orders.get(price.getDate()).equals(OrderType.BUY));
+            }
+        });
+
+        ImageView filterSells = new ImageView(getClass().getResource("icons/sell.png").toExternalForm());
+        filterSells.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (filterableData != null)
+                    filterableData.setPredicate(price -> orders.containsKey(price.getDate()) && orders.get(price.getDate()).equals(OrderType.SELL));
+            }
+        });
+
+        ImageView showAll = new ImageView(getClass().getResource("icons/all.png").toExternalForm());
+        showAll.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (filterableData != null)
+                    filterableData.setPredicate(price -> true);
+            }
+        });
+        toolbar.getItems().addAll(filterBuys, filterSells, showAll);
+
+        BorderPane pane = new BorderPane();
+        pane.setCenter(tableView);
+        pane.setTop(toolbar);
+        return pane;
     }
 
     private void addMenu() {

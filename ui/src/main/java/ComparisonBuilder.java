@@ -3,7 +3,6 @@ import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
 import javafx.scene.CacheHint;
 import javafx.scene.chart.*;
 import javafx.scene.control.Label;

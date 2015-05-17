@@ -259,8 +259,7 @@ public class StatsBuilder {
             }
         });
         final ContextMenu menu = new ContextMenu(chartReturnsItem);
-        //tableView.setContextMenu(menu);
-        installMenuOptions(tableView,menu);
+        tableView.setContextMenu(menu);
         return tableView;
     }
 
@@ -406,27 +405,8 @@ public class StatsBuilder {
         //ensures extra space to given to existing columns
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setPrefHeight(150);
-        return tableView;
-    }
 
-    private void installMenuOptions(TableView tableView, ContextMenu menu) {
-        tableView.setTableMenuButtonVisible(true);
-        // *Register event filter to show or hide the custom show/hide context menu*
-        final Node showHideColumnsButton = tableView.lookup(".show-hide-columns-button");
-        if (showHideColumnsButton != null) {
-            showHideColumnsButton.addEventFilter(MouseEvent.MOUSE_PRESSED,
-                    new EventHandler<MouseEvent>() {
-                        @Override
-                        public void handle(MouseEvent event) {
-                            if (menu.isShowing()) {
-                                menu.hide();
-                            } else {
-                                menu.show(showHideColumnsButton, Side.BOTTOM, 0, 0);
-                            }
-                            event.consume();
-                        }
-                    });
-        }
+        return tableView;
     }
 
     private class TooltipContent extends GridPane {

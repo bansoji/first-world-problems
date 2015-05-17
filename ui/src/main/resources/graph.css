@@ -87,3 +87,7 @@
 .normal-row .table-cell {
     -fx-text-fill: black;
 }
+
+#prices-table-filters {
+    -fx-background-color: transparent;
+}

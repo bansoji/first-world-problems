@@ -2,6 +2,7 @@ package main;
 
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.report.builder.DynamicReports;
+import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import net.sf.dynamicreports.report.builder.component.TextFieldBuilder;
 import net.sf.dynamicreports.report.exception.DRException;
 
@@ -21,14 +22,16 @@ public class ReportGenerator {
         this.portfolioData = p;
     }
 
-    public static void main(String[] args) {
+    public static void generateReport(){
+        //  Create Columns
+        TextColumnBuilder<String> companyName = DynamicReports.col.column("Item", "item", DynamicReports.type.stringType());
 
         JasperReportBuilder report = DynamicReports.report();
 
         // Components.
         TextFieldBuilder<String> title = DynamicReports.cmp.text("BuyHard Report");
-
         report.title(title);
+
 
         try {
             report.toPdf(new FileOutputStream(new File("report.pdf")));
@@ -36,6 +39,11 @@ public class ReportGenerator {
         } catch (DRException | FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        generateReport();
+
     }
 
 }

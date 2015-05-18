@@ -1,8 +1,10 @@
 package main;
 
+import date.DateUtils;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.report.builder.DynamicReports;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
+import net.sf.dynamicreports.report.builder.component.MultiPageListBuilder;
 import net.sf.dynamicreports.report.builder.component.TextFieldBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
 import net.sf.dynamicreports.report.constant.HorizontalAlignment;
@@ -11,6 +13,7 @@ import net.sf.dynamicreports.report.constant.PageType;
 import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JREmptyDataSource;
 
 import javax.activation.DataSource;
 import java.awt.*;
@@ -52,6 +55,7 @@ public class ReportGenerator {
                 .setPadding(3);
         StyleBuilder titleStyle = DynamicReports.stl.style()
                 .setFontSize(30)
+                .setBottomPadding(20)
                 .bold();
         StyleBuilder subtitleStyle = DynamicReports.stl.style()
                 .setFontSize(20)
@@ -65,6 +69,11 @@ public class ReportGenerator {
         TextColumnBuilder<Double> equityValueColumn = DynamicReports.col.column("Equity", "equity", DynamicReports.type.doubleType());
         TextColumnBuilder<Double> returnValueColumn = DynamicReports.col.column("Return", "returnValue", DynamicReports.type.doubleType());
         TextColumnBuilder<Double> returnPercentageColumn = DynamicReports.col.column("Return %", "returnPercentage", DynamicReports.type.doubleType());
+
+        TextColumnBuilder<Double> priceColumn = DynamicReports.col.column("Price", "price", DynamicReports.type.doubleType());
+        TextColumnBuilder<Integer> volumeColumn = DynamicReports.col.column("Volume", "volume", DynamicReports.type.integerType());
+        TextColumnBuilder<String> signalColumn = DynamicReports.col.column("Signal", "signal", DynamicReports.type.stringType());
+        TextColumnBuilder<String> dateColumn = DynamicReports.col.column("Date", "date", DynamicReports.type.stringType());
 
         TextFieldBuilder<String> subtitle;
 
@@ -80,35 +89,52 @@ public class ReportGenerator {
         subtitle = DynamicReports.cmp.text("Equities");
         JRDataSource assetData = createDataSource();
         JasperReportBuilder assetReport = DynamicReports.report();
-        assetReport.title(subtitle.setStyle(subtitleStyle));
-        assetReport.columns(companyNameColumn, equityValueColumn);
-        assetReport.setColumnHeaderStyle(tableHeader);
-        assetReport.setColumnStyle(tableBody);
-        assetReport.setDataSource(assetData);
+            assetReport.title(subtitle.setStyle(subtitleStyle));
+            assetReport.columns(companyNameColumn, equityValueColumn);
+            assetReport.setColumnHeaderStyle(tableHeader);
+            assetReport.setColumnStyle(tableBody);
+            assetReport.setDataSource(assetData);
 
 
         // Return value subReport
         subtitle = DynamicReports.cmp.text("Returns");
         JRDataSource resultsData = createDataSource();
         JasperReportBuilder returnsReport = DynamicReports.report();
-        returnsReport.title(subtitle.setStyle(subtitleStyle));
-        returnsReport.columns(companyNameColumn, returnValueColumn, returnPercentageColumn);
-        returnsReport.setColumnHeaderStyle(tableHeader);
-        returnsReport.setColumnStyle(tableBody);
-        returnsReport.setDataSource(resultsData);
+            returnsReport.title(subtitle.setStyle(subtitleStyle));
+            returnsReport.columns(companyNameColumn, returnValueColumn, returnPercentageColumn);
+            returnsReport.setColumnHeaderStyle(tableHeader);
+            returnsReport.setColumnStyle(tableBody);
+            returnsReport.setDataSource(resultsData);
+
+        // Company Breakdown subReport
+        MultiPageListBuilder companyReports = new DynamicReports().cmp.multiPageList();
+        History<Order> companyHistories = portfolioData.getOrderHistory();
+        for (String c : companyHistories.getAllCompanies()){
+            JasperReportBuilder companyReport = DynamicReports.report();
+            subtitle = DynamicReports.cmp.text(c);
+                companyReport.title(subtitle.setStyle(subtitleStyle));
+                companyReport.columns(companyNameColumn, dateColumn, priceColumn, volumeColumn, signalColumn);
+                companyReport.setColumnHeaderStyle(tableHeader);
+                companyReport.setColumnStyle(tableBody);
+                companyReport.setDataSource(createCompanyDataSource(companyHistories.getCompanyHistory(c)));
+            companyReports.add(DynamicReports.cmp.subreport(companyReport));
+        }
 
         // Main Report
         JasperReportBuilder report = DynamicReports.report();
-        TextFieldBuilder<String> title = DynamicReports.cmp.text("BuyHard Report - Overview");
-        report.title(title.setStyle(titleStyle));
-        report.title(DynamicReports.cmp.multiPageList(
-                DynamicReports.cmp.subreport(totalSummary),
-                DynamicReports.cmp.subreport(assetReport),
-                DynamicReports.cmp.subreport(returnsReport))
-        );
         report.setPageMargin(DynamicReports.margin(20));
-
-        // report.setPageFormat(PageType.A4, PageOrientation.LANDSCAPE);
+        report.setPageFormat(PageType.A4, PageOrientation.LANDSCAPE);
+        report.setPageColumnsPerPage(2);
+        report.setPageColumnSpace(15);
+        TextFieldBuilder<String> title = DynamicReports.cmp.text("BuyHard Report - Overview");
+            report.title(title.setStyle(titleStyle));
+            report.detail(DynamicReports.cmp.multiPageList(
+                            DynamicReports.cmp.subreport(totalSummary),
+                            DynamicReports.cmp.subreport(assetReport),
+                            DynamicReports.cmp.subreport(returnsReport)),
+                    companyReports
+            );
+        report.setDataSource(new JREmptyDataSource());
 
 
         try {
@@ -129,6 +155,14 @@ public class ReportGenerator {
             dataSource.add(company, assetValue.get(company),returns.get(company).get(0),returns.get(company).get(1));
         }
 
+        return dataSource;
+    }
+
+    private static JRDataSource createCompanyDataSource(List<Order> companyOrders){
+        DRDataSource dataSource = new DRDataSource("company", "date", "price", "volume", "signal");
+        for (Order o : companyOrders){
+            dataSource.add(o.getCompanyName(), DateUtils.format(o.getOrderDate()),o.getPrice(),o.getVolume(),o.getOrderType().getSignal(o.getOrderType()));
+        }
         return dataSource;
     }
 

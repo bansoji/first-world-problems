@@ -203,4 +203,8 @@ public class Portfolio {
     public boolean isEmpty() {
         return (orderHistory.getAllCompanies().size() == 0);
     }
+
+    //added for reportgeneration
+
+    public History<Order> getOrderHistory(){ return orderHistory; }
 }

@@ -91,3 +91,12 @@
 #prices-table-filters {
     -fx-background-color: transparent;
 }
+
+
+.table-filter {
+    -fx-background-color: transparent;
+}
+
+.table-filter:selected {
+    -fx-background-color: #D0D0D0;
+}

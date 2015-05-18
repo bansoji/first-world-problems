@@ -21,13 +21,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.util.Callback;
 import main.Order;
 import main.OrderType;
 import main.Price;
-import org.gillius.jfxutils.chart.JFXChartUtil;
 import org.joda.time.DateTime;
 
 import java.util.*;
@@ -295,40 +293,51 @@ public class GraphBuilder {
         //ensures extra space to given to existing columns
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
+        BorderPane pane = new BorderPane();
+        pane.setCenter(tableView);
+        pane.setTop(createToolBar(filterableData, orders));
+        return pane;
+    }
+
+    private ToolBar createToolBar(FilteredList<Price> filterableData, Map<DateTime,OrderType> orders) {
         ToolBar toolbar = new ToolBar();
         toolbar.setId("prices-table-filters");
-        ImageView filterBuys = new ImageView(getClass().getResource("icons/buy.png").toExternalForm());
-        filterBuys.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        final ToggleGroup group = new ToggleGroup();
+        ToggleButton filterBuys = new ToggleButton("Buy", new ImageView(getClass().getResource("icons/buy.png").toExternalForm()));
+        filterBuys.getStyleClass().add("table-filter");
+        filterBuys.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(MouseEvent event) {
+            public void handle(ActionEvent event) {
                 if (filterableData != null)
                     filterableData.setPredicate(price -> orders.containsKey(price.getDate()) && orders.get(price.getDate()).equals(OrderType.BUY));
             }
         });
 
-        ImageView filterSells = new ImageView(getClass().getResource("icons/sell.png").toExternalForm());
-        filterSells.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        ToggleButton filterSells = new ToggleButton("Sell", new ImageView(getClass().getResource("icons/sell.png").toExternalForm()));
+        filterSells.getStyleClass().add("table-filter");
+        filterSells.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(MouseEvent event) {
+            public void handle(ActionEvent event) {
                 if (filterableData != null)
                     filterableData.setPredicate(price -> orders.containsKey(price.getDate()) && orders.get(price.getDate()).equals(OrderType.SELL));
             }
         });
 
-        ImageView showAll = new ImageView(getClass().getResource("icons/all.png").toExternalForm());
-        showAll.setOnMouseClicked(new EventHandler<MouseEvent>() {
+        ToggleButton showAll = new ToggleButton("All", new ImageView(getClass().getResource("icons/all.png").toExternalForm()));
+        showAll.getStyleClass().add("table-filter");
+        showAll.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(MouseEvent event) {
+            public void handle(ActionEvent event) {
                 if (filterableData != null)
                     filterableData.setPredicate(price -> true);
             }
         });
+        filterBuys.setToggleGroup(group);
+        filterSells.setToggleGroup(group);
+        showAll.setToggleGroup(group);
+        showAll.setSelected(true);  //show all prices is the default selection
         toolbar.getItems().addAll(filterBuys, filterSells, showAll);
-
-        BorderPane pane = new BorderPane();
-        pane.setCenter(tableView);
-        pane.setTop(toolbar);
-        return pane;
+        return toolbar;
     }
 
     private void addMenu() {

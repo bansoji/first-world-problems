@@ -84,3 +84,7 @@
 .icon-button:hover {
     -fx-opacity: 1.0;
 }
+
+.vertical-marker {
+    -fx-stroke: blue;
+}

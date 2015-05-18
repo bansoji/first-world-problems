@@ -1,6 +1,7 @@
 import format.FormatUtils;
 import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
+import graph.VerticalMarkerBuilder;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -352,8 +353,7 @@ public class StatsBuilder {
                 }
             }
         });
-
-        return ChartPanZoomManager.setup(lineChart);
+       return ChartPanZoomManager.setup(lineChart);
     }
 
     private TableView buildEquityTable(Map<String,Double> equities) {

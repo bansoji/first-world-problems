@@ -85,7 +85,8 @@ public class ComparisonBuilder {
         if (runner == null || runner.getDataFile() == null || params == null) return;
         XYChart.Series<Long,Double> series = new XYChart.Series<>();
         for (Profit p: portfolio.getProfitList()) {
-            series.getData().add(new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue()));
+            XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
+            series.getData().add(data);
         }
         String strategyName = FileUtils.extractFilename(runner.getStrategyFile());
         series.setName(strategyName);

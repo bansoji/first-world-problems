@@ -25,3 +25,6 @@ ui/src/main/resources/fonts
 MAINIFEST.MF
 .DS_Store
 application_log*
+
+# GO AWAY STUPID MANIFEST FILE
+*.MF

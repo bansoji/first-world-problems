@@ -22,4 +22,7 @@ ui/src/main/resources/fonts
 *.log.*
 *.csv#
 
+MANIFEST.MF
+application_log*
+
 .DS_Store

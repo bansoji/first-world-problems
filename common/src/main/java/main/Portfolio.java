@@ -143,6 +143,10 @@ public class Portfolio {
         return assetValue;
     }
 
+    /**
+     * Returns a map of all the companies' total values (asset + return value)
+     * @return  The map of all companies' portfolio values.
+     */
     public Map<String, Double> getPortfolioValue ()
     {
         Map<String, Double> portfolioValue = new HashMap<>();

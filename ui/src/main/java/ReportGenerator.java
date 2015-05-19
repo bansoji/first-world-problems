@@ -5,7 +5,7 @@ import main.Order;
 import main.Portfolio;
 import main.Returns;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
-import net.sf.dynamicreports.jasper.builder.export.JasperXlsExporterBuilder;
+import net.sf.dynamicreports.jasper.builder.export.JasperXlsxExporterBuilder;
 import net.sf.dynamicreports.jasper.constant.JasperProperty;
 import net.sf.dynamicreports.report.builder.DynamicReports;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
@@ -47,8 +47,8 @@ public class ReportGenerator {
     private StyleBuilder tableBody;
     private StyleBuilder boldCentered;
 
-    private static String xlsReportName = "report.xls";
-    private static String xlsReportNameOD = "/Users/addo/Documents/OneDrive/dump/report.xls";
+    private static String xlsReportName = "report.xlsx";
+    private static String xlsReportNameOD = "/Users/addo/Documents/OneDrive/dump/report.xlsx";
 
     private static String pdfReportName = "report.pdf";
 
@@ -79,7 +79,7 @@ public class ReportGenerator {
 
         try {
             TextFieldBuilder<String> title = DynamicReports.cmp.text("BuyHard Report - Overview");
-            JasperXlsExporterBuilder xlsExporter = DynamicReports.export.xlsExporter(xlsReportNameOD) //TODO BANSON Change me to xlsReportName!
+            JasperXlsxExporterBuilder xlsxExporter = DynamicReports.export.xlsxExporter(xlsReportNameOD) //TODO BANSON Change me to xlsReportName!
                     .setDetectCellType(true)
                     .setIgnorePageMargins(true)
                     .setWhitePageBackground(false)
@@ -95,7 +95,7 @@ public class ReportGenerator {
                     .ignorePageWidth()
                     .ignorePagination()
                     .setDataSource(new JREmptyDataSource())
-                    .toXls(xlsExporter);
+                    .toXlsx(xlsxExporter);
         } catch (DRException e) {
             e.printStackTrace();
         }

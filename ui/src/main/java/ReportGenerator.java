@@ -3,6 +3,7 @@ import date.DateUtils;
 import main.History;
 import main.Order;
 import main.Portfolio;
+import main.Returns;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.JasperXlsExporterBuilder;
 import net.sf.dynamicreports.jasper.constant.JasperProperty;
@@ -44,6 +45,13 @@ public class ReportGenerator {
     private StyleBuilder titleStyle;
     private StyleBuilder tableHeader;
     private StyleBuilder tableBody;
+    private StyleBuilder boldCentered;
+
+    private static String xlsReportName = "report.xls";
+    private static String xlsReportNameOD = "/Users/addo/Documents/OneDrive/dump/report.xls";
+
+    private static String pdfReportName = "report.pdf";
+
 
     public ReportGenerator(Portfolio p){
         this.portfolioData = p;
@@ -71,7 +79,7 @@ public class ReportGenerator {
 
         try {
             TextFieldBuilder<String> title = DynamicReports.cmp.text("BuyHard Report - Overview");
-            JasperXlsExporterBuilder xlsExporter = DynamicReports.export.xlsExporter("report.xls")
+            JasperXlsExporterBuilder xlsExporter = DynamicReports.export.xlsExporter(xlsReportNameOD) //TODO BANSON Change me to xlsReportName!
                     .setDetectCellType(true)
                     .setIgnorePageMargins(true)
                     .setWhitePageBackground(false)
@@ -117,6 +125,10 @@ public class ReportGenerator {
                 .setBottomPadding(20)
                 .setTopPadding(20)
                 .bold();
+        boldCentered = DynamicReports.stl.style()
+                .bold()
+                .setHorizontalAlignment(HorizontalAlignment.CENTER);
+
 
         JasperReportBuilder totalSummary = buildTotalSummaryCmp();
         JasperReportBuilder assetReport = buildAssetCmp();
@@ -138,8 +150,13 @@ public class ReportGenerator {
         );
         report.setDataSource(new JREmptyDataSource());
 
+        // Sum columns.
+        report.pageFooter(DynamicReports.cmp.pageXofY().setStyle(boldCentered)); //shows number of page at page footer
+
+
+
         try {
-            report.toPdf(new FileOutputStream(new File("report.pdf")));
+            report.toPdf(new FileOutputStream(new File(pdfReportName)));
             report.show();
 
         } catch (DRException | FileNotFoundException e) {
@@ -178,6 +195,9 @@ public class ReportGenerator {
         assetReport.setColumnStyle(tableBody);
         assetReport.setDataSource(assetData);
 
+        // Sum of Equities.
+        assetReport.subtotalsAtSummary(DynamicReports.sbt.sum(equityValueColumn));
+
         return assetReport;
     }
 
@@ -185,7 +205,7 @@ public class ReportGenerator {
     {
         TextColumnBuilder<String> companyNameColumn = DynamicReports.col.column("Company", "company", DynamicReports.type.stringType());
         TextColumnBuilder<Double> returnValueColumn = DynamicReports.col.column("Return", "returnValue", DynamicReports.type.doubleType());
-        TextColumnBuilder<Double> returnPercentageColumn = DynamicReports.col.column("Return %", "returnPercentage", DynamicReports.type.doubleType());
+        TextColumnBuilder<Double> returnPercentageColumn = DynamicReports.col.column("Return %", "returnPercentage", DynamicReports.type.doubleType()); //TODO THis should use percentType.
         // Return value
         TextFieldBuilder<String> subtitle = DynamicReports.cmp.text("Returns");
         JRDataSource resultsData = createDataSource();
@@ -195,6 +215,9 @@ public class ReportGenerator {
         returnsReport.setColumnHeaderStyle(tableHeader);
         returnsReport.setColumnStyle(tableBody);
         returnsReport.setDataSource(resultsData);
+
+        // Sum of Returns.
+        returnsReport.subtotalsAtSummary(DynamicReports.sbt.sum(returnValueColumn), DynamicReports.sbt.sum(returnPercentageColumn));
 
         return returnsReport;
     }
@@ -236,10 +259,11 @@ public class ReportGenerator {
         DRDataSource dataSource = new DRDataSource("company","equity","returnValue","returnPercentage");
 
         // Reconstruct data set
-        Map<String, List<Double>> returns = portfolioData.getReturns();
+        Map<String, Returns> returns = portfolioData.getReturns();
         Map<String, Double> assetValue = portfolioData.getAssetValue();
         for (String company : assetValue.keySet()) {
-            dataSource.add(company, assetValue.get(company),returns.get(company).get(0),returns.get(company).get(1));
+            dataSource.add(company, assetValue.get(company),returns.get(company).getReturns(),
+                           returns.get(company).getReturns());
         }
 
         return dataSource;
@@ -254,7 +278,8 @@ public class ReportGenerator {
     {
         DRDataSource dataSource = new DRDataSource("company", "date", "price", "volume", "signal");
         for (Order o : companyOrders) {
-            dataSource.add(o.getCompanyName(), DateUtils.format(o.getOrderDate()),o.getPrice(),o.getVolume(),o.getOrderType().getSignal(o.getOrderType()));
+            dataSource.add(o.getCompanyName(), DateUtils.format(o.getOrderDate()),o.getPrice(),o.getVolume(),
+                           o.getOrderType().getSignal(o.getOrderType()));
         }
         return dataSource;
     }

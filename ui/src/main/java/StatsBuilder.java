@@ -63,6 +63,7 @@ public class StatsBuilder {
             //TODO Put this somewhere useful!
             ReportGenerator reporter = new ReportGenerator(portfolio);
             reporter.generateXLS();
+            reporter.generatePDF();
             //////////////////////////////////////////////////
         }
     }

@@ -169,14 +169,14 @@ public class StatsBuilder {
         }
     }
 
-    private TableView buildTable(Map<String,List<Double>> returns, double totalReturnValue) {
+    private TableView buildTable(Map<String,Returns> returns, double totalReturnValue) {
 
         ObservableList<Map> data = FXCollections.observableArrayList();
         for (String company: returns.keySet()) {
             Map<String,Object> row = new HashMap<String,Object>();
             row.put("Company",company);
-            row.put("Return", FormatUtils.round2dp(returns.get(company).get(0)));
-            row.put("Return %", FormatUtils.round2dp(returns.get(company).get(0) / returns.get(company).get(2) * 100));
+            row.put("Return", FormatUtils.round2dp(returns.get(company).getReturns()));
+            row.put("Return %", FormatUtils.round2dp(returns.get(company).getReturns() / returns.get(company).getBought() * 100));
             data.add(row);
         }
 
@@ -240,12 +240,12 @@ public class StatsBuilder {
         return tableView;
     }
 
-    private Node buildReturnChart (Map<String,List<Double>> returns, double totalReturnValue) {
+    private Node buildReturnChart (Map<String,Returns> returns, double totalReturnValue) {
         List<PieChart.Data> returnData = new ArrayList<>();
         if (totalReturnValue > 0) {
             for (String company : returns.keySet()) {
-                if (returns.get(company).get(0).doubleValue() > 0) {
-                    PieChart.Data companyData = new PieChart.Data(company, returns.get(company).get(0));
+                if (returns.get(company).getReturns() > 0) {
+                    PieChart.Data companyData = new PieChart.Data(company, returns.get(company).getReturns());
                     returnData.add(companyData);
                 }
             }

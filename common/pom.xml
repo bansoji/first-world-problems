@@ -28,9 +28,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.googlecode.charts4j</groupId>
-            <artifactId>charts4j</artifactId>
-            <version>1.3</version>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.0.19</version>
         </dependency>
 
     </dependencies>

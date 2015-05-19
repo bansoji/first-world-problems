@@ -1,4 +1,3 @@
-import com.sun.org.apache.xpath.internal.operations.Mult;
 import date.DateUtils;
 import main.History;
 import main.Order;
@@ -20,7 +19,6 @@ import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 
-import javax.swing.text.Style;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;

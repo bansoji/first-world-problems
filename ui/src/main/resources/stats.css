@@ -51,11 +51,11 @@
 }
 
 /* Pie Chart */
-#piechart-placeholder {
+.piechart-placeholder {
     -fx-alignment: center;
     -fx-spacing: 80px;
 }
 
-#placeholder-title {
+.placeholder-title {
     -fx-font-size: 18px;
 }

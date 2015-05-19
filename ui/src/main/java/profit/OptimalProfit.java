@@ -50,7 +50,7 @@ public class OptimalProfit {
                     nextBuy = true;
                     updatePair();
                 }
-            } else {
+            } else if (prev != null) {
                 if (prev.getValue() < price.getValue() && nextBuy) {
                     buy(prev);
                     nextBuy = false;
@@ -76,11 +76,7 @@ public class OptimalProfit {
     }
 
     private void updatePair() {
-        if (paired) {
-            paired = false;
-        } else {
-            paired = true;
-        }
+        paired = !paired;
     }
 
     private void buy(Price prev) {

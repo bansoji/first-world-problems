@@ -162,17 +162,6 @@ public class Portfolio {
      */
     private void addReturns (String company, double returnValue, double returnPercent, double bought)
     {
-        /*
-        double totalReturn = returns.get(company).get(0);
-        double totalPercent = returns.get(company).get(1);
-        double totalBought = returns.get(company).get(2);
-        totalReturn += returnValue;
-        totalPercent += returnPercent;
-        totalBought += bought;
-        returns.get(company).set(0, totalReturn);
-        returns.get(company).set(1, totalPercent);
-        returns.get(company).set(2, totalBought);
-        */
         returns.get(company).addReturns(returnValue);
         returns.get(company).addPercent(returnPercent);
         returns.get(company).addBought(bought);

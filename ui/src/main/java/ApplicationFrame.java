@@ -1,4 +1,9 @@
 import alert.AlertManager;
+import components.AppFileChooser;
+import components.AutoCompleteComboBoxListener;
+import dialog.DialogBuilder;
+import file.FileUtils;
+import file.StrategyRunner;
 import format.FormatUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -62,6 +67,7 @@ public class ApplicationFrame extends Application {
 
     private ComboBox<String> companySelector;
     private ChangeListener companyListener;
+    private Button profile;
 
     private Loader loader;
 
@@ -157,32 +163,14 @@ public class ApplicationFrame extends Application {
         addFilterSelector();
 
         tabPane = new TabPane();
-        Tab tab = new Tab();
-        tab.setText("Data");
-        tab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-data-icon.png").toExternalForm()));
-        tab.setClosable(false);
-        tab.setContent(graph);
-        addHelpModal(tab,new ImageView(getClass().getResource("images/mouse-graph.jpeg").toExternalForm()));
+        Tab dataTab = constructTab("Data", new ImageView(getClass().getResource("app-icons/tab-data-icon.png").toExternalForm()), graph );
+        addHelpModal(dataTab,new ImageView(getClass().getResource("images/mouse-graph.jpeg").toExternalForm()));
 
-        Tab statsTab = new Tab();
-        statsTab.setText("Portfolio");
-        statsTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-portfolio-icon.png").toExternalForm()));
-        statsTab.setClosable(false);
-        statsTab.setContent(stats);
+        Tab statsTab = constructTab("Portfolio", new ImageView(getClass().getResource("app-icons/tab-portfolio-icon.png").toExternalForm()), stats );
+        Tab analysisTab = constructTab("Analysis", new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()), analysis);
+        Tab comparisonTab = constructTab("Comparison", new ImageView(getClass().getResource("app-icons/tab-comparison-icon.png").toExternalForm()), comparison);
 
-        Tab analysisTab = new Tab();
-        analysisTab.setText("Analysis");
-        analysisTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()));
-        analysisTab.setClosable(false);
-        analysisTab.setContent(analysis);
-
-        Tab comparisonTab = new Tab();
-        comparisonTab.setText("Comparison");
-        comparisonTab.setGraphic(new ImageView(getClass().getResource("app-icons/tab-comparison-icon.png").toExternalForm()));
-        comparisonTab.setClosable(false);
-        comparisonTab.setContent(comparison);
-
-        tabPane.getTabs().addAll(tab, statsTab, analysisTab, comparisonTab);
+        tabPane.getTabs().addAll(dataTab, statsTab, analysisTab, comparisonTab);
         addTabLoadingAction(tabPane);
 
         body.getChildren().addAll(tabPane, new Separator());
@@ -190,30 +178,16 @@ public class ApplicationFrame extends Application {
         main.setCenter(body);
     }
 
+    private Tab constructTab(String name, ImageView icon, Node content) {
+        Tab tab = new Tab(name,content);
+        tab.setGraphic(icon);
+        tab.setClosable(false);
+        return tab;
+    }
+
     private void addHelpModal(Tab tab, Node node) {
         final MenuItem helpItem = new MenuItem("Help", new ImageView(getClass().getResource("icons/help.png").toExternalForm()));
-        helpItem.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent event) {
-                final Stage dialog = new Stage();
-                dialog.setTitle("Tutorial");
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(stage);
-                VBox dialogVbox = new VBox();
-                dialogVbox.getStyleClass().add("tutorial-modal");
-                dialogVbox.setAlignment(Pos.CENTER_RIGHT);
-                Button close = new Button("Close");
-                close.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        dialog.close();
-                    }
-                });
-                dialogVbox.getChildren().add(node);
-                Scene dialogScene = new Scene(dialogVbox);
-                dialog.setScene(dialogScene);
-                dialog.show();
-            }
-        });
+        helpItem.setOnAction(DialogBuilder.constructHelpModal(node));
         final ContextMenu menu = new ContextMenu(helpItem);
         tab.setContextMenu(menu);
         tab.getContent().setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -316,12 +290,20 @@ public class ApplicationFrame extends Application {
                         List<Price> prices = priceReader.getCompanyHistory(companyName);
                         List<Order> orders = orderReader.getCompanyHistory(companyName);
                         loadedTabs.remove(tabPane.getSelectionModel().getSelectedItem());
+                        profile.setOnAction(DialogBuilder.constructEventHandler("Profile of " + companyName,
+                                constructProfileGraph(companyName)));
                         loadContent(prices, orders, false);
                     }
                 }
             };
         }
         companySelector.valueProperty().addListener(companyListener);
+    }
+
+    private List<Node> constructProfileGraph(String company) {
+        List<Node> content = new ArrayList<>();
+        content.add(new Label("NO GRAPH"));
+        return content;
     }
 
     private void loadContent(List<Price> prices, List<Order> orders, boolean force)
@@ -435,8 +417,17 @@ public class ApplicationFrame extends Application {
 
         //Run button
         Button runButton = new Button("",new ImageView(getClass().getResource("icons/run-circle.png").toExternalForm()));
-        runButton.setId("run-button");
+        runButton.getStyleClass().add("header-button");
         settings.getChildren().add(runButton);
+
+        //TODO add export actions
+        MenuButton exportButton = new MenuButton("",new ImageView(getClass().getResource("icons/export-icon.png").toExternalForm()));
+        exportButton.getStyleClass().add("header-button");
+        MenuItem exportToPdf = new MenuItem("Export to PDF");
+        MenuItem exportToExcel = new MenuItem("Export to Excel");
+        exportButton.getItems().addAll(exportToPdf, exportToExcel);
+        settings.getChildren().add(exportButton);
+        exportButton.setDisable(true);  //disable until run button is pressed at least once
 
         header.getChildren().add(settings);
 
@@ -447,6 +438,7 @@ public class ApplicationFrame extends Application {
                     public void run() {
                         if (runner.validFiles()) {
                             runButton.setDisable(true);
+                            exportButton.setDisable(true);
                             tabPane.setDisable(true);
                             updateParams();
                             Platform.runLater(new Runnable() {
@@ -490,11 +482,14 @@ public class ApplicationFrame extends Application {
                             companySelector.getSelectionModel().clearSelection();
                             companySelector.setItems(priceCompanies);
                             companySelector.getSelectionModel().selectFirst();
+                            profile.setOnAction(DialogBuilder.constructEventHandler("Profile for " + companySelector.getSelectionModel().getSelectedItem(),
+                                    constructProfileGraph(companySelector.getSelectionModel().getSelectedItem())));
                             addCompanySelectorListener();
 
                             List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
 
-                            if (FileUtils.matches(runner.getStrategyFile(),"aurora.jar")) {
+                            //integration with other JARs
+                            if (FileUtils.matches(runner.getStrategyFile(), "aurora.jar")) {
                                 orderReader = new OrderReaderKoK(OUTPUT_FILE_PATH);
                             } else {
                                 orderReader = new OrderReader(OUTPUT_FILE_PATH);
@@ -511,6 +506,7 @@ public class ApplicationFrame extends Application {
                                 }
                             });
                             runButton.setDisable(false);
+                            exportButton.setDisable(false);
                             tabPane.setDisable(false);
                         } else {
                             Platform.runLater(new Runnable() {
@@ -636,6 +632,13 @@ public class ApplicationFrame extends Application {
         new AutoCompleteComboBoxListener<>(companySelector);
         filter.getChildren().addAll(new Label(name + ": "), companySelector);
         selector.getChildren().add(filter);
+        addProfileButton(selector);
+    }
+
+
+    private void addProfileButton(HBox selector) {
+        profile = new Button("Profile");
+        selector.getChildren().add(profile);
     }
 
     private void initParamTable() {

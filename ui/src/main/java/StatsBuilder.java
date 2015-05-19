@@ -1,7 +1,7 @@
 import format.FormatUtils;
+import dialog.DialogBuilder;
 import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
-import graph.VerticalMarkerBuilder;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -19,15 +19,10 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
 import main.*;
-import org.gillius.jfxutils.chart.ChartPanManager;
-import org.gillius.jfxutils.chart.JFXChartUtil;
-import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -236,48 +231,29 @@ public class StatsBuilder {
         tableView.setMinWidth(300);
 
         final MenuItem chartReturnsItem = new MenuItem("Chart", new ImageView(getClass().getResource("icons/graphs_pie.png").toExternalForm()));
-        chartReturnsItem.setOnAction(new EventHandler<ActionEvent>() {
-            @Override public void handle(ActionEvent event) {
-                final Stage dialog = new Stage();
-                dialog.setTitle("Returns by Company");
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(null);
-                VBox dialogVbox = new VBox();
-                dialogVbox.setPadding(new Insets(20));
-                dialogVbox.setSpacing(20);
-                dialogVbox.setAlignment(Pos.CENTER);
-                Button close = new Button("Close");
-                close.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        dialog.close();
-                    }
-                });
-                dialogVbox.getChildren().addAll(buildReturnChart(returns,totalReturnValue), close);
-                Scene dialogScene = new Scene(dialogVbox);
-                dialog.setScene(dialogScene);
-                dialog.show();
-            }
-        });
+        List<Node> dialogContent = new ArrayList<>();
+        dialogContent.add(buildReturnChart(returns, totalReturnValue));
+        chartReturnsItem.setOnAction(DialogBuilder.constructEventHandler("Returns by company", dialogContent));
         final ContextMenu menu = new ContextMenu(chartReturnsItem);
         tableView.setContextMenu(menu);
+
         return tableView;
     }
 
     private Node buildReturnChart (Map<String,List<Double>> returns, double totalReturnValue) {
         List<PieChart.Data> returnData = new ArrayList<>();
-        if (totalReturnValue >= 0) {
+        if (totalReturnValue > 0) {
             for (String company : returns.keySet()) {
-                if (returns.get(company).get(0).doubleValue() >= 0) {
+                if (returns.get(company).get(0).doubleValue() > 0) {
                     PieChart.Data companyData = new PieChart.Data(company, returns.get(company).get(0));
                     returnData.add(companyData);
                 }
             }
         } else {
             VBox placeholder = new VBox();
-            placeholder.setId("piechart-placeholder");
+            placeholder.getStyleClass().add("piechart-placeholder");
             Label title = new Label("Returns by company");
-            title.setId("placeholder-title");
+            title.getStyleClass().add("placeholder-title");
             Label placeholderText = new Label("No returns");
             placeholder.getChildren().addAll(title, placeholderText);
             VBox.setVgrow(placeholder,Priority.ALWAYS);
@@ -288,11 +264,43 @@ public class StatsBuilder {
         //tooltip installation only works after pie chart is set up
         for (PieChart.Data data: pieChartData) {
             Tooltip tooltip = new Tooltip();
-            tooltip.setGraphic(new TooltipContent(data.getName(),data.getPieValue()));
+            tooltip.setGraphic(new TooltipContentForReturns(data.getName(),data.getPieValue()));
             Tooltip.install(data.getNode(), tooltip);
         }
         chart.setLegendVisible(false);
         chart.setTitle("Returns by company");
+        return chart;
+    }
+
+    private Node buildEquityChart (Map<String,Double> equity, double totalEquityValue) {
+        List<PieChart.Data> equityData = new ArrayList<>();
+        if (totalEquityValue > 0) {
+            for (String company : equity.keySet()) {
+                if (equity.get(company) > 0) {
+                    PieChart.Data companyData = new PieChart.Data(company, equity.get(company));
+                    equityData.add(companyData);
+                }
+            }
+        } else {
+            VBox placeholder = new VBox();
+            placeholder.getStyleClass().add("piechart-placeholder");
+            Label title = new Label("Equities by company");
+            title.getStyleClass().add("placeholder-title");
+            Label placeholderText = new Label("No equities");
+            placeholder.getChildren().addAll(title, placeholderText);
+            VBox.setVgrow(placeholder,Priority.ALWAYS);
+            return placeholder;
+        }
+        ObservableList<PieChart.Data> pieChartData = FXCollections.observableArrayList(equityData);
+        final PieChart chart = new PieChart(pieChartData);
+        //tooltip installation only works after pie chart is set up
+        for (PieChart.Data data: pieChartData) {
+            Tooltip tooltip = new Tooltip();
+            tooltip.setGraphic(new TooltipContentForEquities(data.getName(),data.getPieValue()));
+            Tooltip.install(data.getNode(), tooltip);
+        }
+        chart.setLegendVisible(false);
+        chart.setTitle("Equities by company");
         return chart;
     }
 
@@ -358,11 +366,13 @@ public class StatsBuilder {
 
     private TableView buildEquityTable(Map<String,Double> equities) {
         ObservableList<Map> data = FXCollections.observableArrayList();
+        double totalEquityValue = 0;
         for (String company: equities.keySet()) {
             Map<String,Object> row = new HashMap<String,Object>();
             row.put("Company",company);
             row.put("Equity Value", equities.get(company));
             data.add(row);
+            totalEquityValue += equities.get(company);
         }
 
         TableView tableView = new TableView(data);
@@ -406,14 +416,23 @@ public class StatsBuilder {
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setPrefHeight(150);
 
+        final MenuItem chartReturnsItem = new MenuItem("Chart", new ImageView(getClass().getResource("icons/graphs_pie.png").toExternalForm()));
+        List<Node> dialogContent = new ArrayList<>();
+        dialogContent.add(buildEquityChart(equities,totalEquityValue));
+        chartReturnsItem.setOnAction(DialogBuilder.constructEventHandler("Equities by company", dialogContent));
+        final ContextMenu menu = new ContextMenu(chartReturnsItem);
+        tableView.setContextMenu(menu);
+
+        tableView.setTableMenuButtonVisible(true);
+
         return tableView;
     }
 
-    private class TooltipContent extends GridPane {
+    private class TooltipContentForReturns extends GridPane {
         private Label company = new Label();
         private Label returns = new Label();
 
-        private TooltipContent(String companyName, double returnAmount) {
+        private TooltipContentForReturns(String companyName, double returnAmount) {
             Label returnLabel = new Label("RETURN: ");
             getStyleClass().add("tooltip-content");
 
@@ -424,6 +443,24 @@ public class StatsBuilder {
             setConstraints(returnLabel,0,1);
             setConstraints(returns,1,1);
             getChildren().addAll(company,returnLabel,returns);
+        }
+    }
+
+    private class TooltipContentForEquities extends GridPane {
+        private Label company = new Label();
+        private Label amount = new Label();
+
+        private TooltipContentForEquities(String companyName, double equityAmount) {
+            Label amountLabel = new Label("AMOUNT: ");
+            getStyleClass().add("tooltip-content");
+
+            company.setText(companyName);
+            amount.setText(String.valueOf(equityAmount));
+
+            setConstraints(company, 0, 0);
+            setConstraints(amountLabel,0,1);
+            setConstraints(amount,1,1);
+            getChildren().addAll(company,amountLabel,amount);
         }
     }
 

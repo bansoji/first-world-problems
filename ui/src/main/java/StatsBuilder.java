@@ -24,9 +24,6 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
 import main.*;
-import org.gillius.jfxutils.chart.ChartPanManager;
-import org.gillius.jfxutils.chart.JFXChartUtil;
-import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -66,7 +63,7 @@ public class StatsBuilder {
             ////////////////////////
             //TODO Put this somewhere useful!
             ReportGenerator reporter = new ReportGenerator(portfolio);
-            reporter.generateReport();
+            reporter.generateXLS();
             //////////////////////////////////////////////////
         }
     }

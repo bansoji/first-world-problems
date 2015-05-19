@@ -2,7 +2,9 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 
 /**
@@ -15,7 +17,15 @@ public class AppFileChooser extends VBox {
 
     public AppFileChooser (String buttonName)
     {
-        button = new Button(buttonName);
+        this(buttonName,null);
+    }
+
+    public AppFileChooser (String buttonName, ImageView icon)
+    {
+        //make each word a separate line and all letters to uppercase
+        button = new Button(buttonName.toUpperCase().replaceAll(" ", "\n"), icon);
+        button.setId(buttonName);
+        button.getStyleClass().add("icon-button");
         label = new Label("No file selected");
         getChildren().addAll(button, label);
         setAlignment(Pos.CENTER);
@@ -29,6 +39,10 @@ public class AppFileChooser extends VBox {
     public String getButtonText()
     {
         return button.getText();
+    }
+
+    public String getButtonId() {
+        return button.getId();
     }
 
     public void addListener(EventHandler<ActionEvent> listener)

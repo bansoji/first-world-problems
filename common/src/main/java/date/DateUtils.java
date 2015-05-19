@@ -24,7 +24,6 @@ public class DateUtils {
     private static final String dd_MMM_yyyy = "\\d{1,2}-[a-zA-Z]{1,3}-\\d{4}";
     private static final String yyyy_MM_dd = "\\d{4}-\\d{1,2}-\\d{1,2}";
 
-
     public static String format(DateTime date)
     {
         return df.print(date);
@@ -87,8 +86,9 @@ public class DateUtils {
 
     //compare two date strings
     public static Boolean before(String s1, String s2) {
-        if (!(s1.matches(dd_MMM_yyyy) && s1.matches(dd_MM_yyyy) && s1.matches(yyyy_MM_dd))
-                && !(s2.matches(dd_MMM_yyyy) && s2.matches(dd_MM_yyyy) && s2.matches(yyyy_MM_dd)))
+        //if one of the strings is not in the required date formats
+        if (!(s1.matches(dd_MMM_yyyy) || s1.matches(dd_MM_yyyy) || s1.matches(yyyy_MM_dd))
+                || !(s2.matches(dd_MMM_yyyy) || s2.matches(dd_MM_yyyy) || s2.matches(yyyy_MM_dd)))
             return null;
 
         String[] tokens1 = s1.split("-");
@@ -99,8 +99,19 @@ public class DateUtils {
         if (tokens2[1].length() == 3) tokens2[1] = convertToMonthNum(tokens2[1]);
 
         //format date string to YYYYMMDD
-        String t1 = tokens1[2] + (tokens1[1].length() == 1 ? "0" + tokens1[1] : tokens1[1]) + (tokens1[0].length() == 1 ? "0" + tokens1[0] : tokens1[0]);
-        String t2 = tokens2[2] + (tokens2[1].length() == 1 ? "0" + tokens2[1] : tokens2[1]) + (tokens2[0].length() == 1 ? "0" + tokens2[0] : tokens2[0]);
+        String t1;
+        if (s1.matches(yyyy_MM_dd)) {
+            t1 = tokens1[0] + (tokens1[1].length() == 1 ? "0" + tokens1[1] : tokens1[1]) + (tokens1[2].length() == 1 ? "0" + tokens1[2] : tokens1[2]);
+        } else {
+            t1 = tokens1[2] + (tokens1[1].length() == 1 ? "0" + tokens1[1] : tokens1[1]) + (tokens1[0].length() == 1 ? "0" + tokens1[0] : tokens1[0]);
+        }
+
+        String t2;
+        if (s2.matches(yyyy_MM_dd)) {
+            t2 = tokens2[0] + (tokens2[1].length() == 1 ? "0" + tokens2[1] : tokens2[1]) + (tokens2[2].length() == 1 ? "0" + tokens2[2] : tokens2[2]);
+        } else {
+            t2 = tokens2[2] + (tokens2[1].length() == 1 ? "0" + tokens2[1] : tokens2[1]) + (tokens2[0].length() == 1 ? "0" + tokens2[0] : tokens2[0]);
+        }
         return (Integer.parseInt(t1) < Integer.parseInt(t2));
     }
 

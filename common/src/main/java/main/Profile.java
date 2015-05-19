@@ -13,6 +13,7 @@ public class Profile {
     private double averageVolume;
     private double overallTrend;
     private double overallDailyVariance;
+    private double dailyDifference;
 
     /**
      * Build the profile for a company.
@@ -21,6 +22,7 @@ public class Profile {
     public Profile(ArrayList<Price> prices){
 
         averageVolume = 0.0;
+        dailyDifference = 0.0;
         ArrayList<Point> endOfDayPoints = new ArrayList<>();
         ArrayList<Point> highPoints = new ArrayList<>();
         ArrayList<Point> lowPoints= new ArrayList<>();
@@ -30,6 +32,7 @@ public class Profile {
         // Build data.
         for (Price p : prices){
             averageVolume += p.getVolume();
+            dailyDifference += Math.abs(p.getValue() - p.getOpen())/p.getValue();
 
             Point pt = new Point(i, p.getValue());
             Point ptLow = new Point(i, p.getHigh());
@@ -47,6 +50,7 @@ public class Profile {
         Line lLow = GeometryUtils.createLine(lowPoints);
 
         averageVolume = averageVolume/ prices.size();
+        dailyDifference = dailyDifference/ prices.size();
 
         overallTrend = l.getSlope();
         overallDailyVariance = lHigh.getSlope() - lLow.getSlope();
@@ -58,12 +62,15 @@ public class Profile {
         return averageVolume;
     }
 
-
     public double getOverallTrend() {
         return overallTrend;
     }
 
     public double getOverallDailyVariance() {
         return overallDailyVariance;
+    }
+
+    public double getDailyDifference() {
+        return dailyDifference;
     }
 }

@@ -15,7 +15,7 @@ public class Portfolio {
     private Map<String, List<Order>> boughtOrders; //Contains all orders bought.
     private Map<String, List<Order>> soldOrders; //Contains all orders sold.
 
-    private Map<String, List<Double>> returns; //Contains the return data for each company.
+    private Map<String, Returns> returns; //Contains the return data for each company.
     private Map<String, Double> assetValue; //Contains the asset value data for each company.
     private List<Profit> profitList; //Contains the buy/sell points with date and return.
 
@@ -48,10 +48,7 @@ public class Portfolio {
             //initialisation of variables for this particular company.
             boughtOrders.put(name, new ArrayList<>());
             soldOrders.put(name, new ArrayList<>());
-            returns.put(name, new ArrayList<>());
-            returns.get(name).add(0, 0.00);
-            returns.get(name).add(1, 0.00);
-            returns.get(name).add(2, 0.00);
+            returns.put(name, new Returns());
             double valueNumber = 0.00;
 
             List<Order> companyHistory = orderHistory.getCompanyHistory(name);
@@ -132,7 +129,7 @@ public class Portfolio {
      * Returns a map of all the companies' return values and percents.
      * @return The map of companies' return values and percents.
      */
-    public Map<String, List<Double>> getReturns ()
+    public Map<String, Returns> getReturns ()
     {
         return returns;
     }
@@ -151,7 +148,7 @@ public class Portfolio {
         Map<String, Double> portfolioValue = new HashMap<>();
         for (String name : orderHistory.getAllCompanies())
         {
-            portfolioValue.put(name, returns.get(name).get(0) + assetValue.get(name));
+            portfolioValue.put(name, returns.get(name).getReturns() + assetValue.get(name));
         }
 
         return portfolioValue;
@@ -165,6 +162,7 @@ public class Portfolio {
      */
     private void addReturns (String company, double returnValue, double returnPercent, double bought)
     {
+        /*
         double totalReturn = returns.get(company).get(0);
         double totalPercent = returns.get(company).get(1);
         double totalBought = returns.get(company).get(2);
@@ -174,6 +172,10 @@ public class Portfolio {
         returns.get(company).set(0, totalReturn);
         returns.get(company).set(1, totalPercent);
         returns.get(company).set(2, totalBought);
+        */
+        returns.get(company).addReturns(returnValue);
+        returns.get(company).addPercent(returnPercent);
+        returns.get(company).addBought(bought);
     }
 
     public double getTotalBuyValue() {

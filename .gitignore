@@ -26,3 +26,5 @@ MANIFEST.MF
 application_log*
 
 .DS_Store
+
+*.MF

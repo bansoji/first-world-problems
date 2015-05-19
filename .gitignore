@@ -22,4 +22,6 @@ ui/src/main/resources/fonts
 *.log.*
 *.csv#
 
+MAINIFEST.MF
 .DS_Store
+application_log*

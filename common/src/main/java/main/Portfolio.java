@@ -1,5 +1,7 @@
 package main;
 
+import org.joda.time.DateTime;
+
 import java.util.*;
 
 /**
@@ -26,7 +28,7 @@ public class Portfolio {
     /**
      * This is the constructor for Portfolio. This also calls "Fill Portfolio".
      */
-    public Portfolio (History<Order> orderHistory)
+    public Portfolio (History<Order> orderHistory, DateTime startDate, DateTime endDate)
     {
         this.orderHistory = orderHistory;
         boughtOrders = new HashMap<>();
@@ -35,6 +37,12 @@ public class Portfolio {
         assetValue = new HashMap<>();
         profitList = new ArrayList<>();
         FillPortfolio();
+        //profit is always 0 at the start date of prices data
+        if (startDate != null)
+            profitList.add(new Profit(0,startDate));
+        //profit is always the last calculation of the total return value at the end date of prices data
+        if (endDate != null)
+            profitList.add(new Profit(totalReturnValue,endDate));
     }
 
     /**
@@ -185,5 +193,9 @@ public class Portfolio {
 
     public List<Profit> getProfitList() {
         return profitList;
+    }
+
+    public boolean isEmpty() {
+        return (orderHistory.getAllCompanies().size() == 0);
     }
 }

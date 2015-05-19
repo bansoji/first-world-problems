@@ -39,8 +39,7 @@ public class PriceParser extends Parser<Price> {
                     nextLine = reader.readNext();
                     if (nextLine == null) return null;
                     if (nextLine.length < PRICE) {
-                        for (int i = 0; i < nextLine.length; i++)
-                        {
+                        for (int i = 0; i < nextLine.length; i++){
                             System.out.println(nextLine[i]);
                         }
                     }

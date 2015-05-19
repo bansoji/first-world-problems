@@ -3,11 +3,11 @@ package profit;
 
 import main.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Zippy on 19/05/2015.
+ * A class which calculates the optimal profit given a list of prices.
  */
 public class OptimalProfit {
 
@@ -81,12 +81,12 @@ public class OptimalProfit {
 
     private void buy(Price prev) {
         Order buy = new Order(OrderType.BUY, prev.getCompanyName(), prev.getValue(), volume, prev.getDate());
-        optimalOrders.add("Company", buy);
+        optimalOrders.add(prev.getCompanyName(), buy);
     }
 
     private void sell(Price prev) {
         Order sell = new Order(OrderType.SELL, prev.getCompanyName(), prev.getValue(), volume, prev.getDate());
-        optimalOrders.add("Company", sell);
+        optimalOrders.add(prev.getCompanyName(), sell);
     }
 
     /**

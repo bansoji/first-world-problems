@@ -74,7 +74,8 @@ public class OrderManager {
             // PrintUtils.printPrices(companyHistory);
 
             // Initialise the trading strategy.
-            TradingStrategy strategy = new MomentumStrategy(companyHistory, input);
+            //TradingStrategy strategy = new MomentumStrategy(companyHistory, input);
+            TradingStrategy strategy = new PriceChannelStrategy(companyHistory, input);
 
             ///////////////////////////////
             // RUNNING.

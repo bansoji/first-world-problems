@@ -1,8 +1,0 @@
-May 18, 2015 2:19:13 AM ApplicationFrame initLogger
-INFO: ====== Buy Hard =========
-Developer Team: Group 1
-APPLICATION NAME: BuyHard-Platform-1.1.0.jar
-APPLICATION VERSION: 1.1.0
-LOG FILE: application_log
-May 18, 2015 2:20:21 AM StrategyRunner$1$1 run
-SEVERE: Incompatible module used.

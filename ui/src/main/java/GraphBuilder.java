@@ -5,6 +5,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.CacheHint;
@@ -17,15 +18,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.util.Callback;
 import main.Order;
 import main.OrderType;
 import main.Price;
-import org.gillius.jfxutils.chart.JFXChartUtil;
 import org.joda.time.DateTime;
 
 import java.util.*;
@@ -159,7 +159,7 @@ public class GraphBuilder {
 
         final VBox table = new VBox();
         table.setPadding(new javafx.geometry.Insets(0, 30, 30, 30));
-        TableView tableView = buildTable(prices,orderSummary);
+        Pane tableView = buildTable(prices,orderSummary);
         table.getChildren().add(tableView);
         VBox.setVgrow(tableView,Priority.ALWAYS);
 
@@ -216,7 +216,7 @@ public class GraphBuilder {
     }
 
 
-    private static TableView buildTable(List<Price> prices, Map<DateTime,OrderType> orders) {
+    private Pane buildTable(List<Price> prices, Map<DateTime,OrderType> orders) {
         TableView tableView = new TableView();
 
         TableColumn dateCol = new TableColumn("Date");
@@ -281,14 +281,63 @@ public class GraphBuilder {
             }
         });
 
+        final FilteredList<Price> filterableData;
         if (prices != null) {
             ObservableList<Price> data = FXCollections.observableArrayList(prices);
-            tableView.setItems(data);
+            filterableData = new FilteredList<>(data);
+            tableView.setItems(filterableData);
+        } else {
+            filterableData = null;
         }
         tableView.getColumns().addAll(dateCol, priceCol);
         //ensures extra space to given to existing columns
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        return tableView;
+
+        BorderPane pane = new BorderPane();
+        pane.setCenter(tableView);
+        pane.setTop(createToolBar(filterableData, orders));
+        return pane;
+    }
+
+    private ToolBar createToolBar(FilteredList<Price> filterableData, Map<DateTime,OrderType> orders) {
+        ToolBar toolbar = new ToolBar();
+        toolbar.setId("prices-table-filters");
+        final ToggleGroup group = new ToggleGroup();
+        ToggleButton filterBuys = new ToggleButton("Buy", new ImageView(getClass().getResource("icons/buy.png").toExternalForm()));
+        filterBuys.getStyleClass().add("table-filter");
+        filterBuys.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (filterableData != null)
+                    filterableData.setPredicate(price -> orders.containsKey(price.getDate()) && orders.get(price.getDate()).equals(OrderType.BUY));
+            }
+        });
+
+        ToggleButton filterSells = new ToggleButton("Sell", new ImageView(getClass().getResource("icons/sell.png").toExternalForm()));
+        filterSells.getStyleClass().add("table-filter");
+        filterSells.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (filterableData != null)
+                    filterableData.setPredicate(price -> orders.containsKey(price.getDate()) && orders.get(price.getDate()).equals(OrderType.SELL));
+            }
+        });
+
+        ToggleButton showAll = new ToggleButton("All", new ImageView(getClass().getResource("icons/all.png").toExternalForm()));
+        showAll.getStyleClass().add("table-filter");
+        showAll.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if (filterableData != null)
+                    filterableData.setPredicate(price -> true);
+            }
+        });
+        filterBuys.setToggleGroup(group);
+        filterSells.setToggleGroup(group);
+        showAll.setToggleGroup(group);
+        showAll.setSelected(true);  //show all prices is the default selection
+        toolbar.getItems().addAll(filterBuys, filterSells, showAll);
+        return toolbar;
     }
 
     private void addMenu() {

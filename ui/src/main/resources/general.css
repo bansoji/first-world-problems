@@ -53,7 +53,7 @@
     -fx-padding: 5px 0px 10px 20px;
 }
 
-#run-button {
+.header-button {
     -fx-pref-height: 48px;
     -fx-pref-width: 48px;
     /*-fx-background-radius: 48px;*/
@@ -61,7 +61,7 @@
     -fx-opacity: 0.8;
 }
 
-#run-button:hover {
+.header-button:hover {
     -fx-opacity: 1;
 }
 
@@ -83,4 +83,8 @@
 
 .icon-button:hover {
     -fx-opacity: 1.0;
+}
+
+.vertical-marker {
+    -fx-stroke: blue;
 }

@@ -6,6 +6,9 @@ import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Side;
 import javafx.scene.CacheHint;
@@ -26,6 +29,7 @@ import main.Price;
 import main.Profit;
 import profit.OptimalProfit;
 
+import java.text.Normalizer;
 import java.util.*;
 
 /**
@@ -47,6 +51,8 @@ public class ComparisonBuilder {
     private Map<String, Map<String,Object>> strategiesTableRows = new HashMap<>();
     private boolean optimalPlotted;
 
+    private Portfolio portfolio;
+
     private LineChart companiesLineChart;
     private Button companySelector;
     private Map<String,XYChart.Series> companiesSeries = new HashMap<>();
@@ -62,6 +68,7 @@ public class ComparisonBuilder {
 
     public void buildComparison(StrategyRunner runner, BorderPane comparison, Portfolio portfolio, List<Price> prices, Map<String,?> params) {
         if (tabPane == null) init();
+        this.portfolio = portfolio;
         if (strategiesLines.containsValue(portfolio.getProfitList())) return;
         boolean differentParams = false;
         if (prevParams == null) {
@@ -87,12 +94,12 @@ public class ComparisonBuilder {
         if (runner.getDataFile() != null && runner.getParamFile() != null && runner.getStrategyFile() != null) {
             if (!runner.getDataFile().equals(dataFile)) {
                 clearAllData();
-                addStrategyComparison(runner.getStrategyFile(), params, portfolio, prices);
-                updateCompanyComparison(portfolio);
+                addStrategyComparison(runner.getStrategyFile(), params, prices);
+                updateCompanyComparison();
             } else if (!runner.getStrategyFile().equals(strategyFile) || differentParams) {
                 clearCompaniesGraph();
-                addStrategyComparison(runner.getStrategyFile(), params, portfolio, prices);
-                updateCompanyComparison(portfolio);
+                addStrategyComparison(runner.getStrategyFile(), params, prices);
+                updateCompanyComparison();
             }
         }
         //update prev files
@@ -124,6 +131,7 @@ public class ComparisonBuilder {
         companySelector = new Button("Select companies");
         modeSelector.getItems().addAll("Return Value", "Return %");
         modeSelector.getSelectionModel().selectFirst();
+        addModeAction();
         HBox topBar = new HBox();
         topBar.getChildren().addAll(companySelector, modeSelector);
         companiesContent.setTop(topBar);
@@ -231,11 +239,39 @@ public class ComparisonBuilder {
         yAxis.setForceZeroInRange(false);
         companiesLineChart.setCacheHint(CacheHint.SPEED);
         companiesLineChart.setLegendVisible(false);
+        companiesLineChart.setAnimated(false);  //JAVAFX BUG with clearing series data with create symbols set to false
         companiesLineChart.setCreateSymbols(false);
         ChartPanZoomManager.addResetZoomFunction(companiesLineChart);
     }
 
-    private void updateCompanyComparison(Portfolio portfolio) {
+    private void addModeAction() {
+        modeSelector.valueProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue v, String oldMode, String newMode) {
+                if (newMode.equals("Return Value")) {
+                    for (String company: companiesSeries.keySet()) {
+                        XYChart.Series series = companiesSeries.get(company);
+                        series.getData().clear();
+                        for (Profit p : portfolio.getCompanyProfitList(company)) {
+                            XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
+                            series.getData().add(data);
+                        }
+                    }
+                } else if (newMode.equals("Return %")) {
+                    for (String company: companiesSeries.keySet()) {
+                        XYChart.Series series = companiesSeries.get(company);
+                        series.getData().clear();
+                        for (Profit p : portfolio.getCompanyProfitList(company)) {
+                            XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getReturnPercent());
+                            series.getData().add(data);
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    private void updateCompanyComparison() {
         CheckBox[] companies = new CheckBox[portfolio.getCompanies().size()];
         int i = 0;
         for (String company: portfolio.getCompanies()) {
@@ -247,7 +283,15 @@ public class ComparisonBuilder {
                     if (newValue) {
                         XYChart.Series<Long, Double> series = new XYChart.Series<>();
                         for (Profit p : portfolio.getCompanyProfitList(company)) {
-                            XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
+                            XYChart.Data data = null;
+                            if (modeSelector.getSelectionModel().getSelectedItem().equals("Return Value")) {
+                                data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
+                            } else if (modeSelector.getSelectionModel().getSelectedItem().equals("Return %")) {
+                                data = new XYChart.Data<>(p.getProfitDate().getMillis(),
+                                        portfolio.getReturns().get(company).getPercent()*100);
+                            } else {
+                                return; //TODO log error
+                            }
                             series.getData().add(data);
                         }
                         companiesLineChart.getData().add(series);
@@ -276,7 +320,7 @@ public class ComparisonBuilder {
         companySelector.setOnAction(DialogBuilder.constructSelectionModal("Select companies", content));
     }
 
-    private void addStrategyComparison(String strategyFile, Map<String, ?> params, Portfolio portfolio, List<Price> prices) {
+    private void addStrategyComparison(String strategyFile, Map<String, ?> params, List<Price> prices) {
         XYChart.Series<Long,Double> series = new XYChart.Series<>();
         for (Profit p: portfolio.getProfitList()) {
             XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());

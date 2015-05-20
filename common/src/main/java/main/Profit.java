@@ -9,10 +9,12 @@ import java.util.Date;
  */
 public class Profit {
     private double returnValue;
+    private double returnPercent;
     private DateTime pairDate;
 
-    public Profit (double returnValue, DateTime pairDate) {
+    public Profit (double returnValue, double returnPercent, DateTime pairDate) {
         this.returnValue = returnValue;
+        this.returnPercent = returnPercent;
         this.pairDate = pairDate;
     }
 
@@ -22,5 +24,9 @@ public class Profit {
 
     public DateTime getProfitDate() {
         return this.pairDate;
+    }
+
+    public double getReturnPercent() {
+        return returnPercent;
     }
 }

@@ -1,6 +1,7 @@
 import alert.AlertManager;
 import components.AppFileChooser;
 import components.AutoCompleteComboBoxListener;
+import components.LabeledSelector;
 import dialog.DialogBuilder;
 import file.FileUtils;
 import file.StrategyRunner;
@@ -15,7 +16,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.*;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -28,7 +28,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -84,7 +83,7 @@ public class ApplicationFrame extends Application {
     private StatsBuilder s = new StatsBuilder();
     private ComparisonBuilder c = new ComparisonBuilder();
 
-    private static String VERSION_NUMBER = "1.1.0";
+    private static String VERSION_NUMBER = "1.2.0";
     private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
     private static String FOOTER_MESSAGE = "Get the latest release at our website.";
 
@@ -92,7 +91,6 @@ public class ApplicationFrame extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        //primaryStage.setFullScreen(true);
         initLogger();
         primaryStage.setTitle("BuyHard Platform");
         main = new BorderPane();
@@ -303,10 +301,11 @@ public class ApplicationFrame extends Application {
         companySelector.valueProperty().addListener(companyListener);
     }
 
+    //TODO
     private List<Node> constructProfileGraph(String company) {
-        //TODO
         List<Node> content = new ArrayList<>();
-        content.add(new Label("NO GRAPH"));
+        ProfileBuilder profileBuilder = new ProfileBuilder();
+        content.add(profileBuilder.buildProfile(new Profile(priceReader.getCompanyHistory(company))));
         return content;
     }
 
@@ -401,12 +400,11 @@ public class ApplicationFrame extends Application {
         runButton.getStyleClass().add("header-button");
         settings.getChildren().add(runButton);
 
-        //TODO add export actions
         MenuButton exportButton = new MenuButton("",new ImageView(getClass().getResource("icons/export-icon.png").toExternalForm()));
         exportButton.getStyleClass().add("header-button");
-        MenuItem exportToPdf = new MenuItem("Export to PDF");
-        MenuItem exportToExcel = new MenuItem("Export to Excel");
-        MenuItem screenshot = new MenuItem("Screenshot");
+        MenuItem exportToPdf = new MenuItem("Export to PDF", new ImageView(getClass().getResource("icons/pdf.png").toExternalForm()));
+        MenuItem exportToExcel = new MenuItem("Export to Excel", new ImageView(getClass().getResource("icons/excel.png").toExternalForm()));
+        MenuItem screenshot = new MenuItem("Screenshot", new ImageView(getClass().getResource("icons/screenshot.png").toExternalForm()));
 
         exportButton.getItems().addAll(exportToPdf, exportToExcel, screenshot);
         exportToExcel.setOnAction(new EventHandler<ActionEvent>() {
@@ -573,44 +571,25 @@ public class ApplicationFrame extends Application {
 
     private void addFilterSelector() {
         HBox selector = new HBox();
-        selector.setSpacing(20);
-        selector.setPadding(new javafx.geometry.Insets(15, 15, 0, 15));
+        selector.getStyleClass().add("selector-panel");
         addFilter("Company", selector);
+        addProfileButton(selector);
         addDateFilters(selector);
 
         graph.setTop(selector);
     }
 
     private void addDateFilters(HBox selector) {
-        HBox startDatePanel = new HBox();
-        startDatePanel.getChildren().add(new Label("Start Date: "));
-        selector.getChildren().add(startDatePanel);
-        HBox endDatePanel = new HBox();
-        endDatePanel.getChildren().add(new Label("End Date: "));
-        selector.getChildren().add(endDatePanel);
-
         DatePicker startDatePicker = new DatePicker();
         configureDatePicker(startDatePicker);
-        startDatePanel.getChildren().add(startDatePicker);
-        startDatePicker.setOnAction(new EventHandler() {
-            public void handle(javafx.event.Event t) {
-                LocalDate date = startDatePicker.getValue();
-                if (date == null) return;
-                long startDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                g.updateLowerBound(startDate);
-            }
-        });
+        LabeledSelector startDateSelector = new LabeledSelector("Start Date:", startDatePicker);
+        selector.getChildren().add(startDateSelector);
+
         DatePicker endDatePicker = new DatePicker();
         configureDatePicker(endDatePicker);
-        endDatePanel.getChildren().add(endDatePicker);
-        endDatePicker.setOnAction(new EventHandler() {
-            public void handle(javafx.event.Event t) {
-                LocalDate date = endDatePicker.getValue();
-                if (date == null) return;
-                long endDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                g.updateUpperBound(endDate);
-            }
-        });
+        LabeledSelector endDateSelector = new LabeledSelector("End Date:", endDatePicker);
+        selector.getChildren().add(endDateSelector);
+
         final Callback<DatePicker, DateCell> endDayCellFactory =
                 new Callback<DatePicker, DateCell>() {
                     @Override
@@ -650,11 +629,10 @@ public class ApplicationFrame extends Application {
     }
 
     private void configureDatePicker(DatePicker datePicker) {
-        datePicker.setMinHeight(20);
+        datePicker.getStyleClass().add("datepicker");
         datePicker.setPromptText("dd/MM/yyyy");
         datePicker.setConverter(new StringConverter<LocalDate>() {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
             @Override
             public String toString(LocalDate date) {
                 if (date != null) {
@@ -673,17 +651,22 @@ public class ApplicationFrame extends Application {
                 }
             }
         });
+        datePicker.setOnAction(new EventHandler() {
+            public void handle(javafx.event.Event t) {
+                LocalDate date = datePicker.getValue();
+                if (date == null) return;
+                long startDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                g.updateLowerBound(startDate);
+            }
+        });
     }
 
     private void addFilter(String name, HBox selector) {
-        HBox filter = new HBox();
         companySelector = new ComboBox<>();
+        LabeledSelector filter = new LabeledSelector(name + ":", companySelector);
         new AutoCompleteComboBoxListener<>(companySelector);
-        filter.getChildren().addAll(new Label(name + ": "), companySelector);
         selector.getChildren().add(filter);
-        addProfileButton(selector);
     }
-
 
     private void addProfileButton(HBox selector) {
         profile = new Button("Profile");

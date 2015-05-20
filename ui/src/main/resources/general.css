@@ -31,10 +31,20 @@
     -fx-padding: 0;
 }
 
+/* Modal */
+
 .tutorial-modal {
     -fx-background-color: white;
+    -fx-alignment: center;
 }
 
+.dialog-content {
+    -fx-padding: 20px;
+    -fx-spacing: 20px;
+    -fx-alignment: center;
+}
+
+/* Footer */
 .loader {
     -fx-spacing: 20px;
 }
@@ -48,6 +58,7 @@
     -fx-spacing: 20px;
 }
 
+/* Header */
 #header {
     -fx-background-color: white;
     -fx-padding: 5px 0px 10px 20px;
@@ -65,6 +76,7 @@
     -fx-opacity: 1;
 }
 
+/* Labels and buttons */
 .profit-label {
     -fx-text-fill: #2CFC0E;
 }
@@ -87,4 +99,14 @@
 
 .vertical-marker {
     -fx-stroke: blue;
+}
+
+/* Selectors */
+.selector {
+    -fx-alignment: center-left;
+    -fx-spacing: 5px;
+}
+
+.datepicker {
+    -fx-min-height: 20px;
 }

@@ -1,3 +1,4 @@
+import components.LabeledSelector;
 import dialog.DialogBuilder;
 import file.FileUtils;
 import file.StrategyRunner;
@@ -6,9 +7,6 @@ import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.HPos;
 import javafx.geometry.Side;
 import javafx.scene.CacheHint;
@@ -29,7 +27,6 @@ import main.Price;
 import main.Profit;
 import profit.OptimalProfit;
 
-import java.text.Normalizer;
 import java.util.*;
 
 /**
@@ -132,8 +129,10 @@ public class ComparisonBuilder {
         modeSelector.getItems().addAll("Return Value", "Return %");
         modeSelector.getSelectionModel().selectFirst();
         addModeAction();
+        LabeledSelector mode = new LabeledSelector("Mode:", modeSelector);
         HBox topBar = new HBox();
-        topBar.getChildren().addAll(companySelector, modeSelector);
+        topBar.getStyleClass().add("selector-panel");
+        topBar.getChildren().addAll(companySelector, mode);
         companiesContent.setTop(topBar);
         companiesTab.setContent(companiesContent);
         companiesTab.setClosable(false);

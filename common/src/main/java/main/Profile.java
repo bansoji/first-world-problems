@@ -5,6 +5,9 @@ import utils.Line;
 import utils.Point;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The profile of a given company.
@@ -18,12 +21,12 @@ public class Profile {
      * Build the profile for a company.
      * @param prices The prices for a given company.
      */
-    public Profile(ArrayList<Price> prices){
+    public Profile(List<Price> prices){
 
         averageVolume = 0.0;
-        ArrayList<Point> endOfDayPoints = new ArrayList<>();
-        ArrayList<Point> highPoints = new ArrayList<>();
-        ArrayList<Point> lowPoints= new ArrayList<>();
+        List<Point> endOfDayPoints = new ArrayList<>();
+        List<Point> highPoints = new ArrayList<>();
+        List<Point> lowPoints= new ArrayList<>();
 
         double i = 0.0;
 
@@ -50,14 +53,11 @@ public class Profile {
 
         overallTrend = l.getSlope();
         overallDailyVariance = lHigh.getSlope() - lLow.getSlope();
-
-
     }
 
     public double getAverageVolume(){
         return averageVolume;
     }
-
 
     public double getOverallTrend() {
         return overallTrend;
@@ -65,5 +65,37 @@ public class Profile {
 
     public double getOverallDailyVariance() {
         return overallDailyVariance;
+    }
+
+    public Map<String,Double> getMetrics() {
+        Map<String,Double> metrics = new HashMap<>();
+        metrics.put("Average Volume", averageVolume);
+        metrics.put("Overall Trend", overallTrend);
+        metrics.put("Overall Daily Variance", overallDailyVariance);
+        return metrics;
+    }
+
+    private static class ProfileEvaluator {
+        private int rateVolume(double value) {
+            if (value > 1e9) return 5;
+            else if (value > 1e8) return 4;
+            else if (value > 1e7) return 3;
+            else if (value > 1e6) return 2;
+            else return 1;
+        }
+
+        private int rateTrend(double value) {
+            if (value > 1) return 5;
+            else if (value > 0.75) return 4;
+            else if (value > 0.50) return 3;
+            else if (value > 0.25) return 2;
+            else if (value > 0) return 1;
+            else if (value == 0) return 0;
+            else if (value > -0.25) return -1;
+            else if (value > -0.50) return -2;
+            else if (value > -0.75) return -3;
+            else if (value > -1.0) return -4;
+            else return -5;
+        }
     }
 }

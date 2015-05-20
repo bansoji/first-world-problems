@@ -7,6 +7,7 @@ import main.Order;
 import main.Portfolio;
 import main.Returns;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
+import net.sf.dynamicreports.jasper.builder.export.JasperXlsExporterBuilder;
 import net.sf.dynamicreports.jasper.builder.export.JasperXlsxExporterBuilder;
 import net.sf.dynamicreports.jasper.constant.JasperProperty;
 import net.sf.dynamicreports.report.base.DRSubtotal;
@@ -57,7 +58,7 @@ public class ReportGenerator {
     private StyleBuilder boldCentered;
 
     private static String pdfReportName = "report.pdf";
-    private static String xlsReportName = "report.xlsx";
+    private static String xlsReportName = "report.xls";
 //    private static String xlsReportNameOD = "/Users/addo/Documents/OneDrive/dump/report.xlsx";
 
 
@@ -80,6 +81,7 @@ public class ReportGenerator {
         tableBody = DynamicReports.stl.style()
                 .setHorizontalAlignment(HorizontalAlignment.LEFT)
                 .setBorder(DynamicReports.stl.penThin());
+        tableBodyBolded = DynamicReports.stl.style(tableBody).bold();
         titleStyle = DynamicReports.stl.style()
                 .bold();
         subtitleStyle = DynamicReports.stl.style()
@@ -90,24 +92,37 @@ public class ReportGenerator {
         JasperReportBuilder returnsReport = buildReturnsCmp();
 
         try {
-            TextFieldBuilder<String> title = DynamicReports.cmp.text("BuyHard Report - Overview");
-            JasperXlsxExporterBuilder xlsxExporter = DynamicReports.export.xlsxExporter(xlsReportName)
+            JasperReportBuilder report = DynamicReports.report();
+            // Main Report Header
+            TextFieldBuilder<String> title = DynamicReports.cmp.text("Report - Overview");
+            report.title(DynamicReports.cmp.verticalList().add(
+                    DynamicReports.cmp.image(getClass().getResource("logosizes/BuyHard2Logo_Small.png")).setFixedDimension(313,35)
+
+                            .setHorizontalAlignment(HorizontalAlignment.LEFT),
+                    title.setStyle(titleStyle)
+                            .setHorizontalAlignment(HorizontalAlignment.RIGHT),
+                    DynamicReports.cmp.filler().setStyle(
+                            DynamicReports.stl.style().setTopBorder(DynamicReports.stl.penThin())
+                    ).setFixedHeight(10)
+            ));
+
+            JasperXlsExporterBuilder xlsxExporter = DynamicReports.export.xlsExporter(xlsReportName)
                     .setDetectCellType(true)
                     .setIgnorePageMargins(true)
-                    .setWhitePageBackground(false)
-                    .setRemoveEmptySpaceBetweenColumns(true);
-            DynamicReports.report()
+                    .setWhitePageBackground(false);
+//                    .setRemoveEmptySpaceBetweenColumns(true);
+            report.addProperty( "net.sf.jasperreports.export.xls.create.custom.palette", "true");
+            report
                     .addProperty(JasperProperty.EXPORT_XLS_FREEZE_ROW, "2")
                     .detail(DynamicReports.cmp.horizontalFlowList(
                             DynamicReports.cmp.subreport(totalSummary),
                             DynamicReports.cmp.subreport(assetReport),
                             DynamicReports.cmp.subreport(returnsReport)
                             ))
-                    .title(title.setStyle(titleStyle))
                     .ignorePageWidth()
                     .ignorePagination()
                     .setDataSource(new JREmptyDataSource())
-                    .toXlsx(xlsxExporter);
+                    .toXls(xlsxExporter);
         } catch (DRException e) {
             e.printStackTrace();
         }
@@ -336,7 +351,7 @@ public class ReportGenerator {
         Map<String, Double> assetValue = portfolioData.getAssetValue();
         for (String company : assetValue.keySet()) {
             dataSource.add(company, assetValue.get(company),returns.get(company).getReturns(),
-                           returns.get(company).getReturns());
+                    format.FormatUtils.round2dp(returns.get(company).getReturns()/returns.get(company).getBought()*100));
         }
 
         return dataSource;

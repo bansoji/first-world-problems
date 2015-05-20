@@ -126,7 +126,7 @@ public class ReportGenerator {
                 .setPadding(3);
         tableBody = DynamicReports.stl.style()
                 .setHorizontalAlignment(HorizontalAlignment.LEFT)
-                .setBorder(DynamicReports.stl.penThin())
+                .setBorder(DynamicReports.stl.penThin().setLineColor(Color.WHITE))
                 .setPadding(3);
         tableBodyBolded = DynamicReports.stl.style(tableBody).bold();
         titleStyle = DynamicReports.stl.style()

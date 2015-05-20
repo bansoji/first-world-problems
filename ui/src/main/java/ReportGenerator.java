@@ -1,4 +1,7 @@
 import date.DateUtils;
+import javafx.collections.ObservableList;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import main.History;
 import main.Order;
 import main.Portfolio;
@@ -39,6 +42,8 @@ import java.util.List;
 public class ReportGenerator {
 
     private Portfolio portfolioData;
+    private TableView table;
+
     private StyleBuilder subtitleStyle;
     private StyleBuilder titleStyle;
     private StyleBuilder tableHeader;
@@ -53,6 +58,9 @@ public class ReportGenerator {
 
     public ReportGenerator(Portfolio p){
         this.portfolioData = p;
+    }
+    public ReportGenerator(TableView t){
+        this.table = t;
     }
 
     // Test Code for XLS Generation
@@ -131,7 +139,7 @@ public class ReportGenerator {
         JasperReportBuilder totalSummary = buildTotalSummaryCmp();
         JasperReportBuilder assetReport = buildAssetCmp();
         JasperReportBuilder returnsReport = buildReturnsCmp();
-        MultiPageListBuilder companyReports = buildCompanySubReports();
+//        MultiPageListBuilder companyReports = buildCompanySubReports();
 
         JasperReportBuilder report = DynamicReports.report();
         report.setPageMargin(DynamicReports.margin(20));
@@ -143,9 +151,11 @@ public class ReportGenerator {
         report.detail(DynamicReports.cmp.multiPageList(
                         DynamicReports.cmp.subreport(totalSummary),
                         DynamicReports.cmp.subreport(assetReport),
-                        DynamicReports.cmp.subreport(returnsReport)),
-                companyReports
+                        DynamicReports.cmp.subreport(returnsReport))
+//                companyReports
+//                DynamicReports.cmp.subreport(buildTableViewReport(table))
         );
+
         report.setDataSource(new JREmptyDataSource());
 
         // Sum columns.
@@ -160,6 +170,24 @@ public class ReportGenerator {
         } catch (DRException | FileNotFoundException e) {
             e.printStackTrace();
         }
+    }
+
+    public JasperReportBuilder buildTableViewReport(TableView table)
+    {
+        JasperReportBuilder tableReport = DynamicReports.report();
+        ObservableList<TableColumn> cols = table.getColumns();
+        List<TextColumnBuilder>  columns = new ArrayList<>();
+        for (TableColumn col : cols){
+            columns.add(new DynamicReports().col.column(col.getText(),col.getText().toLowerCase(),DynamicReports.type.stringType()));
+        }
+        tableReport.columns(columns.toArray(new TextColumnBuilder[columns.size()]));
+        tableReport.setColumnHeaderStyle(tableHeader);
+        tableReport.setColumnStyle(tableBody);
+        tableReport.setDataSource(createTableViewDataSource(table));
+
+
+        return tableReport;
+
     }
 
     private JasperReportBuilder buildTotalSummaryCmp()
@@ -282,5 +310,26 @@ public class ReportGenerator {
         return dataSource;
     }
 
+    private JRDataSource createTableViewDataSource(TableView table)
+    {
+        ObservableList<TableColumn> cols = table.getColumns();
+        List<String> columnNames = new ArrayList();
+        for (TableColumn col : cols){
+            columnNames.add(col.getText().toLowerCase());
+        }
+        DRDataSource dataSource = new DRDataSource(columnNames.toArray(new String[columnNames.size()]));
+        ObservableList<Map> rows = table.getItems();
+        for (Map row : rows){
+            List<String> rowItems = new ArrayList();
+            for (Object key : row.keySet()) {
+                rowItems.add(row.get(key).toString());
+            }
+
+            dataSource.add(rowItems.toArray(new String[rowItems.size()]));
+        }
+
+        return dataSource;
+
+    }
 
 }

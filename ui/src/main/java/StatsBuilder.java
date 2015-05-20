@@ -58,14 +58,6 @@ public class StatsBuilder {
         GridPane.setHgrow(graphs, Priority.ALWAYS);
         stats.getChildren().setAll(vbox,graphs);
 
-        if(!portfolio.getReturns().isEmpty()){
-            ////////////////////////
-            //TODO Put this somewhere useful!
-            ReportGenerator reporter = new ReportGenerator(portfolio);
-            reporter.generateXLS();
-            reporter.generatePDF();
-            //////////////////////////////////////////////////
-        }
     }
 
     private VBox buildPortfolioStats(Portfolio portfolio) {

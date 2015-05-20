@@ -251,8 +251,7 @@ public class ApplicationFrame extends Application {
                 FileChooser chooser = new FileChooser();
                 chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
                 File file = chooser.showOpenDialog(stage);
-                if (file != null)
-                {
+                if (file != null) {
                     try {
                         if (fileChooser.getButtonId().equals("Choose CSV")) {
                             runner.setDataFile(file.getAbsolutePath());
@@ -267,9 +266,7 @@ public class ApplicationFrame extends Application {
                             return;
                         }
                         fileChooser.setLabelText(file.getName());
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         logger.severe(ex.getMessage());
                     }
                 }
@@ -376,7 +373,7 @@ public class ApplicationFrame extends Application {
         AppFileChooser paramFileChooser = new AppFileChooser("Choose parameters", new ImageView(getClass().getResource("app-icons/choose-settings.png").toExternalForm()));
         addFileChooserListener(paramFileChooser);
 
-        fileChoosers.getChildren().addAll(dataFileChooser,strategyFileChooser,paramFileChooser);
+        fileChoosers.getChildren().addAll(dataFileChooser, strategyFileChooser, paramFileChooser);
 
         header.getChildren().add(fileChoosers);
     }
@@ -424,7 +421,21 @@ public class ApplicationFrame extends Application {
         MenuButton exportButton = new MenuButton("",new ImageView(getClass().getResource("icons/export-icon.png").toExternalForm()));
         exportButton.getStyleClass().add("header-button");
         MenuItem exportToPdf = new MenuItem("Export to PDF");
+        exportToPdf.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                ReportGenerator rg = new ReportGenerator(portfolio);
+                rg.generatePDF();
+            }
+        }); //TODO Remove after testing
         MenuItem exportToExcel = new MenuItem("Export to Excel");
+        exportToExcel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                ReportGenerator rg = new ReportGenerator(portfolio);
+                rg.generateXLS();
+            }
+        }); //TODO Remove after testing
         exportButton.getItems().addAll(exportToPdf, exportToExcel);
         settings.getChildren().add(exportButton);
         exportButton.setDisable(true);  //disable until run button is pressed at least once

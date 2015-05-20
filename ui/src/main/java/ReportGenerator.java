@@ -45,10 +45,10 @@ public class ReportGenerator {
     private StyleBuilder tableBody;
     private StyleBuilder boldCentered;
 
-    private static String xlsReportName = "report.xlsx";
-    private static String xlsReportNameOD = "/Users/addo/Documents/OneDrive/dump/report.xlsx";
-
     private static String pdfReportName = "report.pdf";
+    private static String xlsReportName = "report.xlsx";
+//    private static String xlsReportNameOD = "/Users/addo/Documents/OneDrive/dump/report.xlsx";
+
 
 
     public ReportGenerator(Portfolio p){
@@ -77,7 +77,7 @@ public class ReportGenerator {
 
         try {
             TextFieldBuilder<String> title = DynamicReports.cmp.text("BuyHard Report - Overview");
-            JasperXlsxExporterBuilder xlsxExporter = DynamicReports.export.xlsxExporter(xlsReportNameOD) //TODO BANSON Change me to xlsReportName!
+            JasperXlsxExporterBuilder xlsxExporter = DynamicReports.export.xlsxExporter(xlsReportName)
                     .setDetectCellType(true)
                     .setIgnorePageMargins(true)
                     .setWhitePageBackground(false)

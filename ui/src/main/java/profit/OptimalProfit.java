@@ -65,7 +65,7 @@ public class OptimalProfit {
             prev = price;
         }
 
-        if (paired) {
+        if (!paired) {
             if (nextBuy) {
                 buy(prev);
             } else {

@@ -4,6 +4,7 @@ import components.AutoCompleteComboBoxListener;
 import dialog.DialogBuilder;
 import file.FileUtils;
 import file.StrategyRunner;
+import format.FormatChecker;
 import format.FormatUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -12,6 +13,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -33,6 +35,7 @@ import javafx.util.StringConverter;
 import main.*;
 import org.joda.time.DateTime;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -301,6 +304,7 @@ public class ApplicationFrame extends Application {
     }
 
     private List<Node> constructProfileGraph(String company) {
+        //TODO
         List<Node> content = new ArrayList<>();
         content.add(new Label("NO GRAPH"));
         return content;
@@ -341,7 +345,7 @@ public class ApplicationFrame extends Application {
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Comparison") && !loaded) || force) {
                     comparison.setVisible(false);
-                    c.buildComparison(runner, comparison, portfolio, manager.getParams());
+                    c.buildComparison(runner, comparison, portfolio, prices, manager.getParams());
                     comparison.setVisible(true);
                 }
                 if (!portfolio.isEmpty()) {
@@ -390,30 +394,7 @@ public class ApplicationFrame extends Application {
         settingsButton.getStyleClass().add("icon-button");
         settings.getChildren().add(settingsButton);
         initParamTable();
-        settingsButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                final Stage dialog = new Stage();
-                dialog.setTitle("Parameters");
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(stage);
-                VBox dialogVbox = new VBox();
-                dialogVbox.setPadding(new Insets(20));
-                dialogVbox.setSpacing(20);
-                dialogVbox.setAlignment(Pos.CENTER_RIGHT);
-                Button close = new Button("Close");
-                close.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        dialog.close();
-                    }
-                });
-                dialogVbox.getChildren().addAll(paramTable, close);
-                Scene dialogScene = new Scene(dialogVbox);
-                dialog.setScene(dialogScene);
-                dialog.show();
-            }
-        });
+        settingsButton.setOnAction(DialogBuilder.constructEventHandler("Parameters",paramTable));
 
         //Run button
         Button runButton = new Button("",new ImageView(getClass().getResource("icons/run-circle.png").toExternalForm()));
@@ -425,7 +406,75 @@ public class ApplicationFrame extends Application {
         exportButton.getStyleClass().add("header-button");
         MenuItem exportToPdf = new MenuItem("Export to PDF");
         MenuItem exportToExcel = new MenuItem("Export to Excel");
-        exportButton.getItems().addAll(exportToPdf, exportToExcel);
+        MenuItem screenshot = new MenuItem("Screenshot");
+
+        exportButton.getItems().addAll(exportToPdf, exportToExcel, screenshot);
+        exportToExcel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                new Thread() {
+                    public void run() {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                loader.setProgress(0);
+                                loader.setText("Generating preview for Excel file...");
+                            }
+                        });
+                        ReportGenerator g = new ReportGenerator(portfolio);
+                        g.generateXLS();
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                loader.setProgress(1);
+                                loader.setText("Loaded.");
+                            }
+                        });
+                    }
+                }.start();
+            }
+        });
+        exportToPdf.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                new Thread() {
+                    public void run() {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                loader.setProgress(0);
+                                loader.setText("Generating preview for PDF file...");
+                            }
+                        });
+                        ReportGenerator g = new ReportGenerator(portfolio);
+                        g.generatePDF();
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                loader.setProgress(1);
+                                loader.setText("Loaded.");
+                            }
+                        });
+                    }
+                }.start();
+            }
+        });
+        screenshot.setOnAction(new EventHandler<ActionEvent>() {
+               public void handle(ActionEvent e) {
+                   FileChooser fileChooser = new FileChooser();
+                   fileChooser.setTitle("Save Image");
+                   File file = fileChooser.showSaveDialog(stage);
+                   if (file != null) {
+                       try {
+                           ImageIO.write(SwingFXUtils.fromFXImage(stage.getScene().snapshot(null),
+                                   null), "png", file);
+                       } catch (IOException ex) {
+                           System.out.println(ex.getMessage());
+                       }
+                   }
+               }
+           }
+        );
         settings.getChildren().add(exportButton);
         exportButton.setDisable(true);  //disable until run button is pressed at least once
 
@@ -698,13 +747,10 @@ public class ApplicationFrame extends Application {
 
             while (properties.hasMoreElements()) {
                 String key = (String) properties.nextElement();
-                //if the value of the property is not numerical, it is not a parameter
-                try {
-                    Double.parseDouble(props.getProperty(key));
-                } catch (NumberFormatException e) {
-                    continue;
+                //if the value of the property is not numerical, it is not a parameter we need to record
+                if (FormatChecker.isDouble(props.getProperty(key))) {
+                    manager.put(key, props.getProperty(key));
                 }
-                manager.put(key, props.getProperty(key));
             }
         }
     }

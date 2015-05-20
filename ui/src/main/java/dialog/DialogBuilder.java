@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -46,6 +47,33 @@ public class DialogBuilder {
         };
     }
 
+    public static EventHandler<ActionEvent> constructEventHandler(String title, Node child) {
+        return new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                final Stage dialog = new Stage();
+                dialog.setTitle(title);
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(null);
+                VBox dialogVbox = new VBox();
+                dialogVbox.setPadding(new Insets(20));
+                dialogVbox.setSpacing(20);
+                dialogVbox.setAlignment(Pos.CENTER);
+                Button close = new Button("Close");
+                close.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        dialog.close();
+                    }
+                });
+                dialogVbox.getChildren().add(child);
+                dialogVbox.getChildren().add(close);
+                Scene dialogScene = new Scene(dialogVbox);
+                dialog.setScene(dialogScene);
+                dialog.show();
+            }
+        };
+    }
+
     public static EventHandler<ActionEvent> constructHelpModal(Node node) {
         return new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
@@ -64,6 +92,86 @@ public class DialogBuilder {
                     }
                 });
                 dialogVbox.getChildren().add(node);
+                Scene dialogScene = new Scene(dialogVbox);
+                dialog.setScene(dialogScene);
+                dialog.show();
+            }
+        };
+    }
+
+    public static EventHandler<ActionEvent> constructSelectionModal(String title, List<Node> children) {
+        return new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                final Stage dialog = new Stage();
+                dialog.setTitle(title);
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(null);
+                VBox dialogVbox = new VBox();
+                dialogVbox.setPadding(new Insets(20));
+                dialogVbox.setSpacing(20);
+                dialogVbox.setAlignment(Pos.CENTER);
+
+                HBox footer = new HBox();
+                Button close = new Button("Close");
+                close.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        dialog.close();
+                    }
+                });
+
+                Button apply = new Button("Apply");
+                apply.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        dialog.close();
+                    }
+                });
+
+                footer.getChildren().addAll(apply,close);
+                for (Node child: children) {
+                    dialogVbox.getChildren().add(child);
+                }
+                dialogVbox.getChildren().add(footer);
+                Scene dialogScene = new Scene(dialogVbox);
+                dialog.setScene(dialogScene);
+                dialog.show();
+            }
+        };
+    }
+
+    public static EventHandler<ActionEvent> constructSelectionModal(String title, Node child) {
+        return new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                final Stage dialog = new Stage();
+                dialog.setTitle(title);
+                dialog.initModality(Modality.APPLICATION_MODAL);
+                dialog.initOwner(null);
+                VBox dialogVbox = new VBox();
+                dialogVbox.setPadding(new Insets(20));
+                dialogVbox.setSpacing(20);
+                dialogVbox.setAlignment(Pos.CENTER);
+
+                HBox footer = new HBox();
+                Button close = new Button("Close");
+                close.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        dialog.close();
+                    }
+                });
+
+                Button apply = new Button("Apply");
+                apply.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override
+                    public void handle(ActionEvent event) {
+                        dialog.close();
+                    }
+                });
+
+                footer.getChildren().addAll(apply,close);
+                dialogVbox.getChildren().add(child);
+                dialogVbox.getChildren().add(footer);
                 Scene dialogScene = new Scene(dialogVbox);
                 dialog.setScene(dialogScene);
                 dialog.show();

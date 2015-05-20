@@ -25,4 +25,17 @@ public class ChartPanZoomManager {
         panManager.start();
         return JFXChartUtil.setupZooming(chart);
     }
+
+    public static void addResetZoomFunction(XYChart chart) {
+        //reset zoom if left-clicked twice
+        chart.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+                    chart.getXAxis().setAutoRanging(true);
+                    chart.getYAxis().setAutoRanging(true);
+                }
+            }
+        });
+    }
 }

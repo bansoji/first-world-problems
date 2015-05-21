@@ -22,10 +22,14 @@ ui/src/main/resources/fonts
 
 # extra output files
 *.csv
-*.log*
-*.pdf
-*.xlsx
+*.log
+*.log.*
+*.csv#
 
 MANIFEST.MF
 .DS_Store
 application_log*
+
+.DS_Store
+
+*.MF

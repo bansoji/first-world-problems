@@ -26,6 +26,7 @@ import main.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -57,6 +58,14 @@ public class StatsBuilder {
         GridPane.setVgrow(graphs, Priority.ALWAYS);
         GridPane.setHgrow(graphs, Priority.ALWAYS);
         stats.getChildren().setAll(vbox,graphs);
+
+        // TODO(Gavin/Addo): MOVE THIS
+        try {
+            TableViewExporter.exportCsv(returnTable, "test");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ///
     }
 
     private VBox buildPortfolioStats(Portfolio portfolio) {

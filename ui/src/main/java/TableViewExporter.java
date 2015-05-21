@@ -1,8 +1,5 @@
-import com.opencsv.CSVWriter;
+import javafx.scene.control.TableView;
 
-import javax.swing.text.TableView;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -20,7 +17,6 @@ public class TableViewExporter {
         writer.close();
 
         */
-
 
 
 

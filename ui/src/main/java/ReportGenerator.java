@@ -1,8 +1,8 @@
 import date.DateUtils;
-import main.History;
-import main.Order;
-import main.Portfolio;
-import main.Returns;
+import core.History;
+import core.Order;
+import core.Portfolio;
+import core.Returns;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.JasperXlsxExporterBuilder;
 import net.sf.dynamicreports.jasper.constant.JasperProperty;
@@ -54,8 +54,9 @@ public class ReportGenerator {
     }
 
     // Test Code for XLS Generation
-    public void generateXLS()
+    public void generateXLS(String name)
     {
+        if (name == null) name = xlsReportName;
         tableHeader = DynamicReports.stl.style()
                 .bold()
                 .setHorizontalAlignment(HorizontalAlignment.LEFT)
@@ -75,7 +76,7 @@ public class ReportGenerator {
 
         try {
             TextFieldBuilder<String> title = DynamicReports.cmp.text("BuyHard Report - Overview");
-            JasperXlsxExporterBuilder xlsxExporter = DynamicReports.export.xlsxExporter(xlsReportName)
+            JasperXlsxExporterBuilder xlsxExporter = DynamicReports.export.xlsxExporter(name)
                     .setDetectCellType(true)
                     .setIgnorePageMargins(true)
                     .setWhitePageBackground(false)

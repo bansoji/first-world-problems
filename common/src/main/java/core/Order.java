@@ -1,4 +1,4 @@
-package main;
+package core;
 
 import date.DateUtils;
 import org.joda.time.DateTime;

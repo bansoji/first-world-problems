@@ -1,8 +1,6 @@
-package main;
+package core;
 
 import org.joda.time.DateTime;
-
-import java.util.Date;
 
 /**
  * Created by Edwin Li on 3/05/2015.

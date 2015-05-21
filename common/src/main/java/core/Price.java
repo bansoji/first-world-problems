@@ -1,8 +1,7 @@
-package main;
+package core;
 
 import org.joda.time.DateTime;
 
-import java.util.Date;
 import java.util.logging.Logger;
 
 /**

@@ -1,5 +1,5 @@
 import date.DateUtils;
-import main.OrderType;
+import core.OrderType;
 import quickDate.Order;
 import quickDate.Price;
 import utils.Channel;

@@ -23,11 +23,10 @@ import javafx.scene.text.Text;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
-import main.*;
+import core.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import table.ExportChartableTable;
-import table.OptionsTable;
 
 import java.util.*;
 
@@ -253,6 +252,7 @@ public class StatsBuilder {
             Label title = new Label("Returns by company");
             title.getStyleClass().add("placeholder-title");
             Label placeholderText = new Label("No returns");
+            placeholderText.getStyleClass().add("placeholder-text");
             placeholder.getChildren().addAll(title, placeholderText);
             VBox.setVgrow(placeholder,Priority.ALWAYS);
             return placeholder;
@@ -285,6 +285,7 @@ public class StatsBuilder {
             Label title = new Label("Equities by company");
             title.getStyleClass().add("placeholder-title");
             Label placeholderText = new Label("No equities");
+            placeholderText.getStyleClass().add("placeholder-text");
             placeholder.getChildren().addAll(title, placeholderText);
             VBox.setVgrow(placeholder,Priority.ALWAYS);
             return placeholder;
@@ -414,7 +415,7 @@ public class StatsBuilder {
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setPrefHeight(150);
 
-        tableView.setChartAction(DialogBuilder.constructEventHandler("Equities by company", buildEquityChart(equities,totalEquityValue)));
+        tableView.setChartAction(DialogBuilder.constructEventHandler("Equities by company", buildEquityChart(equities, totalEquityValue)));
 
         tableView.setTableMenuButtonVisible(true);
 

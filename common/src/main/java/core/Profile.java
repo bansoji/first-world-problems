@@ -1,4 +1,4 @@
-package main;
+package core;
 
 import utils.GeometryUtils;
 import utils.Line;

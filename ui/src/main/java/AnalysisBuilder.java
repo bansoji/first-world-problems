@@ -26,10 +26,9 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import main.OrderReader;
-import main.Portfolio;
+import core.OrderReader;
+import core.Portfolio;
 import table.ExportableTable;
-import table.OptionsTable;
 import table.NumericEditableTableCell;
 
 import java.util.*;

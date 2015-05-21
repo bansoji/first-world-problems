@@ -1,5 +1,5 @@
 import quickDate.*;
-import main.Reader;
+import core.Reader;
 
 import java.io.*;
 import java.util.List;

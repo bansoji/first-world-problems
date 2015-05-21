@@ -1,7 +1,7 @@
 package profit;
 
 
-import main.*;
+import core.*;
 
 import java.util.List;
 

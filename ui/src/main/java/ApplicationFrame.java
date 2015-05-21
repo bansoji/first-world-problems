@@ -3,7 +3,6 @@ import components.AppFileChooser;
 import components.AutoCompleteComboBoxListener;
 import components.LabeledSelector;
 import dialog.DialogBuilder;
-import file.FileUtils;
 import file.StrategyRunner;
 import format.FormatChecker;
 import format.FormatUtils;
@@ -32,7 +31,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-import main.*;
+import core.*;
 import org.joda.time.DateTime;
 
 import javax.imageio.ImageIO;
@@ -84,11 +83,9 @@ public class ApplicationFrame extends Application {
     private StatsBuilder s = new StatsBuilder();
     private ComparisonBuilder c = new ComparisonBuilder();
 
-    private static String VERSION_NUMBER = "1.2.0";
-    private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
-    private static String FOOTER_MESSAGE = "Get the latest release at our website.";
-
-    private static String OUTPUT_FILE_PATH = "orders.csv";
+    private static final String VERSION_NUMBER = "1.2.0";
+    private static final String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
+    private static final String FOOTER_MESSAGE = "Get the latest release at our website.";
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -416,15 +413,21 @@ public class ApplicationFrame extends Application {
                         Platform.runLater(new Runnable() {
                             @Override
                             public void run() {
+                                FileChooser fileChooser = new FileChooser();
+                                fileChooser.setTitle("Export Excel file");
+                                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Microsoft Excel Document", ".xlsx"));
+                                File file = fileChooser.showSaveDialog(stage);
                                 loader.setProgress(0);
-                                loader.setText("Generating preview for Excel file...");
-                            }
-                        });
-                        ReportGenerator g = new ReportGenerator(portfolio);
-                        g.generateXLS();
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
+                                loader.setText("Generating Excel file...");
+                                if (file != null) {
+                                    new Thread() {
+                                        @Override
+                                        public void run() {
+                                            ReportGenerator g = new ReportGenerator(portfolio);
+                                            g.generateXLS(file.getAbsolutePath());
+                                        }
+                                    }.start();
+                                }
                                 loader.setProgress(1);
                                 loader.setText("Loaded.");
                             }
@@ -537,11 +540,7 @@ public class ApplicationFrame extends Application {
                             List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
 
                             //integration with other JARs
-                            if (FileUtils.matches(runner.getStrategyFile(), "aurora.jar")) {
-                                orderReader = new OrderReaderKoK(OUTPUT_FILE_PATH);
-                            } else {
-                                orderReader = new OrderReader(OUTPUT_FILE_PATH);
-                            }
+                            orderReader = IntegrationUtils.selectReader(runner.getStrategyFile());
                             orderReader.readAll();
                             List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
 

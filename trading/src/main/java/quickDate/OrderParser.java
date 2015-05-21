@@ -1,9 +1,7 @@
 package quickDate;
 
-import date.DateUtils;
-import main.OrderType;
-import main.Parser;
-import org.joda.time.DateTime;
+import core.OrderType;
+import core.Parser;
 
 import java.io.IOException;
 

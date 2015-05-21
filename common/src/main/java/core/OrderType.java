@@ -1,4 +1,4 @@
-package main;
+package core;
 
 /**
  * This enum represents an Order type.

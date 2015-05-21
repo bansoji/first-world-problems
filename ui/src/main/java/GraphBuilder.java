@@ -23,12 +23,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Path;
 import javafx.util.Callback;
-import main.Order;
-import main.OrderType;
-import main.Price;
+import core.Order;
+import core.OrderType;
+import core.Price;
 import org.joda.time.DateTime;
 import table.ExportableTable;
-import table.OptionsTable;
 
 import java.util.*;
 

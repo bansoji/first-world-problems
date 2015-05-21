@@ -1,4 +1,4 @@
-package main;
+package core;
 
 /**
  * Created by Zippy on 19/05/2015.

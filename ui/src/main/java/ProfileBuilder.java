@@ -4,7 +4,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
-import main.Profile;
+import core.Profile;
 
 /**
  * Created by gavintam on 20/05/15.

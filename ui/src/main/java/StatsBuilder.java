@@ -2,6 +2,7 @@ import format.FormatUtils;
 import dialog.DialogBuilder;
 import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
+import image.ImageUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -25,6 +26,8 @@ import javafx.util.converter.DoubleStringConverter;
 import main.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import table.ExportChartableTable;
+import table.OptionsTable;
 
 import java.util.*;
 
@@ -163,9 +166,9 @@ public class StatsBuilder {
 
     private ImageView getArrowIcon(double returnValue) {
         if (returnValue > 0) {
-            return new ImageView(getClass().getResource("icons/up.png").toExternalForm());
+            return ImageUtils.getImage("icons/up.png");
         } else {
-            return new ImageView(getClass().getResource("icons/down.png").toExternalForm());
+            return ImageUtils.getImage("icons/down.png");
         }
     }
 
@@ -180,7 +183,7 @@ public class StatsBuilder {
             data.add(row);
         }
 
-        TableView tableView = new TableView(data);
+        ExportChartableTable tableView = new ExportChartableTable(data);
         tableView.setPlaceholder(new Label("No orders made."));
 
         TableColumn companyCol = new TableColumn("Company");
@@ -230,12 +233,7 @@ public class StatsBuilder {
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setMinWidth(300);
 
-        final MenuItem chartReturnsItem = new MenuItem("Chart", new ImageView(getClass().getResource("icons/graphs_pie.png").toExternalForm()));
-        List<Node> dialogContent = new ArrayList<>();
-        dialogContent.add(buildReturnChart(returns, totalReturnValue));
-        chartReturnsItem.setOnAction(DialogBuilder.constructEventHandler("Returns by company", dialogContent));
-        final ContextMenu menu = new ContextMenu(chartReturnsItem);
-        tableView.setContextMenu(menu);
+        tableView.setChartAction(DialogBuilder.constructEventHandler("Returns by company", buildReturnChart(returns, totalReturnValue)));
 
         return tableView;
     }
@@ -337,7 +335,7 @@ public class StatsBuilder {
             tooltip.setGraphic(new TooltipForProfitGraph(df.print((long) data.getXValue()), (double) data.getYValue()));
             Tooltip.install(data.getNode(), tooltip);
         }
-        final MenuItem resetZoomItem = new MenuItem("Reset zoom", new ImageView(getClass().getResource("icons/reset_zoom.png").toExternalForm()));
+        final MenuItem resetZoomItem = new MenuItem("Reset zoom", ImageUtils.getImage("icons/reset_zoom.png"));
         resetZoomItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
                 xAxis.setAutoRanging(true);
@@ -375,7 +373,7 @@ public class StatsBuilder {
             totalEquityValue += equities.get(company);
         }
 
-        TableView tableView = new TableView(data);
+        ExportChartableTable tableView = new ExportChartableTable(data);
         tableView.setPlaceholder(new Label("No securities held."));
 
         TableColumn companyCol = new TableColumn("Company");
@@ -416,12 +414,7 @@ public class StatsBuilder {
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setPrefHeight(150);
 
-        final MenuItem chartReturnsItem = new MenuItem("Chart", new ImageView(getClass().getResource("icons/graphs_pie.png").toExternalForm()));
-        List<Node> dialogContent = new ArrayList<>();
-        dialogContent.add(buildEquityChart(equities,totalEquityValue));
-        chartReturnsItem.setOnAction(DialogBuilder.constructEventHandler("Equities by company", dialogContent));
-        final ContextMenu menu = new ContextMenu(chartReturnsItem);
-        tableView.setContextMenu(menu);
+        tableView.setChartAction(DialogBuilder.constructEventHandler("Equities by company", buildEquityChart(equities,totalEquityValue)));
 
         tableView.setTableMenuButtonVisible(true);
 

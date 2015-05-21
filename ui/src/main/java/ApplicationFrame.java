@@ -7,6 +7,7 @@ import file.FileUtils;
 import file.StrategyRunner;
 import format.FormatChecker;
 import format.FormatUtils;
+import image.ImageUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -143,7 +144,7 @@ public class ApplicationFrame extends Application {
         HBox appInfo = new HBox();
         appInfo.setSpacing(50);
         appInfo.setId("app-info");
-        ImageView logo = new ImageView(getClass().getResource("logosizes/BuyHard2Logo_Small.png").toExternalForm());
+        ImageView logo = ImageUtils.getImage("logosizes/BuyHard2Logo_Small.png");
         //Label info = new Label(APPLICATION_INFO);
         appInfo.setAlignment(Pos.CENTER_LEFT);
         appInfo.getChildren().addAll(logo);
@@ -164,12 +165,12 @@ public class ApplicationFrame extends Application {
         addFilterSelector();
 
         tabPane = new TabPane();
-        Tab dataTab = constructTab("Data", new ImageView(getClass().getResource("app-icons/tab-data-icon.png").toExternalForm()), graph );
-        addHelpModal(dataTab,new ImageView(getClass().getResource("images/mouse-graph.jpeg").toExternalForm()));
+        Tab dataTab = constructTab("Data", ImageUtils.getImage("app-icons/tab-data-icon.png"), graph);
+        addHelpModal(dataTab,ImageUtils.getImage("images/mouse-graph.jpeg"));
 
-        Tab statsTab = constructTab("Portfolio", new ImageView(getClass().getResource("app-icons/tab-portfolio-icon.png").toExternalForm()), stats );
-        Tab analysisTab = constructTab("Analysis", new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()), analysis);
-        Tab comparisonTab = constructTab("Comparison", new ImageView(getClass().getResource("app-icons/tab-comparison-icon.png").toExternalForm()), comparison);
+        Tab statsTab = constructTab("Portfolio", ImageUtils.getImage("app-icons/tab-portfolio-icon.png"), stats);
+        Tab analysisTab = constructTab("Analysis", ImageUtils.getImage("app-icons/tab-analysis-icon.png"), analysis);
+        Tab comparisonTab = constructTab("Comparison", ImageUtils.getImage("app-icons/tab-comparison-icon.png"), comparison);
 
         tabPane.getTabs().addAll(dataTab, statsTab, analysisTab, comparisonTab);
         addTabLoadingAction(tabPane);
@@ -187,7 +188,7 @@ public class ApplicationFrame extends Application {
     }
 
     private void addHelpModal(Tab tab, Node node) {
-        final MenuItem helpItem = new MenuItem("Help", new ImageView(getClass().getResource("icons/help.png").toExternalForm()));
+        final MenuItem helpItem = new MenuItem("Help", ImageUtils.getImage("icons/help.png"));
         helpItem.setOnAction(DialogBuilder.constructHelpModal(node));
         final ContextMenu menu = new ContextMenu(helpItem);
         tab.setContextMenu(menu);
@@ -368,15 +369,15 @@ public class ApplicationFrame extends Application {
         fileChoosers.setSpacing(50);
 
         //Choose csv file button
-        AppFileChooser dataFileChooser = new AppFileChooser("Choose CSV", new ImageView(getClass().getResource("app-icons/choose-csv.png").toExternalForm()));
+        AppFileChooser dataFileChooser = new AppFileChooser("Choose CSV", ImageUtils.getImage("app-icons/choose-csv.png"));
         addFileChooserListener(dataFileChooser);
 
         //Choose strategy module file button
-        AppFileChooser strategyFileChooser = new AppFileChooser("Choose strategy", new ImageView(getClass().getResource("app-icons/choose-strat.png").toExternalForm()));
+        AppFileChooser strategyFileChooser = new AppFileChooser("Choose strategy", ImageUtils.getImage("app-icons/choose-strat.png"));
         addFileChooserListener(strategyFileChooser);
 
         //Choose parameters file button
-        AppFileChooser paramFileChooser = new AppFileChooser("Choose parameters", new ImageView(getClass().getResource("app-icons/choose-settings.png").toExternalForm()));
+        AppFileChooser paramFileChooser = new AppFileChooser("Choose parameters", ImageUtils.getImage("app-icons/choose-settings.png"));
         addFileChooserListener(paramFileChooser);
 
         fileChoosers.getChildren().addAll(dataFileChooser,strategyFileChooser,paramFileChooser);
@@ -389,22 +390,22 @@ public class ApplicationFrame extends Application {
         settings.setAlignment(Pos.CENTER);
         settings.setSpacing(50);
 
-        Button settingsButton = new Button("CHANGE\nPARAMETERS", new ImageView(getClass().getResource("app-icons/change-settings.png").toExternalForm()));
+        Button settingsButton = new Button("CHANGE\nPARAMETERS", ImageUtils.getImage("app-icons/change-settings.png"));
         settingsButton.getStyleClass().add("icon-button");
         settings.getChildren().add(settingsButton);
         initParamTable();
         settingsButton.setOnAction(DialogBuilder.constructEventHandler("Parameters",paramTable));
 
         //Run button
-        Button runButton = new Button("",new ImageView(getClass().getResource("icons/run-circle.png").toExternalForm()));
+        Button runButton = new Button("",ImageUtils.getImage("icons/run-circle.png"));
         runButton.getStyleClass().add("header-button");
         settings.getChildren().add(runButton);
 
-        MenuButton exportButton = new MenuButton("",new ImageView(getClass().getResource("icons/export-icon.png").toExternalForm()));
+        MenuButton exportButton = new MenuButton("",ImageUtils.getImage("icons/export-icon.png"));
         exportButton.getStyleClass().add("header-button");
-        MenuItem exportToPdf = new MenuItem("Export to PDF", new ImageView(getClass().getResource("icons/pdf.png").toExternalForm()));
-        MenuItem exportToExcel = new MenuItem("Export to Excel", new ImageView(getClass().getResource("icons/excel.png").toExternalForm()));
-        MenuItem screenshot = new MenuItem("Screenshot", new ImageView(getClass().getResource("icons/screenshot.png").toExternalForm()));
+        MenuItem exportToPdf = new MenuItem("Export to PDF", ImageUtils.getImage("icons/pdf.png"));
+        MenuItem exportToExcel = new MenuItem("Export to Excel", ImageUtils.getImage("icons/excel.png"));
+        MenuItem screenshot = new MenuItem("Screenshot", ImageUtils.getImage("icons/screenshot.png"));
 
         exportButton.getItems().addAll(exportToPdf, exportToExcel, screenshot);
         exportToExcel.setOnAction(new EventHandler<ActionEvent>() {
@@ -669,7 +670,8 @@ public class ApplicationFrame extends Application {
     }
 
     private void addProfileButton(HBox selector) {
-        profile = new Button("Profile");
+        profile = new Button("Profile", ImageUtils.getImage("icons/profile.png"));
+        profile.setGraphicTextGap(5);
         selector.getChildren().add(profile);
     }
 

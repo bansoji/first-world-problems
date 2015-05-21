@@ -31,6 +31,7 @@ public class DialogBuilder {
                 }
                 dialogVbox.getChildren().add(closeButton(dialog));
                 Scene dialogScene = new Scene(dialogVbox);
+                dialogScene.getStylesheets().addAll("general.css", "modal.css");
                 dialog.setScene(dialogScene);
                 dialog.show();
             }
@@ -51,6 +52,7 @@ public class DialogBuilder {
                 dialogVbox.getStyleClass().add("tutorial-modal");
                 dialogVbox.getChildren().addAll(node, closeButton(dialog));
                 Scene dialogScene = new Scene(dialogVbox);
+                dialogScene.getStylesheets().addAll("general.css", "modal.css");
                 dialog.setScene(dialogScene);
                 dialog.show();
             }
@@ -71,6 +73,7 @@ public class DialogBuilder {
                 }
                 dialogVbox.getChildren().add(footer);
                 Scene dialogScene = new Scene(dialogVbox);
+                dialogScene.getStylesheets().addAll("general.css", "modal.css");
                 dialog.setScene(dialogScene);
                 dialog.show();
             }

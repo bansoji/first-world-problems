@@ -1,4 +1,4 @@
-package tablecell;
+package table;
 
 import alert.AlertManager;
 import format.FormatChecker;

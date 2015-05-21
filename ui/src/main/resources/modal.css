@@ -1,0 +1,23 @@
+/* Pie Chart */
+.piechart-placeholder {
+    -fx-alignment: center;
+    -fx-spacing: 80px;
+}
+
+.placeholder-title {
+    -fx-font-size: 18px;
+}
+
+
+/* Modal */
+
+.tutorial-modal {
+    -fx-background-color: white;
+    -fx-alignment: center;
+}
+
+.dialog-content {
+    -fx-padding: 20px;
+    -fx-spacing: 20px;
+    -fx-alignment: center;
+}

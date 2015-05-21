@@ -13,7 +13,10 @@ public class Profile {
     private double averageVolume;
     private double overallTrend;
     private double overallDailyVariance;
+     /* The price difference within the days.
+    Calculated using the % difference of the open and close prices. */
     private double dailyDifference;
+    private double intraDayVariance; /* The price difference between the days. */
 
     /**
      * Build the profile for a company.
@@ -23,11 +26,14 @@ public class Profile {
 
         averageVolume = 0.0;
         dailyDifference = 0.0;
+        intraDayVariance = 0.0;
+
         ArrayList<Point> endOfDayPoints = new ArrayList<>();
         ArrayList<Point> highPoints = new ArrayList<>();
         ArrayList<Point> lowPoints= new ArrayList<>();
 
-        double i = 0.0;
+        int i = 0;
+        double prevDay = 0;
 
         // Build data.
         for (Price p : prices){
@@ -38,11 +44,18 @@ public class Profile {
             Point ptLow = new Point(i, p.getHigh());
             Point ptHigh = new Point(i, p.getLow());
 
+            if (i == 0){
+                prevDay = p.getValue();
+            } else {
+                intraDayVariance += Math.abs(p.getValue() - prevDay)/prevDay;
+                prevDay = p.getValue();
+            }
+
             endOfDayPoints.add(pt);
             highPoints.add(ptHigh);
             lowPoints.add(ptLow);
 
-            i += 1.0;
+            i += 1;
         }
 
         Line l = GeometryUtils.createLine(endOfDayPoints);
@@ -51,6 +64,7 @@ public class Profile {
 
         averageVolume = averageVolume/ prices.size();
         dailyDifference = dailyDifference/ prices.size();
+        intraDayVariance = intraDayVariance/ prices.size();
 
         overallTrend = l.getSlope();
         overallDailyVariance = lHigh.getSlope() - lLow.getSlope();
@@ -72,5 +86,9 @@ public class Profile {
 
     public double getDailyDifference() {
         return dailyDifference;
+    }
+
+    public double getIntraDayVariance() {
+        return intraDayVariance;
     }
 }

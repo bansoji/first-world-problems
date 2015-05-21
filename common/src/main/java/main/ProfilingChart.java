@@ -33,20 +33,19 @@ public class ProfilingChart extends ApplicationFrame {
     }
 
     private static CategoryDataset createDataset() {
-        String s = "First";
-        String s1 = "Second";
-        String s2 = "Third";
+        String company = "BHP.AX";
+
         String s3 = "Category 1";
         String s4 = "Category 2";
         String s5 = "Category 3";
         String s6 = "Category 4";
         String s7 = "Category 5";
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        dataset.addValue(2, s, s3);
-        dataset.addValue(11, s, s4);
-        dataset.addValue(40, s, s5);
-        dataset.addValue(3, s, s6);
-        dataset.addValue(30, s, s7);
+        dataset.addValue(2, company, s3);
+        dataset.addValue(11, company, s4);
+        dataset.addValue(40, company, s5);
+        dataset.addValue(3, company, s6);
+        dataset.addValue(30, company, s7);
 
 //        dataset.addValue(5D, s1, s3);
 //        dataset.addValue(7D, s1, s4);
@@ -63,7 +62,7 @@ public class ProfilingChart extends ApplicationFrame {
 
     private static JFreeChart createChart(CategoryDataset categorydataset) {
         SpiderWebPlot plot = new SpiderWebPlot(categorydataset);
-        plot.setStartAngle(54D);
+        plot.setStartAngle(90);
         plot.setInteriorGap(0.40000000000000002D);
         plot.setToolTipGenerator(new StandardCategoryToolTipGenerator());
         JFreeChart chart = new JFreeChart("Spider Web Chart Demo 1", TextTitle.DEFAULT_FONT, plot, false);

@@ -33,6 +33,7 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 import core.*;
 import org.joda.time.DateTime;
+import report.ReportGenerator;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -289,7 +290,7 @@ public class ApplicationFrame extends Application {
                         List<Price> prices = priceReader.getCompanyHistory(companyName);
                         List<Order> orders = orderReader.getCompanyHistory(companyName);
                         loadedTabs.remove(tabPane.getSelectionModel().getSelectedItem());
-                        profile.setOnAction(DialogBuilder.constructEventHandler("Profile of " + companyName,
+                        profile.setOnAction(DialogBuilder.constructExportableDialog("Profile of " + companyName,
                                 constructProfileGraph(companyName)));
                         loadContent(prices, orders, false);
                     }
@@ -391,7 +392,7 @@ public class ApplicationFrame extends Application {
         settingsButton.getStyleClass().add("icon-button");
         settings.getChildren().add(settingsButton);
         initParamTable();
-        settingsButton.setOnAction(DialogBuilder.constructEventHandler("Parameters",paramTable));
+        settingsButton.setOnAction(DialogBuilder.constructExportableDialog("Parameters", paramTable));
 
         //Run button
         Button runButton = new Button("",ImageUtils.getImage("icons/run-circle.png"));
@@ -439,26 +440,30 @@ public class ApplicationFrame extends Application {
         exportToPdf.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                new Thread() {
+                Platform.runLater(new Runnable() {
+                    @Override
                     public void run() {
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                loader.setProgress(0);
-                                loader.setText("Generating preview for PDF file...");
-                            }
-                        });
-                        ReportGenerator g = new ReportGenerator(portfolio);
-                        g.generatePDF();
-                        Platform.runLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                loader.setProgress(1);
-                                loader.setText("Loaded.");
-                            }
-                        });
+                        loader.setProgress(0);
+                        loader.setText("Generating preview for PDF file...");
+                        FileChooser fileChooser = new FileChooser();
+                        fileChooser.setTitle("Export PDF file");
+                        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF file", ".pdf"));
+                        File file = fileChooser.showSaveDialog(stage);
+                        loader.setProgress(0);
+                        loader.setText("Generating Excel file...");
+                        if (file != null) {
+                            new Thread() {
+                                @Override
+                                public void run() {
+                                    ReportGenerator g = new ReportGenerator(portfolio);
+                                    g.generatePDF(file.getAbsolutePath());
+                                }
+                            }.start();
+                        }
+                        loader.setProgress(1);
+                        loader.setText("Loaded.");
                     }
-                }.start();
+                });
             }
         });
         screenshot.setOnAction(new EventHandler<ActionEvent>() {
@@ -533,7 +538,7 @@ public class ApplicationFrame extends Application {
                             companySelector.getSelectionModel().clearSelection();
                             companySelector.setItems(priceCompanies);
                             companySelector.getSelectionModel().selectFirst();
-                            profile.setOnAction(DialogBuilder.constructEventHandler("Profile for " + companySelector.getSelectionModel().getSelectedItem(),
+                            profile.setOnAction(DialogBuilder.constructExportableDialog("Profile for " + companySelector.getSelectionModel().getSelectedItem(),
                                     constructProfileGraph(companySelector.getSelectionModel().getSelectedItem())));
                             addCompanySelectorListener();
 

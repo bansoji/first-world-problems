@@ -232,7 +232,7 @@ public class StatsBuilder {
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setMinWidth(300);
 
-        tableView.setChartAction(DialogBuilder.constructEventHandler("Returns by company", buildReturnChart(returns, totalReturnValue)));
+        tableView.setChartAction(DialogBuilder.constructExportableDialog("Returns by company", buildReturnChart(returns, totalReturnValue)));
 
         return tableView;
     }
@@ -415,9 +415,7 @@ public class StatsBuilder {
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setPrefHeight(150);
 
-        tableView.setChartAction(DialogBuilder.constructEventHandler("Equities by company", buildEquityChart(equities, totalEquityValue)));
-
-        tableView.setTableMenuButtonVisible(true);
+        tableView.setChartAction(DialogBuilder.constructExportableDialog("Equities by company", buildEquityChart(equities, totalEquityValue)));
 
         return tableView;
     }

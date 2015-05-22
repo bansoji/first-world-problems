@@ -16,12 +16,16 @@ public class Profile {
     private double averageVolume;
     private double overallTrend;
     private double overallDailyVariance;
+    private String company;
 
     /**
      * Build the profile for a company.
      * @param prices The prices for a given company.
      */
     public Profile(List<Price> prices){
+
+        if (prices == null || prices.size() == 0) return;
+        company = prices.get(0).getCompanyName();
 
         averageVolume = 0.0;
         List<Point> endOfDayPoints = new ArrayList<>();
@@ -75,8 +79,24 @@ public class Profile {
         return metrics;
     }
 
-    private static class ProfileEvaluator {
-        private int rateVolume(double value) {
+    public String getCompany() {
+        return company;
+    }
+
+    public static class ProfileEvaluator {
+        public static int rate(String metric, double value) {
+            if (metric.equals("Average Volume")) {
+                return rateVolume(value);
+            } else if (metric.equals("Overall Trend")) {
+                return rateTrend(value);
+            } else if (metric.equals("Overall Daily Variance")) {
+                return rateVariance(value);
+            } else {
+                return -1;
+            }
+        }
+
+        private static int rateVolume(double value) {
             if (value > 1e9) return 5;
             else if (value > 1e8) return 4;
             else if (value > 1e7) return 3;
@@ -84,18 +104,22 @@ public class Profile {
             else return 1;
         }
 
-        private int rateTrend(double value) {
+        private static int rateTrend(double value) {
             if (value > 1) return 5;
             else if (value > 0.75) return 4;
             else if (value > 0.50) return 3;
             else if (value > 0.25) return 2;
             else if (value > 0) return 1;
-            else if (value == 0) return 0;
-            else if (value > -0.25) return -1;
-            else if (value > -0.50) return -2;
-            else if (value > -0.75) return -3;
-            else if (value > -1.0) return -4;
-            else return -5;
+            else return 0;
+        }
+
+        private static int rateVariance(double value) {
+            if (value > 1) return 5;
+            else if (value > 0.75) return 4;
+            else if (value > 0.50) return 3;
+            else if (value > 0.25) return 2;
+            else if (value > 0) return 1;
+            else return 0;
         }
     }
 }

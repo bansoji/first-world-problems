@@ -26,7 +26,9 @@ import javafx.util.converter.DoubleStringConverter;
 import core.Portfolio;
 import core.Price;
 import core.Profit;
+import javafx.util.converter.IntegerStringConverter;
 import profit.OptimalProfit;
+import table.ExportableTable;
 
 import java.util.*;
 
@@ -37,7 +39,7 @@ public class ComparisonBuilder {
 
     private TabPane tabPane;
 
-    private TableView strategiesTableView;
+    private ExportableTable strategiesTableView;
     private LineChart strategiesLineChart;
     private BarChart strategiesBarChart;
     private Map<String,List<Profit>> strategiesLines = new HashMap<>();
@@ -48,6 +50,7 @@ public class ComparisonBuilder {
     private Map<String, Map<String,String>> strategyParams = new HashMap<>();
     private Map<String, Map<String,Object>> strategiesTableRows = new HashMap<>();
     private boolean optimalPlotted;
+    private double optimalReturn;
 
     private Portfolio portfolio;
 
@@ -165,7 +168,9 @@ public class ComparisonBuilder {
         strategiesBarChart.setLegendVisible(false);
         strategiesBarChart.setPrefHeight(300);
 
-        strategiesTableView = new TableView();
+        strategiesTableView = new ExportableTable();
+        strategiesTableView.setMaxWidth(300);   //no more than three columns worth of width
+        strategiesTableView.setTableMenuButtonVisible(true);
         strategiesTableView.setPlaceholder(new Label("No strategies run."));
 
         TableColumn strategyCol = new TableColumn("Strategy");
@@ -223,7 +228,31 @@ public class ComparisonBuilder {
             }
         });
 
-        strategiesTableView.getColumns().addAll(strategyCol, returnCol, returnPercentageCol, hitRatioCol);
+        TableColumn numTradesCol = new TableColumn("Trades");
+        numTradesCol.setMinWidth(50);
+        numTradesCol.setCellValueFactory(new MapValueFactory<>("Trades"));
+        numTradesCol.setCellFactory(new Callback<TableColumn<Map, Object>,
+                TableCell<Map, Object>>() {
+            @Override
+            public TableCell call(TableColumn p) {
+                return new TextFieldTableCell(new IntegerStringConverter());
+            }
+        });
+        numTradesCol.setVisible(false); //by default, this is not shown
+
+        TableColumn percentageOptimalCol = new TableColumn("% of Optimal Return");
+        percentageOptimalCol.setMinWidth(50);
+        percentageOptimalCol.setCellValueFactory(new MapValueFactory<>("% of Optimal Return"));
+        percentageOptimalCol.setCellFactory(new Callback<TableColumn<Map, Object>,
+                TableCell<Map, Object>>() {
+            @Override
+            public TableCell call(TableColumn p) {
+                return new TextFieldTableCell(new DoubleStringConverter());
+            }
+        });
+        percentageOptimalCol.setVisible(false);
+
+        strategiesTableView.getColumns().addAll(strategyCol, returnCol, returnPercentageCol, hitRatioCol, numTradesCol, percentageOptimalCol);
         //ensures extra space to given to existing columns
         strategiesTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
@@ -358,6 +387,7 @@ public class ComparisonBuilder {
                 XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
                 optimal.getData().add(data);
             }
+            optimalReturn = optimalProfit.getProfitList().get(optimalProfit.getProfitList().size()-1).getProfitValue();
             strategiesLineChart.getData().add(optimal);
             optimalPlotted = true;
         }
@@ -432,7 +462,8 @@ public class ComparisonBuilder {
 
         //first point is always 0 so don't include in calculation and last point is just last price point
         //so neglect if it is not correlated with a trade
-        double hitRatio = successfulTrades/(double)(profitList.size()-1-(neglectLast ? 1 : 0));
+        int numTrades = profitList.size()-1-(neglectLast ? 1 : 0);
+        double hitRatio = successfulTrades/(double)numTrades;
         if (strategiesTableRows.containsKey(strategy)) {
             strategiesTableView.getItems().remove(strategiesTableRows.get(strategy));
         }
@@ -441,6 +472,8 @@ public class ComparisonBuilder {
         row.put("Return", FormatUtils.round2dp(strategyProfits.get(strategy)));
         row.put("Return %", FormatUtils.round3dp((strategyProfits.get(strategy) / strategiesTotalBuyAmount.get(strategy)) * 100));
         row.put("Hit ratio", FormatUtils.round3dp(hitRatio));
+        row.put("Trades", numTrades);
+        row.put("% of Optimal Return", FormatUtils.round2dp(strategyProfits.get(strategy))/optimalReturn);
         strategiesTableView.getItems().add(row);
         strategiesTableRows.put(strategy, row);
     }
@@ -458,6 +491,7 @@ public class ComparisonBuilder {
         strategiesTableRows.clear();
         bestStrategies.clear();
         optimalPlotted = false;
+        optimalReturn = 0;
         companiesLineChart.getData().clear();
     }
 

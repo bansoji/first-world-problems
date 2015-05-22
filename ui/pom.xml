@@ -85,6 +85,12 @@
             <version>3.12</version>
         </dependency>
 
+        <dependency>
+            <groupId>eu.hansolo.enzo</groupId>
+            <artifactId>Enzo</artifactId>
+            <version>0.1</version>
+        </dependency>
+
 
     </dependencies>
     

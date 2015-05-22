@@ -19,10 +19,17 @@
 .tutorial-modal {
     -fx-background-color: white;
     -fx-alignment: center;
+    -fx-padding: 20px;
+    -fx-spacing: 20px;
+    -fx-alignment: center;
 }
 
 .dialog-content {
     -fx-padding: 20px;
     -fx-spacing: 20px;
     -fx-alignment: center;
+}
+
+.export-toolbar {
+    -fx-background-color: transparent;
 }

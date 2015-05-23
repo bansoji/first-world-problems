@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>SENG3011</groupId>
-    <artifactId>priceChannel</artifactId>
+    <artifactId>price-channel</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>

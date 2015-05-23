@@ -9,7 +9,8 @@ import java.io.IOException;
 /**
  * Order Parser Integration.
  *
- * Used to integrate with another module that uses the format of yyyy-MM-dd
+ * Used to integrate with another module that uses the format of yyyy-MM-dd.
+ * This can be used as a template for other integrations.
  */
 public class OrderParserKoK extends Parser<Order> {
     //Column numbers for output order prices data file.

@@ -1,13 +1,16 @@
 package main;
 
+import core.Price;
 import utils.GeometryUtils;
 import utils.Line;
 import utils.Point;
 
 import java.util.ArrayList;
 
+//////////////// DEPRECATED ////////////////////////
+
 /**
- * The profile of a given company.
+ * The profile of a given company. NOTE -- DEPRECATED. USE core/Profile instead.
  */
 public class Profile {
     private double averageVolume;
@@ -33,7 +36,7 @@ public class Profile {
         ArrayList<Point> lowPoints= new ArrayList<>();
 
         int i = 0;
-        double prevDay = 0;
+        double prevDay = 0.0;
 
         // Build data.
         for (Price p : prices){

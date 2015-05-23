@@ -24,7 +24,6 @@ public class MeanReversionStrategy implements TradingStrategy {
 
     private static final Logger logger = Logger.getLogger("log");
 
-
     public MeanReversionStrategy(List<Price> historicalPrices, InputStream config) {
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
@@ -41,6 +40,7 @@ public class MeanReversionStrategy implements TradingStrategy {
         configureStrategy(prop);
 
         String parameters = "Parameters Used:\n" +
+                "Threshold: " + this.threshold +
                 "Volume: " + this.volume;
 
         if (startDate != null) {
@@ -58,7 +58,8 @@ public class MeanReversionStrategy implements TradingStrategy {
      *             the strategy module.
      */
     private void configureStrategy(Properties prop) {
-        this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
+        this.threshold = Double.parseDouble(prop.getProperty("mReversionThreshold", "0.001"));
+        this.volume = Integer.parseInt(prop.getProperty("mReversionVolume", "100"));
 
         startDate = prop.getProperty("startDate");
         endDate = prop.getProperty("endDate");
@@ -67,9 +68,7 @@ public class MeanReversionStrategy implements TradingStrategy {
     @Override
     public void generateOrders() {
         this.mean = 0;
-        this.threshold = 0.001;
         OrderType nextStatus = OrderType.BUY; // The next status to look for.
-
 
         for (Price p : prices){
             // Update the mean
@@ -78,7 +77,7 @@ public class MeanReversionStrategy implements TradingStrategy {
 
             //Check if orders need to be generated for today.
             if (startDate != null && DateUtils.before(p.getDate(), startDate)) continue;
-            if (endDate != null && DateUtils.before(p.getDate(), endDate)) break;
+            if (endDate != null && DateUtils.after(p.getDate(), endDate)) break;
 
             // If the price is lower, issue a buy.
             if (nextStatus == OrderType.BUY){

@@ -97,7 +97,6 @@ public class PriceChannelStrategy implements TradingStrategy {
                 partialPriceInput = priceInput.subList(h, h+channelSize);   // If there is still a channelSize size of points to traverse.
             } else {
                 partialPriceInput = priceInput.subList(h, prices.size());  // If there is less than a channelSize size of points to traverse.
-                System.out.println("Numbers of prices: " + prices.size());
             }
 
             PointPair result = calculateLowsAndHighs(partialPriceInput, minWindowSize, variance);

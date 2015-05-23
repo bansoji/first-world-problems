@@ -85,16 +85,14 @@ public class OrderManager {
         // Initialise the timer.
         //startTime = System.currentTimeMillis();
 
-        // Load the properties file.
-        InputStream input = new BufferedInputStream(new FileInputStream(paramName));
-
         for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
+            // Load the properties file.
+            InputStream input = new BufferedInputStream(new FileInputStream(paramName));
             logger.info("Analysing prices for " + company);
             List<Price> companyHistory = tReader.getCompanyHistory(company);
             // PrintUtils.printPrices(companyHistory);
 
             // Initialise the trading strategy.
-            //TradingStrategy strategy = new MomentumStrategy(companyHistory, input);
             TradingStrategy strategy = new PriceChannelStrategy(companyHistory, input);
 
             ///////////////////////////////
@@ -106,6 +104,8 @@ public class OrderManager {
             List<Order> ordersGenerated = strategy.getOrders();
             csvOrderWriter.writeOrders(ordersGenerated);
 
+            // Close the input stream.
+            input.close();
         }
 
         ///////////////////////////////
@@ -126,7 +126,6 @@ public class OrderManager {
         } catch (IOException e) {
             logger.severe(e.getMessage());
         }
-        input.close();
         handler.close();
         // Log successful.
         logger.info("Module successful. No errors encountered.");

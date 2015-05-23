@@ -62,9 +62,9 @@ public class MomentumStrategy implements TradingStrategy {
     private void configureStrategy(Properties prop) {
         // Configure the strategy using parameters config properties file.
         // Defaults are the same as in MSM spec.
-        this.movingAvgTimeWindow = Integer.parseInt(prop.getProperty("movingAvgTimeWindow", "4"));
-        this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.001"));
-        this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
+        this.movingAvgTimeWindow = Integer.parseInt(prop.getProperty("momentumMovingAvgTimeWindow", "4"));
+        this.threshold = Double.parseDouble(prop.getProperty("momentumThreshold", "0.001"));
+        this.volume = Integer.parseInt(prop.getProperty("momentumVolume", "100"));
 
         startDate = prop.getProperty("startDate");
         endDate = prop.getProperty("endDate");

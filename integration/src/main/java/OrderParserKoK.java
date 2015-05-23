@@ -1,7 +1,7 @@
 import date.DateUtils;
-import main.Order;
-import main.OrderType;
-import main.Parser;
+import core.Order;
+import core.OrderType;
+import core.Parser;
 import org.joda.time.DateTime;
 
 import java.io.IOException;

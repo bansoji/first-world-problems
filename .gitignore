@@ -12,16 +12,20 @@ trading/.idea
 trading/target
 common/target
 ui/target
+integration/target
+mean-reversion/target
+momentum/target
+priceChannel/target
 
 # fonts (for now)
 ui/src/main/resources/fonts
 
 # extra output files
 *.csv
-*.log
-*.log.*
-*.csv#
+*.log*
+*.pdf
+*.xlsx
 
-MAINIFEST.MF
+MANIFEST.MF
 .DS_Store
 application_log*

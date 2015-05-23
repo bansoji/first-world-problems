@@ -1,6 +1,6 @@
-import main.History;
-import main.Order;
-import main.Reader;
+import core.History;
+import core.Order;
+import core.Reader;
 
 public class OrderReaderKoK extends Reader<Order> {
 

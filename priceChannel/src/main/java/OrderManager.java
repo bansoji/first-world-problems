@@ -1,4 +1,4 @@
-import main.Reader;
+import core.Reader;
 import quickDate.Order;
 import quickDate.Price;
 import quickDate.PriceReader;

@@ -18,6 +18,11 @@
     -fx-font-size: 12;
 }
 
+.selector-panel {
+    -fx-padding: 15px 15px 5px 15px;
+    -fx-spacing: 20px
+}
+
 /* ====== CANDLE STICK CHART =========================================================== */
 .candlestick-average-line {
     -fx-stroke: #106ece;
@@ -76,17 +81,20 @@
     -fx-text-fill: red;
 }
 
-.buy-row .table-cell {
+/*
+.buy-row {
     -fx-text-fill: green;
 }
 
-.sell-row .table-cell {
+.sell-row {
     -fx-text-fill: red;
+    -fx-control-inner-background: red;
 }
 
-.normal-row .table-cell {
+.normal-row {
     -fx-text-fill: black;
 }
+*/
 
 #prices-table-filters {
     -fx-background-color: transparent;

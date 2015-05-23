@@ -49,13 +49,3 @@
 #profit-graph .chart-line-symbol:hover {
     -fx-background-color: #000033;
 }
-
-/* Pie Chart */
-.piechart-placeholder {
-    -fx-alignment: center;
-    -fx-spacing: 80px;
-}
-
-.placeholder-title {
-    -fx-font-size: 18px;
-}

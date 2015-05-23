@@ -1,5 +1,6 @@
 import date.DateUtils;
 import graph.*;
+import image.ImageUtils;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -14,7 +15,6 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
@@ -23,10 +23,11 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Path;
 import javafx.util.Callback;
-import main.Order;
-import main.OrderType;
-import main.Price;
+import core.Order;
+import core.OrderType;
+import core.Price;
 import org.joda.time.DateTime;
+import table.ExportableTable;
 
 import java.util.*;
 
@@ -303,7 +304,7 @@ public class GraphBuilder {
         ToolBar toolbar = new ToolBar();
         toolbar.setId("prices-table-filters");
         final ToggleGroup group = new ToggleGroup();
-        ToggleButton filterBuys = new ToggleButton("Buy", new ImageView(getClass().getResource("icons/buy.png").toExternalForm()));
+        ToggleButton filterBuys = new ToggleButton("Buy", ImageUtils.getImage("icons/buy.png"));
         filterBuys.getStyleClass().add("table-filter");
         filterBuys.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -313,7 +314,7 @@ public class GraphBuilder {
             }
         });
 
-        ToggleButton filterSells = new ToggleButton("Sell", new ImageView(getClass().getResource("icons/sell.png").toExternalForm()));
+        ToggleButton filterSells = new ToggleButton("Sell", ImageUtils.getImage("icons/sell.png"));
         filterSells.getStyleClass().add("table-filter");
         filterSells.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -323,7 +324,7 @@ public class GraphBuilder {
             }
         });
 
-        ToggleButton showAll = new ToggleButton("All", new ImageView(getClass().getResource("icons/all.png").toExternalForm()));
+        ToggleButton showAll = new ToggleButton("All", ImageUtils.getImage("icons/all.png"));
         showAll.getStyleClass().add("table-filter");
         showAll.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -341,7 +342,7 @@ public class GraphBuilder {
     }
 
     private void addMenu() {
-        final MenuItem resetZoomItem = new MenuItem("Reset zoom", new ImageView(getClass().getResource("icons/reset_zoom.png").toExternalForm()));
+        final MenuItem resetZoomItem = new MenuItem("Reset zoom", ImageUtils.getImage("icons/reset_zoom.png"));
         resetZoomItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
                 lineChart.getXAxis().setAutoRanging(true);
@@ -349,7 +350,7 @@ public class GraphBuilder {
             }
         });
 
-        final MenuItem hideShowLineItem = new MenuItem("Hide Line", new ImageView(getClass().getResource("icons/line_chart_hide.png").toExternalForm()));
+        final MenuItem hideShowLineItem = new MenuItem("Hide Line", ImageUtils.getImage("icons/line_chart_hide.png"));
         hideShowLineItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
                 for (int seriesIndex=0; seriesIndex < lineChart.getData().size(); seriesIndex++) {
@@ -358,11 +359,11 @@ public class GraphBuilder {
                         if (path.getOpacity() == 1) {
                             path.setOpacity(0);
                             hideShowLineItem.setText("Show Line");
-                            hideShowLineItem.setGraphic(new ImageView(getClass().getResource("icons/line_chart_show.png").toExternalForm()));
+                            hideShowLineItem.setGraphic(ImageUtils.getImage("icons/line_chart_show.png"));
                         } else if (path.getOpacity() == 0) {
                             path.setOpacity(1);
                             hideShowLineItem.setText("Hide Line");
-                            hideShowLineItem.setGraphic(new ImageView(getClass().getResource("icons/line_chart_hide.png").toExternalForm()));
+                            hideShowLineItem.setGraphic(ImageUtils.getImage("icons/line_chart_hide.png"));
                         }
                     }
                 }

@@ -2,6 +2,7 @@ package file;
 
 import alert.AlertManager;
 import javafx.application.Platform;
+import org.apache.commons.lang.SystemUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -55,9 +56,15 @@ public class StrategyRunner {
     public void run(boolean waitFor) {
         if (strategyFile != null && dataFile != null && paramFile != null) {
             try {
-                ProcessBuilder pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
-                //pb.redirectErrorStream(true);
-                pb.redirectOutput(new File("/dev/null"));
+                ProcessBuilder pb;
+                //Windows treats JARs as non-executables so we must use javaw
+                if (SystemUtils.IS_OS_WINDOWS) {
+                    pb = new ProcessBuilder("javaw", "-jar", strategyFile, dataFile, paramFile);
+                    pb.redirectOutput(new File("nul"));
+                } else {    //Non-Windows systems
+                    pb = new ProcessBuilder("java", "-jar", strategyFile, dataFile, paramFile);
+                    pb.redirectOutput(new File("/dev/null"));
+                }
                 p = pb.start();
                 new Thread() {
                     public void run() {

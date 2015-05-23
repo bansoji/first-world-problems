@@ -1,9 +1,7 @@
 package quickDate;
 
-import main.History;
-import quickDate.Price;
-import quickDate.PriceParser;
-import main.Reader;
+import core.History;
+import core.Reader;
 
 /**
  * Created by jasonlim on 30/03/15.

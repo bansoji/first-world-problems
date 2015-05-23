@@ -2,6 +2,7 @@ import format.FormatUtils;
 import dialog.DialogBuilder;
 import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
+import image.ImageUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -22,9 +23,11 @@ import javafx.scene.text.Text;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
-import main.*;
+import core.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import table.ExportChartableTable;
+import table.TableUtils;
 
 import java.util.*;
 
@@ -48,7 +51,6 @@ public class StatsBuilder {
         VBox graphs = new VBox();
         vbox.setSpacing(30);
         graphs.getChildren().addAll(buildProfitChart(portfolio.getProfitList()), returnTable);
-
 
         stats.setConstraints(vbox, 0, 0);
         stats.setConstraints(graphs, 1, 0);
@@ -163,9 +165,9 @@ public class StatsBuilder {
 
     private ImageView getArrowIcon(double returnValue) {
         if (returnValue > 0) {
-            return new ImageView(getClass().getResource("icons/up.png").toExternalForm());
+            return ImageUtils.getImage("icons/up.png");
         } else {
-            return new ImageView(getClass().getResource("icons/down.png").toExternalForm());
+            return ImageUtils.getImage("icons/down.png");
         }
     }
 
@@ -180,49 +182,17 @@ public class StatsBuilder {
             data.add(row);
         }
 
-        TableView tableView = new TableView(data);
+        ExportChartableTable tableView = new ExportChartableTable(data);
         tableView.setPlaceholder(new Label("No orders made."));
 
-        TableColumn companyCol = new TableColumn("Company");
+        TableColumn companyCol = TableUtils.createMapColumn("Company", TableUtils.ColumnType.String);
         companyCol.setMinWidth(100);
-        companyCol.setCellValueFactory(new MapValueFactory<>("Company"));
 
-        companyCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new StringConverter() {
-                    @Override
-                    public String toString(Object t) {
-                        return t.toString();
-                    }
-
-                    @Override
-                    public Object fromString(String string) {
-                        return string;
-                    }
-                });
-            }
-        });
-
-        Callback<TableColumn<Map, Object>, TableCell<Map, Object>>
-                returnCallback = new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new DoubleStringConverter());
-            }
-        };
-
-        TableColumn returnCol = new TableColumn("Return");
+        TableColumn returnCol = TableUtils.createMapColumn("Return", TableUtils.ColumnType.Double);
         returnCol.setMinWidth(100);
-        returnCol.setCellValueFactory(new MapValueFactory<>("Return"));
-        returnCol.setCellFactory(returnCallback);
 
-        TableColumn returnPercentCol = new TableColumn("Return %");
+        TableColumn returnPercentCol = TableUtils.createMapColumn("Return %", TableUtils.ColumnType.Double);
         returnPercentCol.setMinWidth(100);
-        returnPercentCol.setCellValueFactory(new MapValueFactory<>("Return %"));
-        returnPercentCol.setCellFactory(returnCallback);
 
 
         tableView.getColumns().addAll(companyCol, returnCol, returnPercentCol);
@@ -230,12 +200,7 @@ public class StatsBuilder {
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setMinWidth(300);
 
-        final MenuItem chartReturnsItem = new MenuItem("Chart", new ImageView(getClass().getResource("icons/graphs_pie.png").toExternalForm()));
-        List<Node> dialogContent = new ArrayList<>();
-        dialogContent.add(buildReturnChart(returns, totalReturnValue));
-        chartReturnsItem.setOnAction(DialogBuilder.constructEventHandler("Returns by company", dialogContent));
-        final ContextMenu menu = new ContextMenu(chartReturnsItem);
-        tableView.setContextMenu(menu);
+        tableView.setChartAction(DialogBuilder.constructExportableDialog("Returns by company", buildReturnChart(returns, totalReturnValue)));
 
         return tableView;
     }
@@ -255,6 +220,7 @@ public class StatsBuilder {
             Label title = new Label("Returns by company");
             title.getStyleClass().add("placeholder-title");
             Label placeholderText = new Label("No returns");
+            placeholderText.getStyleClass().add("placeholder-text");
             placeholder.getChildren().addAll(title, placeholderText);
             VBox.setVgrow(placeholder,Priority.ALWAYS);
             return placeholder;
@@ -287,6 +253,7 @@ public class StatsBuilder {
             Label title = new Label("Equities by company");
             title.getStyleClass().add("placeholder-title");
             Label placeholderText = new Label("No equities");
+            placeholderText.getStyleClass().add("placeholder-text");
             placeholder.getChildren().addAll(title, placeholderText);
             VBox.setVgrow(placeholder,Priority.ALWAYS);
             return placeholder;
@@ -337,7 +304,7 @@ public class StatsBuilder {
             tooltip.setGraphic(new TooltipForProfitGraph(df.print((long) data.getXValue()), (double) data.getYValue()));
             Tooltip.install(data.getNode(), tooltip);
         }
-        final MenuItem resetZoomItem = new MenuItem("Reset zoom", new ImageView(getClass().getResource("icons/reset_zoom.png").toExternalForm()));
+        final MenuItem resetZoomItem = new MenuItem("Reset zoom", ImageUtils.getImage("icons/reset_zoom.png"));
         resetZoomItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
                 xAxis.setAutoRanging(true);
@@ -375,55 +342,21 @@ public class StatsBuilder {
             totalEquityValue += equities.get(company);
         }
 
-        TableView tableView = new TableView(data);
+        ExportChartableTable tableView = new ExportChartableTable(data);
         tableView.setPlaceholder(new Label("No securities held."));
 
-        TableColumn companyCol = new TableColumn("Company");
+        TableColumn companyCol = TableUtils.createMapColumn("Company", TableUtils.ColumnType.String);
         companyCol.setMinWidth(100);
-        companyCol.setCellValueFactory(new MapValueFactory<>("Company"));
 
-        companyCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new StringConverter() {
-                    @Override
-                    public String toString(Object t) {
-                        return t.toString();
-                    }
-
-                    @Override
-                    public Object fromString(String string) {
-                        return string;
-                    }
-                });
-            }
-        });
-
-        TableColumn equityCol = new TableColumn("Equity Value");
+        TableColumn equityCol = TableUtils.createMapColumn("Equity Value", TableUtils.ColumnType.Double);
         equityCol.setMinWidth(100);
-        equityCol.setCellValueFactory(new MapValueFactory<>("Equity Value"));
-        equityCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new DoubleStringConverter());
-            }
-        });
 
         tableView.getColumns().addAll(companyCol, equityCol);
         //ensures extra space to given to existing columns
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableView.setPrefHeight(150);
 
-        final MenuItem chartReturnsItem = new MenuItem("Chart", new ImageView(getClass().getResource("icons/graphs_pie.png").toExternalForm()));
-        List<Node> dialogContent = new ArrayList<>();
-        dialogContent.add(buildEquityChart(equities,totalEquityValue));
-        chartReturnsItem.setOnAction(DialogBuilder.constructEventHandler("Equities by company", dialogContent));
-        final ContextMenu menu = new ContextMenu(chartReturnsItem);
-        tableView.setContextMenu(menu);
-
-        tableView.setTableMenuButtonVisible(true);
+        tableView.setChartAction(DialogBuilder.constructExportableDialog("Equities by company", buildEquityChart(equities, totalEquityValue)));
 
         return tableView;
     }

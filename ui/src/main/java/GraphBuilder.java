@@ -218,7 +218,7 @@ public class GraphBuilder {
 
 
     private Pane buildTable(List<Price> prices, Map<DateTime,OrderType> orders) {
-        ExportableTable tableView = new ExportableTable();
+        TableView tableView = new TableView();
 
         TableColumn dateCol = new TableColumn("Date");
         dateCol.setMinWidth(100);

@@ -27,6 +27,7 @@ import core.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import table.ExportChartableTable;
+import table.TableUtils;
 
 import java.util.*;
 
@@ -50,7 +51,6 @@ public class StatsBuilder {
         VBox graphs = new VBox();
         vbox.setSpacing(30);
         graphs.getChildren().addAll(buildProfitChart(portfolio.getProfitList()), returnTable);
-
 
         stats.setConstraints(vbox, 0, 0);
         stats.setConstraints(graphs, 1, 0);
@@ -185,46 +185,14 @@ public class StatsBuilder {
         ExportChartableTable tableView = new ExportChartableTable(data);
         tableView.setPlaceholder(new Label("No orders made."));
 
-        TableColumn companyCol = new TableColumn("Company");
+        TableColumn companyCol = TableUtils.createMapColumn("Company", TableUtils.ColumnType.String);
         companyCol.setMinWidth(100);
-        companyCol.setCellValueFactory(new MapValueFactory<>("Company"));
 
-        companyCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new StringConverter() {
-                    @Override
-                    public String toString(Object t) {
-                        return t.toString();
-                    }
-
-                    @Override
-                    public Object fromString(String string) {
-                        return string;
-                    }
-                });
-            }
-        });
-
-        Callback<TableColumn<Map, Object>, TableCell<Map, Object>>
-                returnCallback = new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new DoubleStringConverter());
-            }
-        };
-
-        TableColumn returnCol = new TableColumn("Return");
+        TableColumn returnCol = TableUtils.createMapColumn("Return", TableUtils.ColumnType.Double);
         returnCol.setMinWidth(100);
-        returnCol.setCellValueFactory(new MapValueFactory<>("Return"));
-        returnCol.setCellFactory(returnCallback);
 
-        TableColumn returnPercentCol = new TableColumn("Return %");
+        TableColumn returnPercentCol = TableUtils.createMapColumn("Return %", TableUtils.ColumnType.Double);
         returnPercentCol.setMinWidth(100);
-        returnPercentCol.setCellValueFactory(new MapValueFactory<>("Return %"));
-        returnPercentCol.setCellFactory(returnCallback);
 
 
         tableView.getColumns().addAll(companyCol, returnCol, returnPercentCol);
@@ -377,38 +345,11 @@ public class StatsBuilder {
         ExportChartableTable tableView = new ExportChartableTable(data);
         tableView.setPlaceholder(new Label("No securities held."));
 
-        TableColumn companyCol = new TableColumn("Company");
+        TableColumn companyCol = TableUtils.createMapColumn("Company", TableUtils.ColumnType.String);
         companyCol.setMinWidth(100);
-        companyCol.setCellValueFactory(new MapValueFactory<>("Company"));
 
-        companyCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new StringConverter() {
-                    @Override
-                    public String toString(Object t) {
-                        return t.toString();
-                    }
-
-                    @Override
-                    public Object fromString(String string) {
-                        return string;
-                    }
-                });
-            }
-        });
-
-        TableColumn equityCol = new TableColumn("Equity Value");
+        TableColumn equityCol = TableUtils.createMapColumn("Equity Value", TableUtils.ColumnType.Double);
         equityCol.setMinWidth(100);
-        equityCol.setCellValueFactory(new MapValueFactory<>("Equity Value"));
-        equityCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new DoubleStringConverter());
-            }
-        });
 
         tableView.getColumns().addAll(companyCol, equityCol);
         //ensures extra space to given to existing columns

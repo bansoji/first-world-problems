@@ -6,6 +6,8 @@ import format.FormatUtils;
 import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
 import image.ImageUtils;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.HPos;
@@ -14,21 +16,17 @@ import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.MapValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
-import javafx.util.converter.DoubleStringConverter;
 import core.Portfolio;
 import core.Price;
 import core.Profit;
-import javafx.util.converter.IntegerStringConverter;
 import profit.OptimalProfit;
 import table.ExportableTable;
+import table.TableUtils;
 
 import java.util.*;
 
@@ -173,83 +171,24 @@ public class ComparisonBuilder {
         strategiesTableView.setTableMenuButtonVisible(true);
         strategiesTableView.setPlaceholder(new Label("No strategies run."));
 
-        TableColumn strategyCol = new TableColumn("Strategy");
+        TableColumn strategyCol = TableUtils.createMapColumn("Strategy", TableUtils.ColumnType.String);
         strategyCol.setMinWidth(100);
-        strategyCol.setCellValueFactory(new MapValueFactory<>("Strategy"));
 
-        strategyCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new StringConverter() {
-                    @Override
-                    public String toString(Object t) {
-                        return t.toString();
-                    }
-
-                    @Override
-                    public Object fromString(String string) {
-                        return string;
-                    }
-                });
-            }
-        });
-
-        TableColumn returnCol = new TableColumn("Return");
+        TableColumn returnCol = TableUtils.createMapColumn("Return", TableUtils.ColumnType.Double);
         returnCol.setMinWidth(50);
-        returnCol.setCellValueFactory(new MapValueFactory<>("Return"));
-        returnCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new DoubleStringConverter());
-            }
-        });
 
-        TableColumn returnPercentageCol = new TableColumn("Return %");
+        TableColumn returnPercentageCol = TableUtils.createMapColumn("Return %", TableUtils.ColumnType.Double);
         returnPercentageCol.setMinWidth(50);
-        returnPercentageCol.setCellValueFactory(new MapValueFactory<>("Return %"));
-        returnPercentageCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new DoubleStringConverter());
-            }
-        });
 
-        TableColumn hitRatioCol = new TableColumn("Hit ratio");
+        TableColumn hitRatioCol = TableUtils.createMapColumn("Hit ratio", TableUtils.ColumnType.Double);
         hitRatioCol.setMinWidth(50);
-        hitRatioCol.setCellValueFactory(new MapValueFactory<>("Hit ratio"));
-        hitRatioCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new DoubleStringConverter());
-            }
-        });
 
-        TableColumn numTradesCol = new TableColumn("Trades");
+        TableColumn numTradesCol = TableUtils.createMapColumn("Trades", TableUtils.ColumnType.Integer);
         numTradesCol.setMinWidth(50);
-        numTradesCol.setCellValueFactory(new MapValueFactory<>("Trades"));
-        numTradesCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new IntegerStringConverter());
-            }
-        });
         numTradesCol.setVisible(false); //by default, this is not shown
 
-        TableColumn percentageOptimalCol = new TableColumn("% of Optimal Return");
+        TableColumn percentageOptimalCol = TableUtils.createMapColumn("% of Optimal Return", TableUtils.ColumnType.Double);
         percentageOptimalCol.setMinWidth(50);
-        percentageOptimalCol.setCellValueFactory(new MapValueFactory<>("% of Optimal Return"));
-        percentageOptimalCol.setCellFactory(new Callback<TableColumn<Map, Object>,
-                TableCell<Map, Object>>() {
-            @Override
-            public TableCell call(TableColumn p) {
-                return new TextFieldTableCell(new DoubleStringConverter());
-            }
-        });
         percentageOptimalCol.setVisible(false);
 
         strategiesTableView.getColumns().addAll(strategyCol, returnCol, returnPercentageCol, hitRatioCol, numTradesCol, percentageOptimalCol);
@@ -301,51 +240,50 @@ public class ComparisonBuilder {
     }
 
     private void updateCompanyComparison() {
-        CheckBox[] companies = new CheckBox[portfolio.getCompanies().size()];
-        int i = 0;
+        ListView<String> listView = new ListView<>();
         for (String company: portfolio.getCompanies()) {
-            CheckBox checkBox = new CheckBox(company);
-            checkBox.getStyleClass().add("company-checkbox");
-            checkBox.selectedProperty().addListener(new ChangeListener<Boolean>() {
-                @Override
-                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                    if (newValue) {
-                        XYChart.Series<Long, Double> series = new XYChart.Series<>();
-                        for (Profit p : portfolio.getCompanyProfitList(company)) {
-                            XYChart.Data data = null;
-                            if (modeSelector.getSelectionModel().getSelectedItem().equals("Return Value")) {
-                                data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
-                            } else if (modeSelector.getSelectionModel().getSelectedItem().equals("Return %")) {
-                                data = new XYChart.Data<>(p.getProfitDate().getMillis(),
-                                        portfolio.getReturns().get(company).getPercent()*100);
-                            } else {
-                                return; //TODO log error
-                            }
-                            series.getData().add(data);
-                        }
-                        companiesLineChart.getData().add(series);
-                        companiesSeries.put(company, series);
-                        Tooltip tooltip = new Tooltip(company);
-                        Tooltip.install(series.getNode(), tooltip);
-                    } else {
-                        XYChart.Series series = companiesSeries.remove(company);
-                        companiesLineChart.getData().remove(series);
-                    }
-                }
-            });
-            //auto select the first 5 companies
-            if (i < 5) {
-                checkBox.setSelected(true);
-            }
-            companies[i++] = checkBox;
+            listView.getItems().add(company);
         }
-        VBox companyCheckboxes = new VBox();
-        companyCheckboxes.getChildren().addAll(companies);
-        ScrollPane scrollPane = new ScrollPane(companyCheckboxes);
+
+        listView.setCellFactory(CheckBoxListCell.forListView(new Callback<String, ObservableValue<Boolean>>() {
+            @Override
+            public ObservableValue<Boolean> call(String company) {
+                BooleanProperty observable = new SimpleBooleanProperty();
+                observable.addListener(new ChangeListener<Boolean>() {
+                    @Override
+                    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                        if (newValue) {
+                            XYChart.Series<Long, Double> series = new XYChart.Series<>();
+                            for (Profit p : portfolio.getCompanyProfitList(company)) {
+                                XYChart.Data data = null;
+                                if (modeSelector.getSelectionModel().getSelectedItem().equals("Return Value")) {
+                                    data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
+                                } else if (modeSelector.getSelectionModel().getSelectedItem().equals("Return %")) {
+                                    data = new XYChart.Data<>(p.getProfitDate().getMillis(),
+                                            portfolio.getReturns().get(company).getPercent()*100);
+                                } else {
+                                    return; //TODO log error
+                                }
+                                series.getData().add(data);
+                            }
+                            companiesLineChart.getData().add(series);
+                            companiesSeries.put(company, series);
+                            Tooltip tooltip = new Tooltip(company);
+                            Tooltip.install(series.getNode(), tooltip);
+                        } else {
+                            XYChart.Series series = companiesSeries.remove(company);
+                            companiesLineChart.getData().remove(series);
+                        }
+                    }
+                });
+                return observable;
+            }
+        }));
+
         List<Node> content = new ArrayList<>();
         Label label = new Label("Select companies to compare:");
         content.add(label);
-        content.add(scrollPane);
+        content.add(listView);
         companySelector.setOnAction(DialogBuilder.constructSelectionModal("Select companies", content));
     }
 
@@ -400,9 +338,7 @@ public class ComparisonBuilder {
         //if we have ran less than NUM_RESULTS of strategies, then just add new strategies to the rankings
         if (!bestStrategies.contains(strategyName)) {
             if (bestStrategies.size() >= NUM_RESULTS) {
-                String lessProfitableStrategy = bestStrategies.remove(NUM_RESULTS - 1);
-                //strategyProfits.remove(lessProfitableStrategy);
-                //strategyParams.remove(lessProfitableStrategy);
+                bestStrategies.remove(NUM_RESULTS - 1);
             }
             bestStrategies.add(strategyName);
         }

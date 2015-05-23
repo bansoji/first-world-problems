@@ -1,7 +1,6 @@
-import main.History;
-import main.Order;
-import main.OrderParser;
-import main.Reader;
+import core.History;
+import core.Order;
+import core.Reader;
 
 /**
  * This class reads an input CSV file and outputs its contents as an ArrayList.

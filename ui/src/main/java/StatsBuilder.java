@@ -59,13 +59,6 @@ public class StatsBuilder {
         GridPane.setHgrow(graphs, Priority.ALWAYS);
         stats.getChildren().setAll(vbox,graphs);
 
-        // TODO(Gavin/Addo): MOVE THIS
-        try {
-            TableViewExporter.exportCsv(returnTable, "test");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ///
     }
 
     private VBox buildPortfolioStats(Portfolio portfolio) {

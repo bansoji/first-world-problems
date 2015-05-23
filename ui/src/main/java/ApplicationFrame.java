@@ -165,7 +165,7 @@ public class ApplicationFrame extends Application {
 
         tabPane = new TabPane();
         Tab dataTab = constructTab("Data", new ImageView(getClass().getResource("app-icons/tab-data-icon.png").toExternalForm()), graph );
-        addHelpModal(dataTab,new ImageView(getClass().getResource("images/mouse-graph.jpeg").toExternalForm()));
+        addHelpModal(dataTab, new ImageView(getClass().getResource("images/mouse-graph.jpeg").toExternalForm()));
 
         Tab statsTab = constructTab("Portfolio", new ImageView(getClass().getResource("app-icons/tab-portfolio-icon.png").toExternalForm()), stats );
         Tab analysisTab = constructTab("Analysis", new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()), analysis);
@@ -240,7 +240,7 @@ public class ApplicationFrame extends Application {
         });
         footerText.getChildren().addAll(appInfo, websiteLink);
         loader = new Loader();
-        footerPanel.getChildren().addAll(loader,footerText);
+        footerPanel.getChildren().addAll(loader, footerText);
         main.setBottom(footerPanel);
     }
 
@@ -252,8 +252,7 @@ public class ApplicationFrame extends Application {
                 FileChooser chooser = new FileChooser();
                 chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
                 File file = chooser.showOpenDialog(stage);
-                if (file != null)
-                {
+                if (file != null) {
                     try {
                         if (fileChooser.getButtonId().equals("Choose CSV")) {
                             runner.setDataFile(file.getAbsolutePath());
@@ -268,9 +267,7 @@ public class ApplicationFrame extends Application {
                             return;
                         }
                         fileChooser.setLabelText(file.getName());
-                    }
-                    catch (Exception ex)
-                    {
+                    } catch (Exception ex) {
                         logger.severe(ex.getMessage());
                     }
                 }
@@ -633,6 +630,7 @@ public class ApplicationFrame extends Application {
         datePicker.setPromptText("dd/MM/yyyy");
         datePicker.setConverter(new StringConverter<LocalDate>() {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
             @Override
             public String toString(LocalDate date) {
                 if (date != null) {
@@ -735,6 +733,13 @@ public class ApplicationFrame extends Application {
                     manager.put(key, props.getProperty(key));
                 }
             }
+            // TODO(Gavin/Addo): MOVE THIS!!!!!!!!!!!!!!!
+            try {
+                TableViewExporter.exportCsv(paramTable, "test");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            ///
         }
     }
 

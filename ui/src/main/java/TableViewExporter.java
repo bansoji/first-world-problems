@@ -1,6 +1,13 @@
+import javafx.collections.ObservableList;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import net.sf.dynamicreports.report.builder.DynamicReports;
+import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
+import org.apache.poi.ss.usermodel.CellValue;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class exports a table view.
@@ -18,7 +25,13 @@ public class TableViewExporter {
 
         */
 
+        ObservableList<TableColumn> cols = tv.getColumns();
+        List<String> columns = new ArrayList<>();
+        for (TableColumn col : cols){
+            //columns.add(col.getText());
 
+            System.out.println();
+        }
 
 
     }

@@ -8,7 +8,6 @@ import main.Portfolio;
 import main.Returns;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.JasperXlsExporterBuilder;
-import net.sf.dynamicreports.jasper.builder.export.JasperXlsxExporterBuilder;
 import net.sf.dynamicreports.jasper.constant.JasperProperty;
 import net.sf.dynamicreports.report.base.DRSubtotal;
 import net.sf.dynamicreports.report.builder.DynamicReports;

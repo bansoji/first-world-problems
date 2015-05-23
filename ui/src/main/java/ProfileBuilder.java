@@ -1,4 +1,5 @@
 import eu.hansolo.enzo.charts.SimpleRadarChart;
+import javafx.geometry.Orientation;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -6,6 +7,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 import core.Profile;
+import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Stop;
 
@@ -19,9 +21,9 @@ public class ProfileBuilder {
 
     private BarChart barChart;
 
-    public BorderPane buildProfile(Profile profile) {
+    public BorderPane buildProfile(Profile profile, Orientation orientation) {
         if (barChart == null) init();
-         return buildChart(profile);
+         return buildChart(profile, orientation);
     }
 
     private void init() {
@@ -32,10 +34,11 @@ public class ProfileBuilder {
         yAxis.setForceZeroInRange(false);
         barChart = new BarChart(xAxis, yAxis);
         barChart.getStyleClass().add("profile-graph");
+        barChart.setPrefHeight(300);
         barChart.setLegendVisible(false);
     }
 
-    private BorderPane buildChart(Profile profile) {
+    private BorderPane buildChart(Profile profile, Orientation orientation) {
         barChart.getData().clear();
         BorderPane content = new BorderPane();
         XYChart.Series<String,Double> series = new XYChart.Series<>();
@@ -45,12 +48,14 @@ public class ProfileBuilder {
         }
         barChart.getData().add(series);
         for (XYChart.Data data: series.getData()) {
-
-            //TODO
-            Tooltip tooltip = new Tooltip();
+            Tooltip tooltip = new Tooltip((String)data.getXValue());
             Tooltip.install(data.getNode(),tooltip);
         }
-        content.setRight(barChart);
+        if (orientation.equals(Orientation.HORIZONTAL)) {
+            content.setRight(barChart);
+        } else {
+            content.setBottom(barChart);
+        }
         content.setCenter(buildRadarChart(profile));
         return content;
     }
@@ -61,7 +66,9 @@ public class ProfileBuilder {
         chart.setScaleVisible(true);
         chart.setMinValue(0);
         chart.setMaxValue(5);
-        chart.setZeroLineVisible(true);
+        chart.setPrefWidth(500);
+        chart.setMinWidth(500);
+        //chart.setZeroLineVisible(true);
         chart.setFilled(true);
         chart.setNoOfSectors(profile.getMetrics().size());
         List<String> keys = new ArrayList<>(profile.getMetrics().keySet());

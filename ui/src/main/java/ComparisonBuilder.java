@@ -1,4 +1,5 @@
 import components.LabeledSelector;
+import core.*;
 import dialog.DialogBuilder;
 import file.FileUtils;
 import file.StrategyRunner;
@@ -10,7 +11,9 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.geometry.HPos;
+import javafx.geometry.Orientation;
 import javafx.geometry.Side;
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
@@ -21,9 +24,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.util.Callback;
-import core.Portfolio;
-import core.Price;
-import core.Profit;
 import profit.OptimalProfit;
 import table.ExportableTable;
 import table.TableUtils;
@@ -36,6 +36,9 @@ import java.util.*;
 public class ComparisonBuilder {
 
     private TabPane tabPane;
+
+    private BorderPane profile;
+    private ComboBox<String> profileCompanySelector;
 
     private ExportableTable strategiesTableView;
     private LineChart strategiesLineChart;
@@ -65,7 +68,7 @@ public class ComparisonBuilder {
 
     private static final int NUM_RESULTS = 5;
 
-    public void buildComparison(StrategyRunner runner, BorderPane comparison, Portfolio portfolio, List<Price> prices, Map<String,?> params) {
+    public void buildComparison(StrategyRunner runner, BorderPane comparison, Portfolio portfolio, List<Price> prices, Reader priceReader, Map<String,?> params) {
         if (tabPane == null) init();
         this.portfolio = portfolio;
         if (strategiesLines.containsValue(portfolio.getProfitList())) return;
@@ -95,10 +98,12 @@ public class ComparisonBuilder {
                 clearAllData();
                 addStrategyComparison(runner.getStrategyFile(), params, prices);
                 updateCompanyComparison();
+                buildProfileChart(priceReader);
             } else if (!runner.getStrategyFile().equals(strategyFile) || differentParams) {
                 clearCompaniesGraph();
                 addStrategyComparison(runner.getStrategyFile(), params, prices);
                 updateCompanyComparison();
+                buildProfileChart(priceReader);
             }
         }
         //update prev files
@@ -126,7 +131,11 @@ public class ComparisonBuilder {
 
         Tab companiesTab = new Tab("Companies");
         BorderPane companiesContent = new BorderPane();
+        profile = new BorderPane();
+        profileCompanySelector = new ComboBox<String>();
+        profile.setTop(profileCompanySelector);
         companiesContent.setCenter(ChartPanZoomManager.setup(companiesLineChart));
+        companiesContent.setRight(profile);
         companySelector = new Button("Select companies", ImageUtils.getImage("icons/company.png"));
         modeSelector.getItems().addAll("Return Value", "Return %");
         modeSelector.getSelectionModel().selectFirst();
@@ -138,6 +147,7 @@ public class ComparisonBuilder {
         companiesContent.setTop(topBar);
         companiesTab.setContent(companiesContent);
         companiesTab.setClosable(false);
+
         tabPane.getTabs().addAll(strategiesTab,companiesTab);
         tabPane.setSide(Side.LEFT);
     }
@@ -295,6 +305,17 @@ public class ComparisonBuilder {
         }
         String strategyName = FileUtils.extractFilename(strategyFile);
         series.setName(strategyName);
+        if (!optimalPlotted) {
+            OptimalProfit optimalProfit = new OptimalProfit(prices);
+            XYChart.Series<Long, Double> optimal = new XYChart.Series<>();
+            for (Profit p : optimalProfit.getProfitList()) {
+                XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
+                optimal.getData().add(data);
+            }
+            optimalReturn = optimalProfit.getProfitList().get(optimalProfit.getProfitList().size()-1).getProfitValue();
+            strategiesLineChart.getData().add(optimal);
+            optimalPlotted = true;
+        }
         //only add line for strategy if parameters result in better profit or if we haven't run 5 strategies yet
         if (bestStrategies.size() < NUM_RESULTS || portfolio.getTotalReturnValue() > strategyProfits.get(bestStrategies.get(NUM_RESULTS - 1))) {
             if (this.strategiesSeries.containsKey(strategyName)) {
@@ -317,17 +338,6 @@ public class ComparisonBuilder {
             }
 
             updateStrategyRankings(strategyName, copy, portfolio);
-        }
-        if (!optimalPlotted) {
-            OptimalProfit optimalProfit = new OptimalProfit(prices);
-            XYChart.Series<Long, Double> optimal = new XYChart.Series<>();
-            for (Profit p : optimalProfit.getProfitList()) {
-                XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
-                optimal.getData().add(data);
-            }
-            optimalReturn = optimalProfit.getProfitList().get(optimalProfit.getProfitList().size()-1).getProfitValue();
-            strategiesLineChart.getData().add(optimal);
-            optimalPlotted = true;
         }
     }
 
@@ -379,6 +389,19 @@ public class ComparisonBuilder {
                 data.getNode().getStyleClass().add("bar-loss");
             }
         }
+    }
+
+    private void buildProfileChart(Reader priceReader) {
+        profileCompanySelector.setItems(FXCollections.observableArrayList(portfolio.getCompanies()));
+        profileCompanySelector.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                String company = observable.getValue();
+                ProfileBuilder profileBuilder = new ProfileBuilder();
+                profile.setCenter(profileBuilder.buildProfile(new Profile(priceReader.getCompanyHistory(company)), Orientation.VERTICAL));
+            }
+        });
+        profileCompanySelector.getSelectionModel().selectFirst();
     }
 
     private void updateStrategyTable(String strategy) {

@@ -16,6 +16,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.*;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -304,7 +305,7 @@ public class ApplicationFrame extends Application {
     private List<Node> constructProfileGraph(String company) {
         List<Node> content = new ArrayList<>();
         ProfileBuilder profileBuilder = new ProfileBuilder();
-        content.add(profileBuilder.buildProfile(new Profile(priceReader.getCompanyHistory(company))));
+        content.add(profileBuilder.buildProfile(new Profile(priceReader.getCompanyHistory(company)), Orientation.HORIZONTAL));
         return content;
     }
 
@@ -343,7 +344,7 @@ public class ApplicationFrame extends Application {
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Comparison") && !loaded) || force) {
                     comparison.setVisible(false);
-                    c.buildComparison(runner, comparison, portfolio, prices, manager.getParams());
+                    c.buildComparison(runner, comparison, portfolio, prices, priceReader, manager.getParams());
                     comparison.setVisible(true);
                 }
                 if (!portfolio.isEmpty()) {

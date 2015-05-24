@@ -733,13 +733,6 @@ public class ApplicationFrame extends Application {
                     manager.put(key, props.getProperty(key));
                 }
             }
-            // TODO(Gavin/Addo): MOVE THIS!!!!!!!!!!!!!!!
-            try {
-                TableViewExporter.exportCsv(paramTable, "test");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            ///
         }
     }
 

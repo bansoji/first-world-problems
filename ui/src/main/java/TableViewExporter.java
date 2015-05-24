@@ -1,3 +1,4 @@
+import com.opencsv.CSVWriter;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -5,6 +6,7 @@ import net.sf.dynamicreports.report.builder.DynamicReports;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import org.apache.poi.ss.usermodel.CellValue;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,23 +18,25 @@ public class TableViewExporter {
 
     public static void exportCsv(TableView tv, String filename) throws IOException {
 
-        /*
+
         CSVWriter writer = new CSVWriter(new FileWriter(filename), ',', CSVWriter.NO_QUOTE_CHARACTER);
-        // feed in your array (or convert your data to an array)
-        String[] entries = "first#second#third".split("#");
-        writer.writeNext(entries);
-        writer.close();
 
-        */
-
+        // Produce headers.
         ObservableList<TableColumn> cols = tv.getColumns();
-        List<String> columns = new ArrayList<>();
+        List<String> columnHeaders = new ArrayList<>();
         for (TableColumn col : cols){
-            //columns.add(col.getText());
+            columnHeaders.add(col.getText());
 
-            System.out.println();
+            System.out.println(col.getText());
         }
 
+        String[] row = new String[columnHeaders.size()];
+        row = columnHeaders.toArray(row);
+
+        writer.writeNext(row);
+
+
+        writer.close();
 
     }
 }

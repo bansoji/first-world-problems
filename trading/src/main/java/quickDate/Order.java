@@ -32,7 +32,7 @@ public class Order {
         this.companyName = companyName;
         this.price = price;
         this.volume = volume;
-        this.date = date;
+        this.date = DateUtils.format(DateUtils.parse(date));
     }
 
     /**

@@ -8,9 +8,7 @@ import main.Portfolio;
 import main.Returns;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.JasperXlsExporterBuilder;
-import net.sf.dynamicreports.jasper.builder.export.JasperXlsxExporterBuilder;
 import net.sf.dynamicreports.jasper.constant.JasperProperty;
-import net.sf.dynamicreports.report.base.DRSubtotal;
 import net.sf.dynamicreports.report.builder.DynamicReports;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import net.sf.dynamicreports.report.builder.component.MultiPageListBuilder;
@@ -25,28 +23,25 @@ import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
 
-import javax.swing.text.Style;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.List;
 
 /**
  * Created by Addo Wondo and Banson Tong on 17/5/2015.
  * This class is responsible for generating reports.
- *
- * READ THIS ADDO:
- *
- * NOTE: At the moment the trigger to this code is temporarily inserted
- * into StatsBuilder so it shows the pdf after u select the Portfolio tab.
- *
  */
 public class ReportGenerator {
 
     private Portfolio portfolioData;
     private TableView table;
+
+    private boolean tableInput = false;
 
     private StyleBuilder subtitleStyle;
     private StyleBuilder titleStyle;
@@ -59,18 +54,15 @@ public class ReportGenerator {
 
     private static String pdfReportName = "report.pdf";
     private static String xlsReportName = "report.xls";
-//    private static String xlsReportNameOD = "/Users/addo/Documents/OneDrive/dump/report.xlsx";
-
-
 
     public ReportGenerator(Portfolio p){
         this.portfolioData = p;
     }
     public ReportGenerator(TableView t){
         this.table = t;
+        this.tableInput = true;
     }
 
-    // Test Code for XLS Generation
     public void generateXLS()
     {
         tableHeader = DynamicReports.stl.style()
@@ -112,13 +104,18 @@ public class ReportGenerator {
                     .setWhitePageBackground(false);
 //                    .setRemoveEmptySpaceBetweenColumns(true);
             report.addProperty( "net.sf.jasperreports.export.xls.create.custom.palette", "true");
-            report
-                    .addProperty(JasperProperty.EXPORT_XLS_FREEZE_ROW, "2")
-                    .detail(DynamicReports.cmp.horizontalFlowList(
-                            DynamicReports.cmp.subreport(totalSummary),
-                            DynamicReports.cmp.subreport(assetReport),
-                            DynamicReports.cmp.subreport(returnsReport)
-                            ))
+
+            if(tableInput){
+                report.detail(DynamicReports.cmp.horizontalFlowList(DynamicReports.cmp.subreport(buildTableViewReport(table))));
+            } else {
+                report.detail(DynamicReports.cmp.horizontalFlowList(
+                    DynamicReports.cmp.subreport(totalSummary),
+                    DynamicReports.cmp.subreport(assetReport),
+                    DynamicReports.cmp.subreport(returnsReport)
+                ));
+            }
+
+            report.addProperty(JasperProperty.EXPORT_XLS_FREEZE_ROW, "2")
                     .ignorePageWidth()
                     .ignorePagination()
                     .setDataSource(new JREmptyDataSource())
@@ -130,9 +127,7 @@ public class ReportGenerator {
 
     public void generatePDF()
     {
-
         // build PDF Styles
-
         tableHeader = DynamicReports.stl.style()
                 .bold()
                 .setHorizontalAlignment(HorizontalAlignment.LEFT)
@@ -141,7 +136,7 @@ public class ReportGenerator {
                 .setPadding(3);
         tableBody = DynamicReports.stl.style()
                 .setHorizontalAlignment(HorizontalAlignment.LEFT)
-                .setBorder(DynamicReports.stl.penThin().setLineColor(Color.WHITE))
+                .setBorder(DynamicReports.stl.penThin().setLineColor(Color.LIGHT_GRAY))
                 .setPadding(3);
         tableBodyBolded = DynamicReports.stl.style(tableBody).bold();
         titleStyle = DynamicReports.stl.style()
@@ -185,13 +180,17 @@ public class ReportGenerator {
                         DynamicReports.stl.style().setTopBorder(DynamicReports.stl.penThin())
                 ).setFixedHeight(10)
         ));
-        report.detail(DynamicReports.cmp.multiPageList(
-                        DynamicReports.cmp.subreport(totalSummary),
-                        DynamicReports.cmp.subreport(assetReport),
-                        DynamicReports.cmp.subreport(returnsReport))
+        if(tableInput){
+            report.detail(DynamicReports.cmp.multiPageList(DynamicReports.cmp.subreport(buildTableViewReport(table))));
+        } else {
+            report.detail(DynamicReports.cmp.multiPageList(
+                            DynamicReports.cmp.subreport(totalSummary),
+                            DynamicReports.cmp.subreport(assetReport),
+                            DynamicReports.cmp.subreport(returnsReport))
 //                companyReports
-//                DynamicReports.cmp.subreport(buildTableViewReport(table))
-        );
+            );
+        }
+
 
         report.setDataSource(new JREmptyDataSource());
 
@@ -241,8 +240,11 @@ public class ReportGenerator {
         JasperReportBuilder totalSummary = DynamicReports.report();
         TextFieldBuilder<String> subtitle = DynamicReports.cmp.text("Summary");
         totalSummary.title(subtitle.setStyle(subtitleStyle));
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = new Date();
         totalSummary.addTitle(DynamicReports.cmp.text("Total return: " + format.FormatUtils.formatPrice(portfolioData.getTotalReturnValue())
-                + "\nTotal return %: " + format.FormatUtils.round2dp(portfolioData.getTotalReturnValue() / (portfolioData.getTotalBuyValue() - totalEquityValue) * 100)));
+                + "\nTotal return %: " + format.FormatUtils.round2dp(portfolioData.getTotalReturnValue() / (portfolioData.getTotalBuyValue() - totalEquityValue) * 100)
+                + "\nGenerated at: " + dateFormat.format(date)));
 
         return totalSummary;
     }
@@ -386,12 +388,8 @@ public class ReportGenerator {
             for (Object key : row.keySet()) {
                 rowItems.add(row.get(key).toString());
             }
-
             dataSource.add(rowItems.toArray(new String[rowItems.size()]));
         }
-
         return dataSource;
-
     }
-
 }

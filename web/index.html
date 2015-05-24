@@ -66,7 +66,7 @@
 
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Module</a></li>
+            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Strategy Modules</a></li>
             <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Testing Platform</a></li>
         </ul>
 
@@ -76,16 +76,47 @@
             <!--Strategy Tab-->
             <div role="tabpanel" class="tab-pane active" id="home">
                 <div class="panel panel-default download-panel" id="internal-panel">
+                    <div class="row">
+                        <div class="span12 centered-pills">
+                            <ul id="selectStrat" class="nav nav-pills custom-nav-pills" role="tablist">
+                                <li role="presentation" class="dropdown">
+                                    <a href="#" id="myTabDrop1" class="dropdown-toggle" data-toggle="dropdown" aria-controls="myTabDrop1-contents">Please Select Module to Download<span class="caret"></span></a>
+                                    <ul class="dropdown-menu" role="menu" aria-labelledby="myTabDrop1" id="myTabDrop1-contents">
+                                        <li><a href="#dropdown1" tabindex="-1" role="tab" id="dropdown1-tab" data-toggle="tab" aria-controls="dropdown1">Momentum</a></li>
+                                        <li><a href="#dropdown2" tabindex="-1" role="tab" id="dropdown2-tab" data-toggle="tab" aria-controls="dropdown2">BuyHarder</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <div id="strategyContent" class="tab-content">
+                                <div role="tabpanel" class="tab-pane fade" id="dropdown1" aria-labelledBy="dropdown1-tab">
+                                    <br>
 
-                    <form method="get" action="BuyHard-Momentum-1.1.0.jar">
-                        <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">Latest Release</button></p>
-                    </form>
-                    <p>
-                        File Name: <i>BuyHard-Momentum-1.1.0.jar</i><br>
-                        Version: 1.1.0<br>
-                        Date Released: 23/04/2015<br>
-                        Size: 1MB<br>
-                    </p>
+                                    <form method="get" action="BuyHard-Momentum-1.1.0.jar">
+                                        <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">Momentum - Latest Release</button></p>
+                                    </form>
+                                    <p>
+                                        File Name: <i>BuyHard-Momentum-1.1.0.jar</i><br>
+                                        Version: 1.1.0<br>
+                                        Date Released: 23/04/2015<br>
+                                        Size: 1MB<br>
+                                    </p>
+                                </div>
+                                <div role="tabpanel" class="tab-pane fade" id="dropdown2" aria-labelledBy="dropdown2-tab">
+                                    <br>
+
+                                    <form method="get" action="">
+                                        <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">BuyHarder - Latest Release</button></p>
+                                    </form>
+                                    <p>
+                                        File Name: <i>???.jar</i><br>
+                                        Version: ???<br>
+                                        Date Released: ???<br>
+                                        Size: ??MB<br>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="panel panel-default" id="internal-panel">
                     <p>
@@ -145,15 +176,15 @@
                     <hr>
                     <h3>Releases</h3>
                     <table class="table table-striped" id="release-list">
-                        <tr><th>Version</th><th>Date</th><th>Changelog</th></tr>
-                        <tr><td>v1.1.0</td><td>23/04/2015</td><td>
+                        <tr><th>Module</th><th>Version</th><th>Date</th><th>Changelog</th></tr>
+                        <tr><td>Momentum</td><td>v1.1.0</td><td>23/04/2015</td><td>
 
                             <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#release-v1-1-0">
                                 View
                             </button>
 
                         </td></tr>
-                        <tr><td>v1.0.0</td><td>02/04/2015</td><td>
+                        <tr><td>Momentum</td><td>v1.0.0</td><td>02/04/2015</td><td>
 
                             <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#release-v1-0-0">
                                 <!--onclick="changeChangelog('1.0.0 changelog');"-->

@@ -187,7 +187,7 @@ ol{
     transition: all 0.5s linear;
 }
 .nav-tabs>li>a {
-    background-color: #f8f8f8;
+    background-color: #f9f9f9;
     border-bottom: #ddd;
 }
 
@@ -232,4 +232,19 @@ ol{
 
 .testing-ss {
     width:100%;
+}
+
+.centered-pills { text-align:center; }
+.centered-pills ul.nav-pills { display:inline-block; }
+.centered-pills li { display:inline; }
+
+.custom-nav-pills{
+    background-color: #f8f8f8;
+}
+
+.custom-nav-pills>li.active>a,
+.custom-nav-pills>li.active>a:focus,
+.custom-nav-pills>li.active>a:hover {
+    background-color: lightgrey;
+
 }

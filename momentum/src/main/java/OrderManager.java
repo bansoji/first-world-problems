@@ -16,7 +16,7 @@ import java.util.logging.SimpleFormatter;
 public class OrderManager {
 
     // Some class constants.
-    public static final String VERSION = "1.1.0";
+    public static final String VERSION = "2.0.0";
 
     public static void main(String[] args) throws IOException {
         long startTime = System.currentTimeMillis();

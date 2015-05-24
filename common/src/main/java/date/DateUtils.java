@@ -43,7 +43,7 @@ public class DateUtils {
         try {
             return df.parseDateTime(string).withZone(DateTimeZone.getDefault());
         } catch (Exception e) {
-            logger.warning(parseErrorMessage + " " + string);
+            logger.warning(parseErrorMessage);
             return null;
         }
     }

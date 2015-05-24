@@ -58,6 +58,7 @@ public class CombinationStrategy implements TradingStrategy {
 
         String parameters = "Parameters Used:\n" +
                 "Combination Window: " + this.combinationWindow + "\n" +
+                
                 "Momentum Moving Average Time Window: " + this.momentumMovingAvgTimeWindow + "\n" +
                 "Momentum Threshold: " + this.momentumThreshold + "\n" +
                 "Momentum Volume: " + this.momentumVolume + "\n\n" +
@@ -115,11 +116,25 @@ public class CombinationStrategy implements TradingStrategy {
 
     @Override
     public void generateOrders() {
+        //grab the first combinationWindow number of prices, put into a cut arrayList.
+        //use linear regression, find line of best fit
+        //if gradient < something, then use null strat
+        //if gradient = something, then use strategyA
+            //if class has not been constructed, construct it, giving it sub-arraylist + config? (this might not work)..
+            //if class has been constructed, Strategy.setPrices(subarraylist)
+            //strategy.generateOrders()
+            //strategy.getOrders() and add it to Combination's strategy order list.
+        //if gradient = something, then use strategyB
+
+        //if gradient > something, then use strategyC
+
+
+
 
     }
 
     @Override
     public List<Order> getOrders() {
-        return null;
+        return ordersGenerated;
     }
 }

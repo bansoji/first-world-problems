@@ -33,9 +33,6 @@ public class CombinationStrategy implements TradingStrategy {
     private double channelThreshold;
     private int channelVolume;
 
-
-
-
     private String startDate;
     private String endDate;
 
@@ -58,7 +55,7 @@ public class CombinationStrategy implements TradingStrategy {
 
         String parameters = "Parameters Used:\n" +
                 "Combination Window: " + this.combinationWindow + "\n" +
-                
+
                 "Momentum Moving Average Time Window: " + this.momentumMovingAvgTimeWindow + "\n" +
                 "Momentum Threshold: " + this.momentumThreshold + "\n" +
                 "Momentum Volume: " + this.momentumVolume + "\n\n" +

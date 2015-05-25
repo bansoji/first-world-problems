@@ -1,9 +1,9 @@
-#This script takes a large input file and appends 20 (limit) lines of each company to the output file.
+#This script takes a large input file and appends 100 (limit) lines of each company to the output file.
 
 f = open("/Users/jasonlim/Desktop/multipleCompanies.csv", 'r')    #Input file.
 g = open("/Users/jasonlim/Desktop/72Companies20Lines.csv", "w")   #Output file.
 companies = {}
-limit = 20     
+limit = 100
 
 f.readline()                        #Skips the first line of the file (header).
 for line in f:                                   

@@ -39,8 +39,8 @@ public class MeanReversionStrategy implements TradingStrategy {
 
         configureStrategy(prop);
 
-        String parameters = "Parameters Used:\n" +
-                "Threshold: " + this.threshold +
+        String parameters = "Parameters Used:\n" + "\n" +
+                "Threshold: " + this.threshold + "\n" +
                 "Volume: " + this.volume;
 
         if (startDate != null) {

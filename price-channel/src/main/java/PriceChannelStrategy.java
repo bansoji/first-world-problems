@@ -69,11 +69,11 @@ public class PriceChannelStrategy implements TradingStrategy {
      */
     private void configureStrategy(Properties prop) {
         // Configure the strategy using parameters config properties file.
-        this.minWindowSize = Integer.parseInt(prop.getProperty("minWindowSize", "2"));
+        this.minWindowSize = Integer.parseInt(prop.getProperty("channelMinWindowSize", "2"));
         this.channelSize = Integer.parseInt(prop.getProperty("channelSize", "50"));
-        this.variance = Double.parseDouble(prop.getProperty("variance", "0.001"));
-        this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.00"));
-        this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
+        this.variance = Double.parseDouble(prop.getProperty("channelVariance", "0.001"));
+        this.threshold = Double.parseDouble(prop.getProperty("channelThreshold", "0.00"));
+        this.volume = Integer.parseInt(prop.getProperty("channelVolume", "100"));
 
         this.startDate = prop.getProperty("startDate");
         this.endDate = prop.getProperty("endDate");

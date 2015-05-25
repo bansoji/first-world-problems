@@ -92,7 +92,7 @@ public class OrderManager {
             // PrintUtils.printPrices(companyHistory);
 
             // Initialise the trading strategy.
-            TradingStrategy strategy = new MeanReversionStrategy(companyHistory, input);
+            TradingStrategy strategy = new BuyHardVengeance(companyHistory, input);
 
             ///////////////////////////////
             // RUNNING.

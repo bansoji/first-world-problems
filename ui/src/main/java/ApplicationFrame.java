@@ -565,7 +565,7 @@ public class ApplicationFrame extends Application {
         paramTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         paramTable.setMinWidth(300);
         //TODO Remove - only for testing
-        //updateParamTable();
+        updateParamTable();
     }
 
     private void updateParamTable() {

@@ -4,10 +4,7 @@ import utils.GeometryUtils;
 import utils.Line;
 import utils.Point;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The profile of a given company.
@@ -17,7 +14,7 @@ public class Profile {
     private double overallTrend;
     private double overallDailyVariance;
     private double dailyDifference;
-    private double intraDayVariance;
+    private double interDayVariance;
     private String company;
 
     /**
@@ -32,7 +29,7 @@ public class Profile {
         averageVolume = 0.0;
         averageVolume = 0.0;
         dailyDifference = 0.0;
-        intraDayVariance = 0.0;
+        interDayVariance = 0.0;
 
         List<Point> endOfDayPoints = new ArrayList<>();
         List<Point> highPoints = new ArrayList<>();
@@ -53,7 +50,7 @@ public class Profile {
             if (i == 0){
                 prevDay = p.getValue();
             } else {
-                intraDayVariance += Math.abs(p.getValue() - prevDay)/prevDay;
+                interDayVariance += Math.abs(p.getValue() - prevDay)/prevDay;
                 prevDay = p.getValue();
             }
 
@@ -70,7 +67,7 @@ public class Profile {
 
         averageVolume = averageVolume/ prices.size();
         dailyDifference = dailyDifference/ prices.size();
-        intraDayVariance = intraDayVariance/ prices.size();
+        interDayVariance = interDayVariance / prices.size();
 
         overallTrend = l.getSlope();
         overallDailyVariance = lHigh.getSlope() - lLow.getSlope();
@@ -93,15 +90,27 @@ public class Profile {
         return dailyDifference;
     }
 
-    public double getIntraDayVariance() {
-        return intraDayVariance;
+    public double getInterDayVariance() {
+        return interDayVariance;
+    }
+
+    public Map<String,Integer> getRatedMetrics() {
+        Map<String,Integer> metrics = new LinkedHashMap<>();
+        metrics.put("Volume", ProfileEvaluator.rate("Volume",averageVolume));
+        metrics.put("Trend", ProfileEvaluator.rate("Trend",overallTrend));
+        metrics.put("Daily Variance", ProfileEvaluator.rate("Daily Variance", overallDailyVariance));
+        metrics.put("Daily Difference", ProfileEvaluator.rate("Daily Difference", dailyDifference));
+        metrics.put("Inter-day Variance", ProfileEvaluator.rate("Inter-day Variance", interDayVariance));
+        return metrics;
     }
 
     public Map<String,Double> getMetrics() {
-        Map<String,Double> metrics = new HashMap<>();
-        metrics.put("Average Volume", averageVolume);
-        metrics.put("Overall Trend", overallTrend);
-        metrics.put("Overall Daily Variance", overallDailyVariance);
+        Map<String,Double> metrics = new LinkedHashMap<>();
+        metrics.put("Volume", averageVolume);
+        metrics.put("Trend", overallTrend);
+        metrics.put("Daily Variance", overallDailyVariance);
+        metrics.put("Daily Difference", dailyDifference);
+        metrics.put("Inter-day Variance", interDayVariance);
         return metrics;
     }
 
@@ -111,32 +120,35 @@ public class Profile {
 
     public static class ProfileEvaluator {
         public static int rate(String metric, double value) {
-            if (metric.equals("Average Volume")) {
+            if (metric.equals("Volume")) {
                 return rateVolume(value);
-            } else if (metric.equals("Overall Trend")) {
+            } else if (metric.equals("Trend")) {
                 return rateTrend(value);
-            } else if (metric.equals("Overall Daily Variance")) {
+            } else if (metric.equals("Daily Variance")) {
                 return rateVariance(value);
+            } else if (metric.equals("Daily Difference")) {
+                return rateDailyDifference(value);
+            } else if (metric.equals("Inter-day Variance")) {
+                return rateIntraDayVariance(value);
             } else {
                 return -1;
             }
         }
 
         private static int rateVolume(double value) {
-            if (value > 1e9) return 5;
-            else if (value > 1e8) return 4;
-            else if (value > 1e7) return 3;
-            else if (value > 1e6) return 2;
+            if (value > 1e6) return 5;
+            else if (value > 1e5) return 4;
+            else if (value > 1e4) return 3;
+            else if (value > 1e3) return 2;
             else return 1;
         }
 
         private static int rateTrend(double value) {
-            if (value > 1) return 5;
-            else if (value > 0.75) return 4;
-            else if (value > 0.50) return 3;
-            else if (value > 0.25) return 2;
-            else if (value > 0) return 1;
-            else return 0;
+            if (value > 0.5) return 5;
+            else if (value > 0.4) return 4;
+            else if (value > 0.3) return 3;
+            else if (value > 0.2) return 2;
+            else return 1;
         }
 
         private static int rateVariance(double value) {
@@ -144,8 +156,23 @@ public class Profile {
             else if (value > 0.75) return 4;
             else if (value > 0.50) return 3;
             else if (value > 0.25) return 2;
-            else if (value > 0) return 1;
-            else return 0;
+            else return 1;
+        }
+
+        private static int rateDailyDifference(double value) {
+            if (value > 10) return 5;
+            else if (value > 5) return 4;
+            else if (value > 1) return 3;
+            else if (value > 0.1) return 2;
+            else return 1;
+        }
+
+        private static int rateIntraDayVariance(double value) {
+            if (value > 10) return 5;
+            else if (value > 5) return 4;
+            else if (value > 1) return 3;
+            else if (value > 0.1) return 2;
+            else return 1;
         }
     }
 }

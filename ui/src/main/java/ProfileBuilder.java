@@ -1,4 +1,5 @@
 import eu.hansolo.enzo.charts.SimpleRadarChart;
+import format.FormatUtils;
 import javafx.geometry.Orientation;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
@@ -10,9 +11,11 @@ import core.Profile;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Stop;
+import javafx.scene.text.Font;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by gavintam on 20/05/15.
@@ -30,25 +33,28 @@ public class ProfileBuilder {
         CategoryAxis xAxis = new CategoryAxis();
         NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("Metric");
-        yAxis.setLabel("Value");
+        yAxis.setLabel("Rating");
         yAxis.setForceZeroInRange(false);
         barChart = new BarChart(xAxis, yAxis);
         barChart.getStyleClass().add("profile-graph");
         barChart.setPrefHeight(300);
         barChart.setLegendVisible(false);
+        xAxis.tickLabelFontProperty().set(Font.font(8));
     }
 
     private BorderPane buildChart(Profile profile, Orientation orientation) {
         barChart.getData().clear();
         BorderPane content = new BorderPane();
         XYChart.Series<String,Double> series = new XYChart.Series<>();
-        for (String metric: profile.getMetrics().keySet()) {
-            XYChart.Data<String,Double> data = new XYChart.Data<>(metric,profile.getMetrics().get(metric));
+        for (String metric: profile.getRatedMetrics().keySet()) {
+            XYChart.Data<String,Double> data = new XYChart.Data<>(metric,(double)profile.getRatedMetrics().get(metric));
             series.getData().add(data);
         }
         barChart.getData().add(series);
+        Map<String,Double> metrics = profile.getMetrics();
         for (XYChart.Data data: series.getData()) {
-            Tooltip tooltip = new Tooltip((String)data.getXValue());
+            String metricName = (String)data.getXValue();
+            Tooltip tooltip = new Tooltip(metricName + ":\n" + FormatUtils.round5dp(metrics.get(metricName)));
             Tooltip.install(data.getNode(),tooltip);
         }
         if (orientation.equals(Orientation.HORIZONTAL)) {
@@ -70,10 +76,10 @@ public class ProfileBuilder {
         chart.setMinWidth(500);
         //chart.setZeroLineVisible(true);
         chart.setFilled(true);
-        chart.setNoOfSectors(profile.getMetrics().size());
-        List<String> keys = new ArrayList<>(profile.getMetrics().keySet());
+        chart.setNoOfSectors(profile.getRatedMetrics().size());
+        List<String> keys = new ArrayList<>(profile.getRatedMetrics().keySet());
         for (int i = 0; i < profile.getMetrics().size(); i++) {
-            chart.addData(i, new XYChart.Data<>(keys.get(i), (double)Profile.ProfileEvaluator.rate(keys.get(i),profile.getMetrics().get(keys.get(i)))));
+            chart.addData(i, new XYChart.Data<>(keys.get(i), (double)profile.getRatedMetrics().get(keys.get(i))));
         }
         chart.setGradientStops(new Stop(0.00000, Color.web("#3552a0")),
                 new Stop(0.09090, Color.web("#456acf")),

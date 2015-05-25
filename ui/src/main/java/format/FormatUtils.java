@@ -21,4 +21,8 @@ public class FormatUtils {
     public static double round3dp (double n) {
         return (double)Math.round(n*1000)/1000;
     }
+
+    public static double round5dp (double n) {
+        return (double)Math.round(n*100000)/100000;
+    }
 }

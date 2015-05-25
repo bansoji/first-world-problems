@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 /**
  * An implementation of the Momentum Strategy.
  */
-public class MomentumStrategy implements TradingStrategy {
+public class BuyHard implements TradingStrategy {
     private List<Price> prices;
     private List<Order> ordersGenerated;
     private int movingAvgTimeWindow;
@@ -25,7 +25,7 @@ public class MomentumStrategy implements TradingStrategy {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public MomentumStrategy(List<Price> historicalPrices, InputStream config) {
+    public BuyHard(List<Price> historicalPrices, InputStream config) {
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
 

@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * An implementation of the Mean Reversion Strategy.
  */
-public class MeanReversionStrategy implements TradingStrategy {
+public class BuyHardVengeance implements TradingStrategy {
     private List<Price> prices;
     private List<Order> ordersGenerated;
     private int volume;
@@ -24,7 +24,7 @@ public class MeanReversionStrategy implements TradingStrategy {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public MeanReversionStrategy(List<Price> historicalPrices, InputStream config) {
+    public BuyHardVengeance(List<Price> historicalPrices, InputStream config) {
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
 

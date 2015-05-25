@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class exports a table view.
@@ -37,6 +38,17 @@ public class TableViewExporter {
 
         // Produce Data.
         // TODO
+        ObservableList<Map> rows = tv.getItems();
+        for (Map rowData : rows){
+            List<String> rowItems = new ArrayList();
+            for (Object key : rowData.keySet()) {
+                rowItems.add(rowData.get(key).toString());
+            }
+            String[] rowWrite = new String[rowItems.size()];
+            rowWrite = rowItems.toArray(rowWrite);
+            writer.writeNext(rowWrite);
+        }
+
 
         writer.close();
 

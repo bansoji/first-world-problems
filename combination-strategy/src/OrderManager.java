@@ -24,7 +24,7 @@ public class OrderManager {
     public static final String VERSION = "1.1.0";
 
     public static void main(String[] args) throws IOException {
-        int combinationWindow = 100;
+        int combinationWindow = 80;
 
         long startTime = System.currentTimeMillis();
         if (args.length != 2){
@@ -118,23 +118,23 @@ public class OrderManager {
                 }
                 Line line = GeometryUtils.createLine(priceInput);
 
-                if (line.getSlope() <  -2){
-                    strategy = new CombinationStrategy(strategyInput, input);
+                if (line.getSlope() < -1){
+                    strategy = new NullStrategy(strategyInput, input);
                     strategy.generateOrders();
                     List<Order> ordersGenerated = strategy.getOrders();
                     csvOrderWriter.writeOrders(ordersGenerated);
-                } else if (line.getSlope() <  2){
+                } else if (line.getSlope() <  0){
                     strategy = new BuyHard(strategyInput, input);
                     strategy.generateOrders();
                     List<Order> ordersGenerated = strategy.getOrders();
                     csvOrderWriter.writeOrders(ordersGenerated);
-                } else if (line.getSlope() <  5){
+                } else if (line.getSlope() <  1){
                     strategy = new BuyHardVengeance(strategyInput, input);
                     strategy.generateOrders();
                     List<Order> ordersGenerated = strategy.getOrders();
                     csvOrderWriter.writeOrders(ordersGenerated);
                 } else {
-                    strategy = new CombinationStrategy(strategyInput, input);
+                    strategy = new PriceChannelStrategy(strategyInput, input);
                     strategy.generateOrders();
                     List<Order> ordersGenerated = strategy.getOrders();
                     csvOrderWriter.writeOrders(ordersGenerated);

@@ -64,7 +64,7 @@ public class NullStrategy implements TradingStrategy {
      */
     @Override
     public List<Order> getOrders() {
-        return new List<Order>();
+        return new ArrayList<Order>();
     }
 
 

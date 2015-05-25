@@ -160,7 +160,6 @@ public class ReportGenerator {
         JasperReportBuilder totalSummary = buildTotalSummaryCmp();
         JasperReportBuilder assetReport = buildAssetCmp();
         JasperReportBuilder returnsReport = buildReturnsCmp();
-//        MultiPageListBuilder companyReports = buildCompanySubReports();
 
         JasperReportBuilder report = DynamicReports.report();
         report.setPageMargin(DynamicReports.margin(20));
@@ -187,7 +186,6 @@ public class ReportGenerator {
                             DynamicReports.cmp.subreport(totalSummary),
                             DynamicReports.cmp.subreport(assetReport),
                             DynamicReports.cmp.subreport(returnsReport))
-//                companyReports
             );
         }
 
@@ -200,11 +198,11 @@ public class ReportGenerator {
                 ).setFixedHeight(5),
                 DynamicReports.cmp.pageXofY().setStyle(boldCentered)));
 
-
+//        List<JasperReportBuilder> companyReports = buildCompanyReports();
+        generateCompanyReports();
 
         try {
             report.toPdf(new FileOutputStream(new File(pdfReportName)));
-            report.show();
 
         } catch (DRException | FileNotFoundException e) {
             e.printStackTrace();
@@ -312,7 +310,7 @@ public class ReportGenerator {
         return returnsReport;
     }
 
-    private MultiPageListBuilder buildCompanySubReports()
+    private void generateCompanyReports()
     {
         TextColumnBuilder<String> companyNameColumn = DynamicReports.col.column("Company", "company", DynamicReports.type.stringType());
         TextColumnBuilder<Double> priceColumn = DynamicReports.col.column("Price", "price", DynamicReports.type.doubleType());
@@ -322,8 +320,13 @@ public class ReportGenerator {
 
         TextFieldBuilder<String> subtitle;
 
+        // Create reports folder
+        File reportsFolder = new File("companyreports");
+        reportsFolder.mkdir();
+
         // Create company subReports
-        MultiPageListBuilder companyReports = new DynamicReports().cmp.multiPageList();
+//        MultiPageListBuilder companyReports = new DynamicReports().cmp.multiPageList();
+//        List<JasperReportBuilder> companyReports = new ArrayList<JasperReportBuilder>();
         History<Order> companyHistories = portfolioData.getOrderHistory();
         for (String c : companyHistories.getAllCompanies()) {
             JasperReportBuilder companyReport = DynamicReports.report();
@@ -333,10 +336,16 @@ public class ReportGenerator {
             companyReport.setColumnHeaderStyle(tableHeader);
             companyReport.setColumnStyle(tableBody);
             companyReport.setDataSource(createCompanyDataSource(companyHistories.getCompanyHistory(c)));
-            companyReports.add(DynamicReports.cmp.subreport(companyReport));
+//            companyReports.add(DynamicReports.cmp.subreport(companyReport));
+//            companyReports.add(companyReport);
+            try {
+                companyReport.toPdf(new FileOutputStream(new File("reports/" + c + ".pdf")));
+
+            } catch (DRException | FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
 
-        return companyReports;
     }
 
 

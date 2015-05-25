@@ -59,6 +59,7 @@ public class StatsBuilder {
         GridPane.setVgrow(graphs, Priority.ALWAYS);
         GridPane.setHgrow(graphs, Priority.ALWAYS);
         stats.getChildren().setAll(vbox,graphs);
+
     }
 
     private VBox buildPortfolioStats(Portfolio portfolio) {

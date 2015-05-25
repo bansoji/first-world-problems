@@ -25,6 +25,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -361,7 +362,10 @@ public class ApplicationFrame extends Application {
 
         MenuButton exportButton = new MenuButton("",ImageUtils.getImage("icons/export-icon.png"));
         exportButton.getStyleClass().add("header-button");
-        MenuItem exportToPdf = new MenuItem("Export to PDF", ImageUtils.getImage("icons/pdf.png"));
+        Menu exportToPdf = new Menu("Export to PDF", ImageUtils.getImage("icons/pdf.png"));
+        MenuItem overview = new Menu("Overview");
+        MenuItem companyReports = new Menu("Company reports");
+        exportToPdf.getItems().addAll(overview, companyReports);
         MenuItem exportToExcel = new MenuItem("Export to Excel", ImageUtils.getImage("icons/excel.png"));
         MenuItem screenshot = new MenuItem("Screenshot", ImageUtils.getImage("icons/screenshot.png"));
 
@@ -376,7 +380,7 @@ public class ApplicationFrame extends Application {
                             public void run() {
                                 FileChooser fileChooser = new FileChooser();
                                 fileChooser.setTitle("Export Excel file");
-                                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Microsoft Excel Document", "*.xlsx"));
+                                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Microsoft Excel Document", "*.xls"));
                                 File file = fileChooser.showSaveDialog(stage);
                                 loader.setProgress(0);
                                 loader.setText("Generating Excel file...");
@@ -397,16 +401,14 @@ public class ApplicationFrame extends Application {
                 }.start();
             }
         });
-        exportToPdf.setOnAction(new EventHandler<ActionEvent>() {
+        overview.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
-                        loader.setProgress(0);
-                        loader.setText("Generating preview for PDF file...");
                         FileChooser fileChooser = new FileChooser();
-                        fileChooser.setTitle("Export PDF file");
+                        fileChooser.setTitle("Export Overview PDF file");
                         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF file", "*.pdf"));
                         File file = fileChooser.showSaveDialog(stage);
                         loader.setProgress(0);
@@ -417,6 +419,32 @@ public class ApplicationFrame extends Application {
                                 public void run() {
                                     ReportGenerator g = new ReportGenerator(portfolio);
                                     g.generatePDF(file.getAbsolutePath());
+                                }
+                            }.start();
+                        }
+                        loader.setProgress(1);
+                        loader.setText("Loaded.");
+                    }
+                });
+            }
+        });
+        companyReports.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        DirectoryChooser directoryChooser = new DirectoryChooser();
+                        directoryChooser.setTitle("Export Company Report PDF files");
+                        File file = directoryChooser.showDialog(stage);
+                        loader.setProgress(0);
+                        loader.setText("Generating PDF files...");
+                        if (file != null) {
+                            new Thread() {
+                                @Override
+                                public void run() {
+                                    ReportGenerator g = new ReportGenerator(portfolio);
+                                    g.generateCompanyReports(file.getAbsolutePath());
                                 }
                             }.start();
                         }

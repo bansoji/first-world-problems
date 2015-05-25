@@ -342,8 +342,9 @@ public class ReportGenerator {
         return returnsReport;
     }
 
-    private MultiPageListBuilder buildCompanySubReports()
+    public void generateCompanyReports(String location)
     {
+        initPDFStyle();
         TextColumnBuilder<String> companyNameColumn = DynamicReports.col.column("Company", "company", DynamicReports.type.stringType());
         TextColumnBuilder<Double> priceColumn = DynamicReports.col.column("Price", "price", DynamicReports.type.doubleType());
         TextColumnBuilder<Integer> volumeColumn = DynamicReports.col.column("Volume", "volume", DynamicReports.type.integerType());
@@ -352,21 +353,29 @@ public class ReportGenerator {
 
         TextFieldBuilder<String> subtitle;
 
+        // Create reports folder
+        File reportsFolder = new File(location + "/reports");
+        reportsFolder.mkdir();
+
         // Create company subReports
-        MultiPageListBuilder companyReports = new DynamicReports().cmp.multiPageList();
         History<Order> companyHistories = portfolioData.getOrderHistory();
         for (String c : companyHistories.getAllCompanies()) {
-            JasperReportBuilder companyReport = DynamicReports.report();
+            JasperReportBuilder companyReport = init("Report - " + c);
             subtitle = DynamicReports.cmp.text(c);
             companyReport.title(subtitle.setStyle(subtitleStyle));
             companyReport.columns(companyNameColumn, dateColumn, priceColumn, volumeColumn, signalColumn);
             companyReport.setColumnHeaderStyle(tableHeader);
             companyReport.setColumnStyle(tableBody);
             companyReport.setDataSource(createCompanyDataSource(companyHistories.getCompanyHistory(c)));
-            companyReports.add(DynamicReports.cmp.subreport(companyReport));
-        }
+            // Main Report Footer
+            companyReport.pageFooter(createFooter());
+            try {
+                companyReport.toPdf(new FileOutputStream(new File(location + "/reports/" + c + ".pdf")));
 
-        return companyReports;
+            } catch (DRException | FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
 

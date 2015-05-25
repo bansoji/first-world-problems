@@ -83,16 +83,13 @@ public class OrderManager {
         // Initialise the timer.
         //startTime = System.currentTimeMillis();
 
-        // Load the properties file.
-        InputStream input = new BufferedInputStream(new FileInputStream(paramName));
-
         for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
             logger.info("Analysing prices for " + company);
             List<Price> companyHistory = tReader.getCompanyHistory(company);
             // PrintUtils.printPrices(companyHistory);
 
             // Initialise the trading strategy.
-            TradingStrategy strategy = new MeanReversionStrategy(companyHistory, input);
+            TradingStrategy strategy = new MeanReversionStrategy(companyHistory, prop);
 
             ///////////////////////////////
             // RUNNING.
@@ -123,7 +120,6 @@ public class OrderManager {
         } catch (IOException e) {
             logger.severe(e.getMessage());
         }
-        input.close();
         handler.close();
         // Log successful.
         logger.info("Module successful. No errors encountered.");

@@ -30,7 +30,6 @@ public class PriceParser extends Parser<Price> {
                 String companyName = nextLine[COMPANY_NAME];
                 double value, open_price, high_price, low_price;
                 int volume;
-
                 //get the next line with a price
                 while (nextLine[PRICE].equals("")) {
                     numberOfFileLines += 1;

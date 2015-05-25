@@ -25,18 +25,9 @@ public class MomentumStrategy implements TradingStrategy {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public MomentumStrategy(List<Price> historicalPrices, InputStream config) {
+    public MomentumStrategy(List<Price> historicalPrices, Properties prop) {
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
-
-        // Initialise the config according to the parameters.
-        Properties prop = new Properties();
-        try {
-            prop.load(config);
-        } catch (IOException e) {
-            logger.severe("Invalid Parameters File.");
-            e.printStackTrace();
-        }
 
         configureStrategy(prop);
 

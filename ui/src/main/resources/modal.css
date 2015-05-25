@@ -30,6 +30,10 @@
     -fx-alignment: center;
 }
 
+.dialog-inner-content {
+    -fx-padding: 0px 0px 20px 0px;
+}
+
 .export-toolbar {
     -fx-background-color: transparent;
 }

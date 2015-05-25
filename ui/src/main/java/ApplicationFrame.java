@@ -349,7 +349,7 @@ public class ApplicationFrame extends Application {
         settings.setSpacing(50);
 
         Button settingsButton = new Button("CHANGE\nPARAMETERS", ImageUtils.getImage("app-icons/change-settings.png"));
-        settingsButton.getStyleClass().add("icon-button");
+        settingsButton.getStyleClass().addAll("icon-button");
         settings.getChildren().add(settingsButton);
         initParamTable();
         settingsButton.setOnAction(DialogBuilder.constructSimpleDialog("Parameters", paramTable));
@@ -376,7 +376,7 @@ public class ApplicationFrame extends Application {
                             public void run() {
                                 FileChooser fileChooser = new FileChooser();
                                 fileChooser.setTitle("Export Excel file");
-                                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Microsoft Excel Document", ".xlsx"));
+                                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Microsoft Excel Document", "*.xlsx"));
                                 File file = fileChooser.showSaveDialog(stage);
                                 loader.setProgress(0);
                                 loader.setText("Generating Excel file...");
@@ -407,10 +407,10 @@ public class ApplicationFrame extends Application {
                         loader.setText("Generating preview for PDF file...");
                         FileChooser fileChooser = new FileChooser();
                         fileChooser.setTitle("Export PDF file");
-                        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF file", ".pdf"));
+                        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF file", "*.pdf"));
                         File file = fileChooser.showSaveDialog(stage);
                         loader.setProgress(0);
-                        loader.setText("Generating Excel file...");
+                        loader.setText("Generating PDF file...");
                         if (file != null) {
                             new Thread() {
                                 @Override
@@ -430,6 +430,7 @@ public class ApplicationFrame extends Application {
                public void handle(ActionEvent e) {
                    FileChooser fileChooser = new FileChooser();
                    fileChooser.setTitle("Save Image");
+                   fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG image", "*.png"));
                    File file = fileChooser.showSaveDialog(stage);
                    if (file != null) {
                        try {

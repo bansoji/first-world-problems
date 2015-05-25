@@ -321,6 +321,8 @@ public class ComparisonBuilder {
             }
             optimalReturn = optimalProfit.getProfitList().get(optimalProfit.getProfitList().size()-1).getProfitValue();
             strategiesLineChart.getData().add(optimal);
+            Tooltip tooltip = new Tooltip("OPTIMAL");
+            Tooltip.install(optimal.getNode(), tooltip);
             optimalPlotted = true;
         }
         //only add line for strategy if parameters result in better profit or if we haven't run 5 strategies yet

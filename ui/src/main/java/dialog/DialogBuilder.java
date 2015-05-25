@@ -36,6 +36,7 @@ public class DialogBuilder {
                 for (Node child: children) {
                     content.getChildren().add(child);
                 }
+                content.getStyleClass().add("dialog-inner-content");
                 dialogBox.setBottom(closeButton(dialog));
                 dialogBox.setCenter(content);
                 Scene dialogScene = new Scene(dialogBox);
@@ -74,6 +75,7 @@ public class DialogBuilder {
                     public void handle(ActionEvent event) {
                         FileChooser fileChooser = new FileChooser();
                         fileChooser.setTitle("Save Image");
+                        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG image", "*.png"));
                         File file = fileChooser.showSaveDialog(dialog);
                         if (file != null) {
                             try {

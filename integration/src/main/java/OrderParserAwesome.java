@@ -7,12 +7,10 @@ import org.joda.time.DateTime;
 import java.io.IOException;
 
 /**
- * Order Parser Integration.
- *
- * Used to integrate with another module that uses the format of yyyy-MM-dd.
- * This can be used as a template for other integrations.
+ * Created by jasonlim on 30/03/15.
  */
-public class OrderParserKoK extends Parser<Order> {
+public class OrderParserAwesome extends Parser<Order> {
+
     //Column numbers for output order prices data file.
     private static final int ORDER_COMPANY_NAME = 0;
     private static final int ORDER_DATE = 1;
@@ -20,7 +18,7 @@ public class OrderParserKoK extends Parser<Order> {
     private static final int ORDER_VOLUME = 3;
     private static final int ORDER_SIGNAL = 5;
 
-    public OrderParserKoK(String filename){
+    public OrderParserAwesome(String filename){
         super(filename);
     }
 
@@ -41,7 +39,7 @@ public class OrderParserKoK extends Parser<Order> {
                 }
                 numberOfFileLines += 1;
                 value = Double.parseDouble(nextLine[ORDER_PRICE]);
-                DateTime date = DateUtils.parseYearFirst(nextLine[ORDER_DATE]);
+                DateTime date = DateUtils.parseMonthAbbr(nextLine[ORDER_DATE]);
 
                 OrderType type;
                 if (nextLine[ORDER_SIGNAL].equals("B")) {
@@ -50,7 +48,7 @@ public class OrderParserKoK extends Parser<Order> {
                     type = OrderType.SELL;
                 }
 
-                int volume = Integer.parseInt(nextLine[ORDER_VOLUME]);
+                int volume = (int) Double.parseDouble(nextLine[ORDER_VOLUME]);
                 return new Order(type, companyName, value, volume, date);
             }
 
@@ -59,5 +57,4 @@ public class OrderParserKoK extends Parser<Order> {
         }
         return null;
     }
-
 }

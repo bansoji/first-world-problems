@@ -11,6 +11,8 @@ public class IntegrationUtils {
         //integration with other JARs
         if (FileUtils.matches(jarFilename, "aurora.jar")) {
             return new OrderReaderKoK(FileUtils.OUTPUT_FILE_PATH);
+        } else if (FileUtils.matches(jarFilename, "MSMStandAlone1.2.jar")) {
+            return new OrderReader("output1.csv");
         } else {
             return new OrderReader(FileUtils.OUTPUT_FILE_PATH);
         }

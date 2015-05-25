@@ -16,6 +16,8 @@ public class Profile {
     private double averageVolume;
     private double overallTrend;
     private double overallDailyVariance;
+    private double dailyDifference;
+    private double intraDayVariance;
     private String company;
 
     /**
@@ -28,25 +30,38 @@ public class Profile {
         company = prices.get(0).getCompanyName();
 
         averageVolume = 0.0;
+        averageVolume = 0.0;
+        dailyDifference = 0.0;
+        intraDayVariance = 0.0;
+
         List<Point> endOfDayPoints = new ArrayList<>();
         List<Point> highPoints = new ArrayList<>();
         List<Point> lowPoints= new ArrayList<>();
 
-        double i = 0.0;
+        int i = 0;
+        double prevDay = 0.0;
 
         // Build data.
         for (Price p : prices){
             averageVolume += p.getVolume();
+            dailyDifference += Math.abs(p.getValue() - p.getOpen())/p.getValue();
 
             Point pt = new Point(i, p.getValue());
             Point ptLow = new Point(i, p.getHigh());
             Point ptHigh = new Point(i, p.getLow());
 
+            if (i == 0){
+                prevDay = p.getValue();
+            } else {
+                intraDayVariance += Math.abs(p.getValue() - prevDay)/prevDay;
+                prevDay = p.getValue();
+            }
+
             endOfDayPoints.add(pt);
             highPoints.add(ptHigh);
             lowPoints.add(ptLow);
 
-            i += 1.0;
+            i += 1;
         }
 
         Line l = GeometryUtils.createLine(endOfDayPoints);
@@ -54,9 +69,12 @@ public class Profile {
         Line lLow = GeometryUtils.createLine(lowPoints);
 
         averageVolume = averageVolume/ prices.size();
+        dailyDifference = dailyDifference/ prices.size();
+        intraDayVariance = intraDayVariance/ prices.size();
 
         overallTrend = l.getSlope();
         overallDailyVariance = lHigh.getSlope() - lLow.getSlope();
+
     }
 
     public double getAverageVolume(){
@@ -69,6 +87,14 @@ public class Profile {
 
     public double getOverallDailyVariance() {
         return overallDailyVariance;
+    }
+
+    public double getDailyDifference() {
+        return dailyDifference;
+    }
+
+    public double getIntraDayVariance() {
+        return intraDayVariance;
     }
 
     public Map<String,Double> getMetrics() {

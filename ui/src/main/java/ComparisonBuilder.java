@@ -8,6 +8,7 @@ import format.FormatUtils;
 import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
 import image.ImageUtils;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -24,10 +25,13 @@ import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.util.Callback;
 import profit.OptimalProfit;
 import table.ExportableTable;
 import table.TableUtils;
+import website.ReutersLoader;
 
 import java.util.*;
 
@@ -58,6 +62,7 @@ public class ComparisonBuilder {
 
     private LineChart companiesLineChart;
     private Button companySelector;
+    private Button moreInfo;
     private Map<String,XYChart.Series> companiesSeries = new HashMap<>();
     private ComboBox<String> modeSelector = new ComboBox<>();
 
@@ -138,9 +143,14 @@ public class ComparisonBuilder {
         Tab companiesTab = new Tab("Companies");
         BorderPane companiesContent = new BorderPane();
         profile = new BorderPane();
-        profile.setId("company-profile");
-        profileCompanySelector = new ComboBox<String>();
-        profile.setTop(new LabelledSelector("Company:", profileCompanySelector));
+        //profile.setId("company-profile");
+        profileCompanySelector = new ComboBox<>();
+        HBox selector = new HBox();
+        selector.getStyleClass().add("selector-panel");
+        moreInfo = new Button("", ImageUtils.getImage("icons/reuters.png"));
+        moreInfo.getStyleClass().add("transparent-button");
+        selector.getChildren().addAll(new LabelledSelector("Company:", profileCompanySelector), moreInfo);
+        profile.setTop(selector);
         companiesContent.setCenter(ChartPanZoomManager.setup(companiesLineChart));
         companiesContent.setRight(profile);
         companySelector = new Button("Select companies", ImageUtils.getImage("icons/company.png"));
@@ -408,6 +418,7 @@ public class ComparisonBuilder {
                 String company = observable.getValue();
                 ProfileBuilder profileBuilder = new ProfileBuilder();
                 profile.setCenter(profileBuilder.buildProfile(new Profile(priceReader.getCompanyHistory(company)), Orientation.VERTICAL));
+                moreInfo.setOnAction(DialogBuilder.constructSimpleDialog(company, ReutersLoader.buildWebsiteDialog(company)));
             }
         });
         profileCompanySelector.getSelectionModel().selectFirst();

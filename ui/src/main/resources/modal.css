@@ -4,6 +4,7 @@
 .piechart-placeholder {
     -fx-alignment: center;
     -fx-spacing: 80px;
+    -fx-padding: 30px;
 }
 
 .placeholder-title {

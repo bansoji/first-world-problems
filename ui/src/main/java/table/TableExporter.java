@@ -1,6 +1,7 @@
 package table;
 
 import com.opencsv.CSVWriter;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -27,17 +28,26 @@ public class TableExporter {
         return new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                FileChooser fileChooser = new FileChooser();
-                fileChooser.setTitle("Export CSV file");
-                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV file", "*.csv"));
-                File file = fileChooser.showSaveDialog(null);
-                if (file != null) {
-                    try {
-                        exportCSV(table, file.getAbsolutePath());
-                    } catch (IOException e) {
-                        logger.severe("CSV export for " + file.getAbsolutePath() + " was unsuccessful.");
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        FileChooser fileChooser = new FileChooser();
+                        fileChooser.setTitle("Export CSV file");
+                        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV file", "*.csv"));
+                        File file = fileChooser.showSaveDialog(null);
+                        if (file != null) {
+                            new Thread() {
+                                public void run() {
+                                    try {
+                                        exportCSV(table, file.getAbsolutePath());
+                                    } catch (IOException e) {
+                                        logger.severe("CSV export for " + file.getAbsolutePath() + " was unsuccessful.");
+                                    }
+                                }
+                            }.start();
+                        }
                     }
-                }
+                });
             }
         };
     }

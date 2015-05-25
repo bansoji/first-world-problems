@@ -408,22 +408,22 @@ public class ReportGenerator {
     {
         ObservableList<TableColumn> cols = table.getColumns();
         List<String> columnNames = new ArrayList();
+        List<String> columnHeaders = new ArrayList<>();
         for (TableColumn col : cols){
             columnNames.add(col.getText().toLowerCase());
+            columnHeaders.add(col.getText());
         }
         DRDataSource dataSource = new DRDataSource(columnNames.toArray(new String[columnNames.size()]));
         ObservableList<Map> rows = table.getItems();
         for (Map row : rows){
             List<String> rowItems = new ArrayList();
-            for (Object key : row.keySet()) {
-                rowItems.add(row.get(key).toString());
+            for (String column: columnHeaders) {
+                rowItems.add(row.get(column).toString());
             }
 
             dataSource.add(rowItems.toArray(new String[rowItems.size()]));
         }
 
         return dataSource;
-
     }
-
 }

@@ -39,7 +39,7 @@ public class ExportableTable extends OptionsTable {
                     public void run() {
                         FileChooser fileChooser = new FileChooser();
                         fileChooser.setTitle("Export PDF file");
-                        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF file", ".pdf"));
+                        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF file", "*.pdf"));
                         File file = fileChooser.showSaveDialog(null);
                         if (file != null) {
                             new Thread() {

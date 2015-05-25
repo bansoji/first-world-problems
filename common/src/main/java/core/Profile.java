@@ -66,11 +66,11 @@ public class Profile {
         Line lLow = GeometryUtils.createLine(lowPoints);
 
         averageVolume = averageVolume/ prices.size();
-        dailyDifference = dailyDifference/ prices.size();
-        interDayVariance = interDayVariance / prices.size();
+        dailyDifference = dailyDifference * 100.0/ prices.size();
+        interDayVariance = interDayVariance*100.0 / prices.size();
 
-        overallTrend = l.getSlope();
-        overallDailyVariance = lHigh.getSlope() - lLow.getSlope();
+        overallTrend = l.getSlope()*1000000000;
+        overallDailyVariance = lHigh.getSlope() - lLow.getSlope() * 100.0;
 
     }
 
@@ -144,10 +144,10 @@ public class Profile {
         }
 
         private static int rateTrend(double value) {
-            if (value > 0.5) return 5;
-            else if (value > 0.4) return 4;
-            else if (value > 0.3) return 3;
-            else if (value > 0.2) return 2;
+            if (value > 0.4) return 5;
+            else if (value > 0.2) return 4;
+            else if (value > 0.15) return 3;
+            else if (value > 0.1) return 2;
             else return 1;
         }
 

@@ -1,4 +1,5 @@
-import components.LabeledSelector;
+import components.DateRangeFilterBuilder;
+import components.LabelledSelector;
 import core.*;
 import dialog.DialogBuilder;
 import file.FileUtils;
@@ -123,6 +124,11 @@ public class ComparisonBuilder {
         charts.setId("comparison-charts");
         charts.setCenter(ChartPanZoomManager.setup(strategiesLineChart));
         charts.setBottom(strategiesBarChart);
+        HBox filters = new HBox();
+        filters.getStyleClass().add("selector-panel");
+        DateRangeFilterBuilder.addDateFilters(filters, strategiesLineChart);
+        charts.setTop(filters);
+
         strategiesContent.setCenter(charts);
         strategiesContent.setRight(strategiesTableView);
         Tab strategiesTab = new Tab("Strategies");
@@ -132,18 +138,19 @@ public class ComparisonBuilder {
         Tab companiesTab = new Tab("Companies");
         BorderPane companiesContent = new BorderPane();
         profile = new BorderPane();
+        profile.setId("company-profile");
         profileCompanySelector = new ComboBox<String>();
-        profile.setTop(profileCompanySelector);
+        profile.setTop(new LabelledSelector("Company:", profileCompanySelector));
         companiesContent.setCenter(ChartPanZoomManager.setup(companiesLineChart));
         companiesContent.setRight(profile);
         companySelector = new Button("Select companies", ImageUtils.getImage("icons/company.png"));
         modeSelector.getItems().addAll("Return Value", "Return %");
         modeSelector.getSelectionModel().selectFirst();
         addModeAction();
-        LabeledSelector mode = new LabeledSelector("Mode:", modeSelector);
         HBox topBar = new HBox();
         topBar.getStyleClass().add("selector-panel");
-        topBar.getChildren().addAll(companySelector, mode);
+        topBar.getChildren().addAll(companySelector, new LabelledSelector("Mode:", modeSelector));
+        DateRangeFilterBuilder.addDateFilters(topBar, companiesLineChart);
         companiesContent.setTop(topBar);
         companiesTab.setContent(companiesContent);
         companiesTab.setClosable(false);
@@ -432,7 +439,7 @@ public class ComparisonBuilder {
         row.put("Return %", FormatUtils.round3dp((strategyProfits.get(strategy) / strategiesTotalBuyAmount.get(strategy)) * 100));
         row.put("Hit ratio", FormatUtils.round3dp(hitRatio));
         row.put("Trades", numTrades);
-        row.put("% of Optimal Return", FormatUtils.round2dp(strategyProfits.get(strategy))/optimalReturn);
+        row.put("% of Optimal Return", FormatUtils.round2dp((strategyProfits.get(strategy)/optimalReturn)*100));
         strategiesTableView.getItems().add(row);
         strategiesTableRows.put(strategy, row);
     }

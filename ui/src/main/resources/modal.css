@@ -33,3 +33,7 @@
 .export-toolbar {
     -fx-background-color: transparent;
 }
+
+.footer-buttons {
+    -fx-spacing: 20px;
+}

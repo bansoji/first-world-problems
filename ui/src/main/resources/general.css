@@ -103,3 +103,8 @@
 .transparent-button {
     -fx-background-color: transparent;
 }
+
+.selector-panel {
+    -fx-padding: 15px 15px 5px 15px;
+    -fx-spacing: 20px
+}

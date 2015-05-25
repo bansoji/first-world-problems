@@ -1,6 +1,7 @@
 /**
  * Created by Gavin Tam on 1/05/15.
  */
+import dialog.DialogBuilder;
 import file.StrategyRunner;
 import format.FormatChecker;
 import format.FormatUtils;
@@ -250,30 +251,7 @@ public class AnalysisBuilder {
                 }
             }
         });
-        settingsButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                final Stage dialog = new Stage();
-                dialog.setTitle("Parameters");
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(null);
-                VBox dialogVbox = new VBox();
-                dialogVbox.setPadding(new Insets(20));
-                dialogVbox.setSpacing(20);
-                dialogVbox.setAlignment(Pos.CENTER_RIGHT);
-                Button close = new Button("Close");
-                close.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        dialog.close();
-                    }
-                });
-                dialogVbox.getChildren().addAll(paramStepTable, close);
-                Scene dialogScene = new Scene(dialogVbox);
-                dialog.setScene(dialogScene);
-                dialog.show();
-            }
-        });
+        settingsButton.setOnAction(DialogBuilder.constructSimpleDialog("Parameters", paramStepTable));
         clearButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {

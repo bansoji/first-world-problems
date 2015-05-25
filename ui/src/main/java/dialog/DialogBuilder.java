@@ -25,6 +25,33 @@ import java.util.List;
  * Created by gavintam on 18/05/15.
  */
 public class DialogBuilder {
+    public static EventHandler<ActionEvent> constructSimpleDialog(String title, List<Node> children) {
+        return new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                final Stage dialog = initDialog(title);
+                BorderPane dialogBox = new BorderPane();
+                dialogBox.getStyleClass().add("dialog-content");
+                VBox content = new VBox();
+
+                for (Node child: children) {
+                    content.getChildren().add(child);
+                }
+                dialogBox.setBottom(closeButton(dialog));
+                dialogBox.setCenter(content);
+                Scene dialogScene = new Scene(dialogBox);
+                dialogScene.getStylesheets().addAll("general.css", "modal.css");
+                dialog.setScene(dialogScene);
+                dialog.show();
+            }
+        };
+    }
+
+    public static EventHandler<ActionEvent> constructSimpleDialog(String title, Node child) {
+        List<Node> content = new ArrayList<>();
+        content.add(child);
+        return constructSimpleDialog(title, content);
+    }
+
     public static EventHandler<ActionEvent> constructExportableDialog(String title, List<Node> children) {
         return new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
@@ -102,6 +129,7 @@ public class DialogBuilder {
                 dialogVbox.getStyleClass().add("dialog-content");
 
                 HBox footer = new HBox();
+                footer.getStyleClass().add("footer-buttons");
                 footer.getChildren().addAll(applyButton(dialog),closeButton(dialog));
                 for (Node child: children) {
                     dialogVbox.getChildren().add(child);

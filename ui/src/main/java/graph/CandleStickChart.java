@@ -67,6 +67,7 @@ import org.joda.time.DateTime;
 public class CandleStickChart extends XYChart<Long,Number> {
 
     private HashSet<Node> candlesShown = new HashSet<>();
+    private Path line;
 
     // -------------- CONSTRUCTORS ----------------------------------------------
 
@@ -105,11 +106,12 @@ public class CandleStickChart extends XYChart<Long,Number> {
         for (int seriesIndex=0; seriesIndex < getData().size(); seriesIndex++) {
             Series<Long,Number> series = getData().get(seriesIndex);
             Iterator<Data<Long,Number>> iter = getDisplayedDataIterator(series);
-            Path seriesPath = null;
-            if (series.getNode() instanceof Path) {
-                seriesPath = (Path)series.getNode();
-                seriesPath.getElements().clear();
-            }
+//            Path seriesPath = null;
+//            if (series.getNode() instanceof Path) {
+//                seriesPath = (Path)series.getNode();
+//                seriesPath.getElements().clear();
+//            }
+            if (line != null) line.getElements().clear();
 
             int j = 0;
             boolean removeAllCandles = false;
@@ -157,11 +159,11 @@ public class CandleStickChart extends XYChart<Long,Number> {
                         removeAllCandles = true;
                     }
                 }
-                if (seriesPath != null) {
-                    if (seriesPath.getElements().isEmpty()) {
-                        seriesPath.getElements().add(new MoveTo(x,getYAxis().getDisplayPosition(extra.getAverage())));
+                if (line != null) {
+                    if (line.getElements().isEmpty()) {
+                        line.getElements().add(new MoveTo(x,getYAxis().getDisplayPosition(extra.getAverage())));
                     } else {
-                        seriesPath.getElements().add(new LineTo(x,getYAxis().getDisplayPosition(extra.getAverage())));
+                        line.getElements().add(new LineTo(x,getYAxis().getDisplayPosition(extra.getAverage())));
                     }
                 }
             }
@@ -214,10 +216,10 @@ public class CandleStickChart extends XYChart<Long,Number> {
     @Override protected  void seriesAdded(Series<Long,Number> series, int seriesIndex) {
         //don't add candles yet as for large data sets, it's really slow
         // create series path
-        Path seriesPath = new Path();
-        seriesPath.getStyleClass().setAll("candlestick-average-line","series"+seriesIndex);
-        series.setNode(seriesPath);
-        getPlotChildren().add(seriesPath);
+        line = new Path();
+        line.getStyleClass().setAll("candlestick-average-line","series"+seriesIndex);
+        series.setNode(line);
+        getPlotChildren().add(line);
     }
 
     @Override protected  void seriesRemoved(Series<Long,Number> series) {
@@ -238,6 +240,7 @@ public class CandleStickChart extends XYChart<Long,Number> {
                 getPlotChildren().remove(candle);
             }
         }
+        line.getElements().clear();
     }
 
     /**

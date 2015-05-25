@@ -332,7 +332,7 @@ public class XYBarChart extends XYChart<Long, Number> {
 
     @Override
     protected void seriesRemoved(final Series<Long, Number> series) {
-        updateDefaultColorIndex(series);
+        //updateDefaultColorIndex(series);
         // remove all symbol nodes
         if (shouldAnimate()) {
             ParallelTransition pt = new ParallelTransition();

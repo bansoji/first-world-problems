@@ -1,7 +1,5 @@
 import alert.AlertManager;
 import components.AppFileChooser;
-import components.AutoCompleteComboBoxListener;
-import components.LabeledSelector;
 import dialog.DialogBuilder;
 import file.StrategyRunner;
 import format.FormatChecker;
@@ -16,7 +14,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.*;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -31,7 +28,6 @@ import javafx.scene.layout.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
 import core.*;
 import org.joda.time.DateTime;
 import report.ReportGenerator;
@@ -39,9 +35,6 @@ import report.ReportGenerator;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -55,6 +48,7 @@ public class ApplicationFrame extends Application {
 
     private static final String LOG_FILE = "application_log";
     private static final Logger logger = Logger.getLogger(LOG_FILE);
+    private static final String WEBSITE_LINK = "http://cgi.cse.unsw.edu.au/~awondo/se3011/web/";
 
     private StrategyRunner runner = new StrategyRunner();
 
@@ -69,15 +63,12 @@ public class ApplicationFrame extends Application {
     private BorderPane comparison;
     private TabPane tabPane;
 
-    private ComboBox<String> companySelector;
-    private ChangeListener companyListener;
-    private Button profile;
-
     private Loader loader;
 
     private ParameterManager<String> manager = new ParameterManager();
     private TableView paramTable;
     private HashSet<Tab> loadedTabs = new HashSet<>();
+
     private Portfolio portfolio = new Portfolio(new History<>(),null,null);
 
     private GraphBuilder g = new GraphBuilder();
@@ -161,7 +152,6 @@ public class ApplicationFrame extends Application {
         stats = new GridPane();
         analysis = new BorderPane();
         comparison = new BorderPane();
-        addFilterSelector();
 
         tabPane = new TabPane();
         Tab dataTab = constructTab("Data", ImageUtils.getImage("app-icons/tab-data-icon.png"), graph);
@@ -235,7 +225,7 @@ public class ApplicationFrame extends Application {
         websiteLink.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                getHostServices().showDocument("http://cgi.cse.unsw.edu.au/~awondo/se3011/web/");
+                getHostServices().showDocument(WEBSITE_LINK);
             }
         });
         footerText.getChildren().addAll(appInfo, websiteLink);
@@ -278,37 +268,6 @@ public class ApplicationFrame extends Application {
         });
     }
 
-    private void addCompanySelectorListener() {
-        new AutoCompleteComboBoxListener<>(companySelector);
-        if (companyListener == null) {
-            companyListener = new ChangeListener<String>() {
-                @Override
-                public void changed(ObservableValue v, String old, String companyName) {
-                    //user may type in invalid company name so we have to check whether or not
-                    //a valid company name has been selected. Also, don't reload if the selected company
-                    //is the same as the previously selected one.
-                    if (companyName != null && !companyName.equals(old) && priceReader.getCompanyHistory(companyName) != null) {
-                        List<Price> prices = priceReader.getCompanyHistory(companyName);
-                        List<Order> orders = orderReader.getCompanyHistory(companyName);
-                        loadedTabs.remove(tabPane.getSelectionModel().getSelectedItem());
-                        profile.setOnAction(DialogBuilder.constructExportableDialog("Profile of " + companyName,
-                                constructProfileGraph(companyName)));
-                        loadContent(prices, orders, false);
-                    }
-                }
-            };
-        }
-        companySelector.valueProperty().addListener(companyListener);
-    }
-
-    //TODO
-    private List<Node> constructProfileGraph(String company) {
-        List<Node> content = new ArrayList<>();
-        ProfileBuilder profileBuilder = new ProfileBuilder();
-        content.add(profileBuilder.buildProfile(new Profile(priceReader.getCompanyHistory(company)), Orientation.HORIZONTAL));
-        return content;
-    }
-
     private void loadContent(List<Price> prices, List<Order> orders, boolean force)
     {
         Runnable r = new Runnable() {
@@ -329,7 +288,7 @@ public class ApplicationFrame extends Application {
                             orderRecord.put(order.getOrderDate(), order.getOrderType());
                         }
                     }
-                    g.buildGraph(graph, prices, orders, orderRecord);
+                    g.buildGraph(graph, prices, orders, priceReader, orderReader, orderRecord);
                     graph.setVisible(true);
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Portfolio") && !loaded) || force) {
@@ -393,7 +352,7 @@ public class ApplicationFrame extends Application {
         settingsButton.getStyleClass().add("icon-button");
         settings.getChildren().add(settingsButton);
         initParamTable();
-        settingsButton.setOnAction(DialogBuilder.constructExportableDialog("Parameters", paramTable));
+        settingsButton.setOnAction(DialogBuilder.constructSimpleDialog("Parameters", paramTable));
 
         //Run button
         Button runButton = new Button("",ImageUtils.getImage("icons/run-circle.png"));
@@ -532,17 +491,6 @@ public class ApplicationFrame extends Application {
                             Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
                             ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
 
-                            //update list of companies in the selector
-                            if (companyListener != null) {
-                                companySelector.valueProperty().removeListener(companyListener);
-                            }
-                            companySelector.getSelectionModel().clearSelection();
-                            companySelector.setItems(priceCompanies);
-                            companySelector.getSelectionModel().selectFirst();
-                            profile.setOnAction(DialogBuilder.constructExportableDialog("Profile for " + companySelector.getSelectionModel().getSelectedItem(),
-                                    constructProfileGraph(companySelector.getSelectionModel().getSelectedItem())));
-                            addCompanySelectorListener();
-
                             List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
 
                             //integration with other JARs
@@ -573,111 +521,6 @@ public class ApplicationFrame extends Application {
                 }.start();
             }
         });
-    }
-
-    private void addFilterSelector() {
-        HBox selector = new HBox();
-        selector.getStyleClass().add("selector-panel");
-        addFilter("Company", selector);
-        addProfileButton(selector);
-        addDateFilters(selector);
-
-        graph.setTop(selector);
-    }
-
-    private void addDateFilters(HBox selector) {
-        DatePicker startDatePicker = new DatePicker();
-        configureDatePicker(startDatePicker);
-        LabeledSelector startDateSelector = new LabeledSelector("Start Date:", startDatePicker);
-        selector.getChildren().add(startDateSelector);
-
-        DatePicker endDatePicker = new DatePicker();
-        configureDatePicker(endDatePicker);
-        LabeledSelector endDateSelector = new LabeledSelector("End Date:", endDatePicker);
-        selector.getChildren().add(endDateSelector);
-
-        final Callback<DatePicker, DateCell> endDayCellFactory =
-                new Callback<DatePicker, DateCell>() {
-                    @Override
-                    public DateCell call(final DatePicker datePicker) {
-                        return new DateCell() {
-                            @Override
-                            public void updateItem(LocalDate item, boolean empty) {
-                                super.updateItem(item, empty);
-
-                                if (startDatePicker.getValue() != null && item.isBefore(startDatePicker.getValue())) {
-                                    setDisable(true);
-                                    setStyle("-fx-background-color: #ffc0cb;");
-                                }
-                            }
-                        };
-                    }
-                };
-        endDatePicker.setDayCellFactory(endDayCellFactory);
-        final Callback<DatePicker, DateCell> startDayCellFactory =
-                new Callback<DatePicker, DateCell>() {
-                    @Override
-                    public DateCell call(final DatePicker datePicker) {
-                        return new DateCell() {
-                            @Override
-                            public void updateItem(LocalDate item, boolean empty) {
-                                super.updateItem(item, empty);
-
-                                if (endDatePicker.getValue() != null && item.isAfter(endDatePicker.getValue())) {
-                                    setDisable(true);
-                                    setStyle("-fx-background-color: #ffc0cb;");
-                                }
-                            }
-                        };
-                    }
-                };
-        startDatePicker.setDayCellFactory(startDayCellFactory);
-    }
-
-    private void configureDatePicker(DatePicker datePicker) {
-        datePicker.getStyleClass().add("datepicker");
-        datePicker.setPromptText("dd/MM/yyyy");
-        datePicker.setConverter(new StringConverter<LocalDate>() {
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            @Override
-            public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override
-            public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        });
-        datePicker.setOnAction(new EventHandler() {
-            public void handle(javafx.event.Event t) {
-                LocalDate date = datePicker.getValue();
-                if (date == null) return;
-                long startDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                g.updateLowerBound(startDate);
-            }
-        });
-    }
-
-    private void addFilter(String name, HBox selector) {
-        companySelector = new ComboBox<>();
-        LabeledSelector filter = new LabeledSelector(name + ":", companySelector);
-        new AutoCompleteComboBoxListener<>(companySelector);
-        selector.getChildren().add(filter);
-    }
-
-    private void addProfileButton(HBox selector) {
-        profile = new Button("Profile", ImageUtils.getImage("icons/profile.png"));
-        profile.setGraphicTextGap(5);
-        selector.getChildren().add(profile);
     }
 
     private void initParamTable() {

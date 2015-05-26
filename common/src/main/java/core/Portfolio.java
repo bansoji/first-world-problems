@@ -1,5 +1,6 @@
 package core;
 
+import date.DateUtils;
 import org.joda.time.DateTime;
 
 import java.util.*;
@@ -20,7 +21,9 @@ public class Portfolio {
     private Map<String, Returns> returns; //Contains the return data for each company.
     private Map<String, Double> assetValue; //Contains the asset value data for each company.
     private List<Profit> profitList; //Contains the buy/sell points with date and return.
+    private List<Long> dates;
     private Map<String, List<Profit>> companyProfitList;
+    private Map<String, List<Profit>> changeInProfit;
 
     private double totalBuyValue;
     private double totalSellValue;
@@ -38,21 +41,31 @@ public class Portfolio {
         assetValue = new HashMap<>();
         profitList = new ArrayList<>();
         companyProfitList = new HashMap<>();
-        FillPortfolio();
+        changeInProfit = new HashMap<>();
+        HashSet<Long> dates = new HashSet<>();
+        for (String company: orderHistory.getAllCompanies()) {
+            List<Order> orders = orderHistory.getCompanyHistory(company);
+            for (Order order: orders) {
+                dates.add(order.getOrderDate().getMillis());
+            }
+        }
         //profit is always 0 at the start date of prices data
         if (startDate != null) {
-            profitList.add(new Profit(0, 0, startDate));
             for (String company: companyProfitList.keySet()) {
                 companyProfitList.get(company).add(new Profit(0, 0, startDate));
             }
         }
+        this.dates = new ArrayList<>(dates);
+        Collections.sort(this.dates);
+        FillPortfolio();
         //profit is always the last calculation of the total return value at the end date of prices data
         if (endDate != null) {
-            profitList.add(new Profit(totalReturnValue, totalReturnValue/totalBuyValue, endDate));
             for (String company: companyProfitList.keySet()) {
                 companyProfitList.get(company).add(new Profit(returns.get(company).getReturns(), returns.get(company).getPercent(), endDate));
             }
         }
+        if (endDate != null && startDate != null)
+            calculateProfitList(startDate, endDate);
     }
 
     /**
@@ -106,20 +119,22 @@ public class Portfolio {
         if (soldOrders.get(company).size() == 0) {
             boughtOrders.get(company).add(order);
         } else {
-            Order sellingOrder = soldOrders.get(company).get(0);
+            Order sellingOrder = soldOrders.get(company).remove(0);
             double sellValue = sellingOrder.getValue();
             double buyValue = order.getValue();
             double returnValue = sellValue - buyValue;
             double returnPercent = returnValue / sellValue; //short-selling change - divide by sell
             totalReturnValue += returnValue;
 
-            profitList.add(new Profit(totalReturnValue, totalReturnValue/totalBuyValue, order.getOrderDate()));
             if (!companyProfitList.containsKey(company)) {
                 companyProfitList.put(company, new ArrayList<>());
+                changeInProfit.put(company, new ArrayList<>());
             }
+            double oldReturns = returns.get(company).getReturns();
+            double oldBuyVolume = returns.get(company).getBought();
             addReturns(company, returnValue, returnPercent, buyValue);
+            changeInProfit.get(company).add(new Profit(returns.get(company).getReturns()-oldReturns, 0, order.getOrderDate()));
             companyProfitList.get(company).add(new Profit(returns.get(company).getReturns(), returns.get(company).getPercent(), order.getOrderDate()));
-            soldOrders.get(company).remove(0);
         }
     }
 
@@ -134,20 +149,22 @@ public class Portfolio {
         if (boughtOrders.get(company).size() == 0) {
             soldOrders.get(company).add(order);
         } else {
-            Order buyingOrder = boughtOrders.get(company).get(0);
+            Order buyingOrder = boughtOrders.get(company).remove(0);
             double buyValue = buyingOrder.getValue();
             double sellValue = order.getValue();
             double returnValue = sellValue - buyValue;
             double returnPercent = returnValue / buyValue; //regular-selling - divide by buy
             totalReturnValue += returnValue;
 
-            profitList.add(new Profit(totalReturnValue, totalReturnValue/totalBuyValue, order.getOrderDate()));
-            if (!companyProfitList.containsKey(company)) {
+            if (companyProfitList.get(company) == null) {
                 companyProfitList.put(company, new ArrayList<>());
+                changeInProfit.put(company, new ArrayList<>());
             }
+            double oldReturns = returns.get(company).getReturns();
             addReturns(company, returnValue, returnPercent, buyValue);
+            //TODO fix percent
+            changeInProfit.get(company).add(new Profit(returns.get(company).getReturns()-oldReturns, -1, order.getOrderDate()));
             companyProfitList.get(company).add(new Profit(returns.get(company).getReturns(), returns.get(company).getPercent(), order.getOrderDate()));
-            boughtOrders.get(company).remove(0);
         }
     }
 
@@ -211,6 +228,25 @@ public class Portfolio {
 
     public List<Profit> getProfitList() {
         return profitList;
+    }
+
+    private void calculateProfitList(DateTime start, DateTime end) {
+        profitList = new ArrayList<>();
+        profitList.add(new Profit(0,0,start));
+        for (Long time: dates) {
+            double totalReturnValue = 0;
+            double totalBuyValue = 0;
+            for (String company : changeInProfit.keySet()) {
+                for (Profit p : changeInProfit.get(company)) {
+                    if (p.getProfitDate().equals(time) || p.getProfitDate().isBefore(time)) {
+                        totalReturnValue += p.getProfitValue();
+                        totalBuyValue += 100;
+                    }
+                }
+            }
+            profitList.add(new Profit(totalReturnValue, totalReturnValue / totalBuyValue, new DateTime(time)));
+        }
+        profitList.add(new Profit(totalReturnValue,totalReturnValue/totalBuyValue,end));
     }
 
     public List<Profit> getCompanyProfitList(String company) {

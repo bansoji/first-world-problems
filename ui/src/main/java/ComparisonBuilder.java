@@ -102,12 +102,12 @@ public class ComparisonBuilder {
         if (runner.getDataFile() != null && runner.getParamFile() != null && runner.getStrategyFile() != null) {
             if (!runner.getDataFile().equals(dataFile)) {
                 clearAllData();
-                addStrategyComparison(runner.getStrategyFile(), params, prices);
+                addStrategyComparison(runner.getStrategyFile(), params, priceReader);
                 updateCompanyComparison();
                 buildProfileChart(priceReader);
             } else if (!runner.getStrategyFile().equals(strategyFile) || differentParams) {
                 clearCompaniesGraph();
-                addStrategyComparison(runner.getStrategyFile(), params, prices);
+                addStrategyComparison(runner.getStrategyFile(), params, priceReader);
                 updateCompanyComparison();
                 buildProfileChart(priceReader);
             }
@@ -314,7 +314,7 @@ public class ComparisonBuilder {
         companySelector.setOnAction(DialogBuilder.constructSelectionModal("Select companies", content));
     }
 
-    private void addStrategyComparison(String strategyFile, Map<String, ?> params, List<Price> prices) {
+    private void addStrategyComparison(String strategyFile, Map<String, ?> params, Reader priceReader) {
         XYChart.Series<Long,Double> series = new XYChart.Series<>();
         for (Profit p: portfolio.getProfitList()) {
             XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
@@ -323,7 +323,11 @@ public class ComparisonBuilder {
         String strategyName = FileUtils.extractFilename(strategyFile);
         series.setName(strategyName);
         if (!optimalPlotted) {
-            OptimalProfit optimalProfit = new OptimalProfit(prices);
+            List<Price> priceList = new ArrayList<>();
+            for (String company: (Set<String>)priceReader.getHistory().getAllCompanies()) {
+                priceList.addAll(priceReader.getCompanyHistory(company));
+            }
+            OptimalProfit optimalProfit = new OptimalProfit(priceList);
             XYChart.Series<Long, Double> optimal = new XYChart.Series<>();
             for (Profit p : optimalProfit.getProfitList()) {
                 XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());

@@ -2,6 +2,7 @@ package profit;
 
 
 import core.*;
+import org.joda.time.DateTime;
 
 import java.util.List;
 
@@ -28,7 +29,16 @@ public class OptimalProfit {
         volume = 100;
         fillHistory(givenPrices);
         generateAllOrders();
-        optimalPortfolio = new Portfolio (optimalOrders, null, null);
+        DateTime startDate = null, endDate = null;
+        for (Price price: givenPrices) {
+            if (startDate == null || price.getDate().getMillis() < startDate.getMillis()) {
+                startDate = price.getDate();
+            }
+            if (endDate == null || price.getDate().getMillis() > endDate.getMillis()) {
+                endDate = price.getDate();
+            }
+        }
+        optimalPortfolio = new Portfolio (optimalOrders, startDate, endDate);
     }
 
 
@@ -59,25 +69,14 @@ public class OptimalProfit {
         Price prev = null;
         boolean nextBuy = true;
         boolean paired = true;
+        if (individualPrices == null || individualPrices.size() == 0) return;
         for (Price price : individualPrices) {
-            if (individualPrices.get(0).equals(prev)) {
-                if (prev.getValue() < price.getValue()) {
-                    buy(prev);
-                    nextBuy = false;
-                    paired = !paired;
-                }
-                if (prev.getValue() > price.getValue()) {
-                    sell(prev);
-                    nextBuy = true;
-                    paired = !paired;
-                }
-            } else if (prev != null) {
+            if (prev != null) {
                 if (prev.getValue() < price.getValue() && nextBuy) {
                     buy(prev);
                     nextBuy = false;
                     paired = !paired;
-                }
-                if (prev.getValue() > price.getValue() && !nextBuy) {
+                } else if (prev.getValue() > price.getValue() && !nextBuy) {
                     sell(prev);
                     nextBuy = true;
                     paired = !paired;

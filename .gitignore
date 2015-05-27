@@ -25,6 +25,7 @@ ui/src/main/resources/fonts
 *.log*
 *.pdf
 *.xlsx
+*.txt
 
 MANIFEST.MF
 .DS_Store

@@ -1,9 +1,11 @@
 /**
  * Created by Gavin Tam on 1/05/15.
  */
+import dialog.DialogBuilder;
 import file.StrategyRunner;
 import format.FormatChecker;
 import format.FormatUtils;
+import image.ImageUtils;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -21,14 +23,14 @@ import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import main.OrderReader;
-import main.Portfolio;
-import tablecell.NumericEditableTableCell;
+import core.OrderReader;
+import core.Portfolio;
+import table.ExportableTable;
+import table.NumericEditableTableCell;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -41,7 +43,7 @@ public class AnalysisBuilder {
     private static final Logger logger = Logger.getLogger("application_log");
 
     private BarChart barChart;
-    private TableView tableView;
+    private ExportableTable tableView;
     private Set<String> prevParams;
     private HashMap<String,Double> paramCombinations = new HashMap<>();
     private ObservableList<String> bestParams = FXCollections.observableList(new LinkedList<String>());
@@ -65,7 +67,7 @@ public class AnalysisBuilder {
         barChart = new BarChart(xAxisParam, yAxisParam);
         barChart.getStyleClass().add("analysis-graph");
         barChart.setLegendVisible(false);
-        tableView = new TableView();
+        tableView = new ExportableTable();
 
         //restart param storage information
         prevParams = null;
@@ -204,14 +206,14 @@ public class AnalysisBuilder {
     }
 
     private ToolBar buildControls() {
-        Button playButton = new Button("",new ImageView(getClass().getResource("icons/run.png").toExternalForm()));
+        Button playButton = new Button("", ImageUtils.getImage("icons/run.png"));
         playButton.getStyleClass().add("toolbar-button");
-        Button pauseButton = new Button("", new ImageView(getClass().getResource("icons/pause.png").toExternalForm()));
+        Button pauseButton = new Button("", ImageUtils.getImage("icons/pause.png"));
         pauseButton.getStyleClass().add("toolbar-button");
         pauseButton.setDisable(true);
-        Button clearButton = new Button("", new ImageView(getClass().getResource("icons/refresh.png").toExternalForm()));
+        Button clearButton = new Button("", ImageUtils.getImage("icons/refresh.png"));
         clearButton.getStyleClass().add("toolbar-button");
-        Button settingsButton = new Button("",new ImageView(getClass().getResource("icons/spanner.png").toExternalForm()));
+        Button settingsButton = new Button("", ImageUtils.getImage("icons/spanner.png"));
         settingsButton.getStyleClass().add("toolbar-button");
         Runnable r = new Runnable() {
             @Override
@@ -249,30 +251,7 @@ public class AnalysisBuilder {
                 }
             }
         });
-        settingsButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                final Stage dialog = new Stage();
-                dialog.setTitle("Parameters");
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(null);
-                VBox dialogVbox = new VBox();
-                dialogVbox.setPadding(new Insets(20));
-                dialogVbox.setSpacing(20);
-                dialogVbox.setAlignment(Pos.CENTER_RIGHT);
-                Button close = new Button("Close");
-                close.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        dialog.close();
-                    }
-                });
-                dialogVbox.getChildren().addAll(paramStepTable, close);
-                Scene dialogScene = new Scene(dialogVbox);
-                dialog.setScene(dialogScene);
-                dialog.show();
-            }
-        });
+        settingsButton.setOnAction(DialogBuilder.constructSimpleDialog("Parameters", paramStepTable));
         clearButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {

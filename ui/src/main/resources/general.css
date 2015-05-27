@@ -31,10 +31,7 @@
     -fx-padding: 0;
 }
 
-.tutorial-modal {
-    -fx-background-color: white;
-}
-
+/* Footer */
 .loader {
     -fx-spacing: 20px;
 }
@@ -48,6 +45,7 @@
     -fx-spacing: 20px;
 }
 
+/* Header */
 #header {
     -fx-background-color: white;
     -fx-padding: 5px 0px 10px 20px;
@@ -65,6 +63,7 @@
     -fx-opacity: 1;
 }
 
+/* Labels and buttons */
 .profit-label {
     -fx-text-fill: #2CFC0E;
 }
@@ -87,4 +86,29 @@
 
 .vertical-marker {
     -fx-stroke: blue;
+}
+
+/* Selectors */
+.selector {
+    -fx-alignment: center-left;
+    -fx-spacing: 5px;
+}
+
+.datepicker {
+    -fx-min-height: 20px;
+}
+
+/* Other */
+
+.transparent-button {
+    -fx-background-color: transparent;
+}
+
+.selector-panel {
+    -fx-padding: 15px 15px 5px 15px;
+    -fx-spacing: 20px
+}
+
+#change-parameters {
+    -fx-padding: 0px 0px 12px 0px;  /* align change parameters button with the file choosers */
 }

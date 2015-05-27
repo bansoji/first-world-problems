@@ -1,10 +1,10 @@
 import alert.AlertManager;
 import components.AppFileChooser;
-import components.AutoCompleteComboBoxListener;
 import dialog.DialogBuilder;
-import file.FileUtils;
 import file.StrategyRunner;
+import format.FormatChecker;
 import format.FormatUtils;
+import image.ImageUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -12,8 +12,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.*;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -25,19 +25,17 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import javafx.util.StringConverter;
-import main.*;
+import core.*;
 import org.joda.time.DateTime;
+import report.ReportGenerator;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.logging.FileHandler;
@@ -51,6 +49,7 @@ public class ApplicationFrame extends Application {
 
     private static final String LOG_FILE = "application_log";
     private static final Logger logger = Logger.getLogger(LOG_FILE);
+    private static final String WEBSITE_LINK = "http://cgi.cse.unsw.edu.au/~awondo/se3011/web/";
 
     private StrategyRunner runner = new StrategyRunner();
 
@@ -65,15 +64,12 @@ public class ApplicationFrame extends Application {
     private BorderPane comparison;
     private TabPane tabPane;
 
-    private ComboBox<String> companySelector;
-    private ChangeListener companyListener;
-    private Button profile;
-
     private Loader loader;
 
     private ParameterManager<String> manager = new ParameterManager();
     private TableView paramTable;
     private HashSet<Tab> loadedTabs = new HashSet<>();
+
     private Portfolio portfolio = new Portfolio(new History<>(),null,null);
 
     private GraphBuilder g = new GraphBuilder();
@@ -81,15 +77,12 @@ public class ApplicationFrame extends Application {
     private StatsBuilder s = new StatsBuilder();
     private ComparisonBuilder c = new ComparisonBuilder();
 
-    private static String VERSION_NUMBER = "1.1.0";
-    private static String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
-    private static String FOOTER_MESSAGE = "Get the latest release at our website.";
-
-    private static String OUTPUT_FILE_PATH = "orders.csv";
+    private static final String VERSION_NUMBER = "1.2.0";
+    private static final String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
+    private static final String FOOTER_MESSAGE = "Get the latest release at our website.";
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        //primaryStage.setFullScreen(true);
         initLogger();
         primaryStage.setTitle("BuyHard Platform");
         main = new BorderPane();
@@ -142,7 +135,7 @@ public class ApplicationFrame extends Application {
         HBox appInfo = new HBox();
         appInfo.setSpacing(50);
         appInfo.setId("app-info");
-        ImageView logo = new ImageView(getClass().getResource("logosizes/BuyHard2Logo_Small.png").toExternalForm());
+        ImageView logo = ImageUtils.getImage("logosizes/BuyHard2Logo_Small.png");
         //Label info = new Label(APPLICATION_INFO);
         appInfo.setAlignment(Pos.CENTER_LEFT);
         appInfo.getChildren().addAll(logo);
@@ -160,15 +153,14 @@ public class ApplicationFrame extends Application {
         stats = new GridPane();
         analysis = new BorderPane();
         comparison = new BorderPane();
-        addFilterSelector();
 
         tabPane = new TabPane();
-        Tab dataTab = constructTab("Data", new ImageView(getClass().getResource("app-icons/tab-data-icon.png").toExternalForm()), graph );
-        addHelpModal(dataTab,new ImageView(getClass().getResource("images/mouse-graph.jpeg").toExternalForm()));
+        Tab dataTab = constructTab("Data", ImageUtils.getImage("app-icons/tab-data-icon.png"), graph);
+        addHelpModal(dataTab,ImageUtils.getImage("images/mouse-graph.jpeg"));
 
-        Tab statsTab = constructTab("Portfolio", new ImageView(getClass().getResource("app-icons/tab-portfolio-icon.png").toExternalForm()), stats );
-        Tab analysisTab = constructTab("Analysis", new ImageView(getClass().getResource("app-icons/tab-analysis-icon.png").toExternalForm()), analysis);
-        Tab comparisonTab = constructTab("Comparison", new ImageView(getClass().getResource("app-icons/tab-comparison-icon.png").toExternalForm()), comparison);
+        Tab statsTab = constructTab("Portfolio", ImageUtils.getImage("app-icons/tab-portfolio-icon.png"), stats);
+        Tab analysisTab = constructTab("Analysis", ImageUtils.getImage("app-icons/tab-analysis-icon.png"), analysis);
+        Tab comparisonTab = constructTab("Comparison", ImageUtils.getImage("app-icons/tab-comparison-icon.png"), comparison);
 
         tabPane.getTabs().addAll(dataTab, statsTab, analysisTab, comparisonTab);
         addTabLoadingAction(tabPane);
@@ -186,7 +178,7 @@ public class ApplicationFrame extends Application {
     }
 
     private void addHelpModal(Tab tab, Node node) {
-        final MenuItem helpItem = new MenuItem("Help", new ImageView(getClass().getResource("icons/help.png").toExternalForm()));
+        final MenuItem helpItem = new MenuItem("Help", ImageUtils.getImage("icons/help.png"));
         helpItem.setOnAction(DialogBuilder.constructHelpModal(node));
         final ContextMenu menu = new ContextMenu(helpItem);
         tab.setContextMenu(menu);
@@ -234,7 +226,7 @@ public class ApplicationFrame extends Application {
         websiteLink.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent e) {
-                getHostServices().showDocument("http://cgi.cse.unsw.edu.au/~awondo/se3011/web/");
+                getHostServices().showDocument(WEBSITE_LINK);
             }
         });
         footerText.getChildren().addAll(appInfo, websiteLink);
@@ -277,35 +269,6 @@ public class ApplicationFrame extends Application {
         });
     }
 
-    private void addCompanySelectorListener() {
-        new AutoCompleteComboBoxListener<>(companySelector);
-        if (companyListener == null) {
-            companyListener = new ChangeListener<String>() {
-                @Override
-                public void changed(ObservableValue v, String old, String companyName) {
-                    //user may type in invalid company name so we have to check whether or not
-                    //a valid company name has been selected. Also, don't reload if the selected company
-                    //is the same as the previously selected one.
-                    if (companyName != null && !companyName.equals(old) && priceReader.getCompanyHistory(companyName) != null) {
-                        List<Price> prices = priceReader.getCompanyHistory(companyName);
-                        List<Order> orders = orderReader.getCompanyHistory(companyName);
-                        loadedTabs.remove(tabPane.getSelectionModel().getSelectedItem());
-                        profile.setOnAction(DialogBuilder.constructEventHandler("Profile of " + companyName,
-                                constructProfileGraph(companyName)));
-                        loadContent(prices, orders, false);
-                    }
-                }
-            };
-        }
-        companySelector.valueProperty().addListener(companyListener);
-    }
-
-    private List<Node> constructProfileGraph(String company) {
-        List<Node> content = new ArrayList<>();
-        content.add(new Label("NO GRAPH"));
-        return content;
-    }
-
     private void loadContent(List<Price> prices, List<Order> orders, boolean force)
     {
         Runnable r = new Runnable() {
@@ -326,7 +289,7 @@ public class ApplicationFrame extends Application {
                             orderRecord.put(order.getOrderDate(), order.getOrderType());
                         }
                     }
-                    g.buildGraph(graph, prices, orders, orderRecord);
+                    g.buildGraph(graph, prices, orders, priceReader, orderReader, orderRecord);
                     graph.setVisible(true);
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Portfolio") && !loaded) || force) {
@@ -341,7 +304,7 @@ public class ApplicationFrame extends Application {
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Comparison") && !loaded) || force) {
                     comparison.setVisible(false);
-                    c.buildComparison(runner, comparison, portfolio, manager.getParams());
+                    c.buildComparison(runner, comparison, portfolio, prices, priceReader, manager.getParams());
                     comparison.setVisible(true);
                 }
                 if (!portfolio.isEmpty()) {
@@ -365,15 +328,15 @@ public class ApplicationFrame extends Application {
         fileChoosers.setSpacing(50);
 
         //Choose csv file button
-        AppFileChooser dataFileChooser = new AppFileChooser("Choose CSV", new ImageView(getClass().getResource("app-icons/choose-csv.png").toExternalForm()));
+        AppFileChooser dataFileChooser = new AppFileChooser("Choose CSV", ImageUtils.getImage("app-icons/choose-csv.png"));
         addFileChooserListener(dataFileChooser);
 
         //Choose strategy module file button
-        AppFileChooser strategyFileChooser = new AppFileChooser("Choose strategy", new ImageView(getClass().getResource("app-icons/choose-strat.png").toExternalForm()));
+        AppFileChooser strategyFileChooser = new AppFileChooser("Choose strategy", ImageUtils.getImage("app-icons/choose-strat.png"));
         addFileChooserListener(strategyFileChooser);
 
         //Choose parameters file button
-        AppFileChooser paramFileChooser = new AppFileChooser("Choose parameters", new ImageView(getClass().getResource("app-icons/choose-settings.png").toExternalForm()));
+        AppFileChooser paramFileChooser = new AppFileChooser("Choose parameters", ImageUtils.getImage("app-icons/choose-settings.png"));
         addFileChooserListener(paramFileChooser);
 
         fileChoosers.getChildren().addAll(dataFileChooser,strategyFileChooser,paramFileChooser);
@@ -386,46 +349,131 @@ public class ApplicationFrame extends Application {
         settings.setAlignment(Pos.CENTER);
         settings.setSpacing(50);
 
-        Button settingsButton = new Button("CHANGE\nPARAMETERS", new ImageView(getClass().getResource("app-icons/change-settings.png").toExternalForm()));
-        settingsButton.getStyleClass().add("icon-button");
-        settings.getChildren().add(settingsButton);
+        HBox container = new HBox();
+        container.setId("change-parameters");
+        Button settingsButton = new Button("CHANGE\nPARAMETERS", ImageUtils.getImage("app-icons/change-settings.png"));
+        settingsButton.getStyleClass().addAll("icon-button");
+        container.getChildren().add(settingsButton);
+        settings.getChildren().add(container);
         initParamTable();
-        settingsButton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                final Stage dialog = new Stage();
-                dialog.setTitle("Parameters");
-                dialog.initModality(Modality.APPLICATION_MODAL);
-                dialog.initOwner(stage);
-                VBox dialogVbox = new VBox();
-                dialogVbox.setPadding(new Insets(20));
-                dialogVbox.setSpacing(20);
-                dialogVbox.setAlignment(Pos.CENTER_RIGHT);
-                Button close = new Button("Close");
-                close.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent event) {
-                        dialog.close();
-                    }
-                });
-                dialogVbox.getChildren().addAll(paramTable, close);
-                Scene dialogScene = new Scene(dialogVbox);
-                dialog.setScene(dialogScene);
-                dialog.show();
-            }
-        });
+        settingsButton.setOnAction(DialogBuilder.constructSimpleDialog("Parameters", paramTable));
 
         //Run button
-        Button runButton = new Button("",new ImageView(getClass().getResource("icons/run-circle.png").toExternalForm()));
+        Button runButton = new Button("",ImageUtils.getImage("icons/run-circle.png"));
         runButton.getStyleClass().add("header-button");
         settings.getChildren().add(runButton);
 
-        //TODO add export actions
-        MenuButton exportButton = new MenuButton("",new ImageView(getClass().getResource("icons/export-icon.png").toExternalForm()));
+        MenuButton exportButton = new MenuButton("",ImageUtils.getImage("icons/export-icon.png"));
         exportButton.getStyleClass().add("header-button");
-        MenuItem exportToPdf = new MenuItem("Export to PDF");
-        MenuItem exportToExcel = new MenuItem("Export to Excel");
-        exportButton.getItems().addAll(exportToPdf, exportToExcel);
+        Menu exportToPdf = new Menu("Export to PDF", ImageUtils.getImage("icons/pdf.png"));
+        MenuItem overview = new Menu("Overview");
+        MenuItem companyReports = new Menu("Company reports");
+        exportToPdf.getItems().addAll(overview, companyReports);
+        MenuItem exportToExcel = new MenuItem("Export to Excel", ImageUtils.getImage("icons/excel.png"));
+        MenuItem screenshot = new MenuItem("Screenshot", ImageUtils.getImage("icons/screenshot.png"));
+
+        exportButton.getItems().addAll(exportToPdf, exportToExcel, screenshot);
+        exportToExcel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                new Thread() {
+                    public void run() {
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                FileChooser fileChooser = new FileChooser();
+                                fileChooser.setTitle("Export Excel file");
+                                fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Microsoft Excel Document", "*.xls"));
+                                File file = fileChooser.showSaveDialog(stage);
+                                loader.setProgress(0);
+                                loader.setText("Generating Excel file...");
+                                if (file != null) {
+                                    new Thread() {
+                                        @Override
+                                        public void run() {
+                                            ReportGenerator g = new ReportGenerator(portfolio);
+                                            g.generateXLS(file.getAbsolutePath());
+                                        }
+                                    }.start();
+                                }
+                                loader.setProgress(1);
+                                loader.setText("Loaded.");
+                            }
+                        });
+                    }
+                }.start();
+            }
+        });
+        overview.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        FileChooser fileChooser = new FileChooser();
+                        fileChooser.setTitle("Export Overview PDF file");
+                        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF file", "*.pdf"));
+                        File file = fileChooser.showSaveDialog(stage);
+                        loader.setProgress(0);
+                        loader.setText("Generating PDF file...");
+                        if (file != null) {
+                            new Thread() {
+                                @Override
+                                public void run() {
+                                    ReportGenerator g = new ReportGenerator(portfolio);
+                                    g.generatePDF(file.getAbsolutePath());
+                                }
+                            }.start();
+                        }
+                        loader.setProgress(1);
+                        loader.setText("Loaded.");
+                    }
+                });
+            }
+        });
+        companyReports.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        DirectoryChooser directoryChooser = new DirectoryChooser();
+                        directoryChooser.setTitle("Export Company Report PDF files");
+                        File file = directoryChooser.showDialog(stage);
+                        loader.setProgress(0);
+                        loader.setText("Generating PDF files...");
+                        if (file != null) {
+                            new Thread() {
+                                @Override
+                                public void run() {
+                                    ReportGenerator g = new ReportGenerator(portfolio);
+                                    g.generateCompanyReports(file.getAbsolutePath());
+                                }
+                            }.start();
+                        }
+                        loader.setProgress(1);
+                        loader.setText("Loaded.");
+                    }
+                });
+            }
+        });
+        screenshot.setOnAction(new EventHandler<ActionEvent>() {
+               public void handle(ActionEvent e) {
+                   FileChooser fileChooser = new FileChooser();
+                   fileChooser.setTitle("Save Image");
+                   fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG image", "*.png"));
+                   File file = fileChooser.showSaveDialog(stage);
+                   if (file != null) {
+                       try {
+                           ImageIO.write(SwingFXUtils.fromFXImage(stage.getScene().snapshot(null),
+                                   null), "png", file);
+                       } catch (IOException ex) {
+                           System.out.println(ex.getMessage());
+                       }
+                   }
+               }
+           }
+        );
         settings.getChildren().add(exportButton);
         exportButton.setDisable(true);  //disable until run button is pressed at least once
 
@@ -475,25 +523,10 @@ public class ApplicationFrame extends Application {
                             Set<String> priceCompaniesSet = priceReader.getHistory().getAllCompanies();
                             ObservableList<String> priceCompanies = FXCollections.observableArrayList(new ArrayList<>(priceCompaniesSet));
 
-                            //update list of companies in the selector
-                            if (companyListener != null) {
-                                companySelector.valueProperty().removeListener(companyListener);
-                            }
-                            companySelector.getSelectionModel().clearSelection();
-                            companySelector.setItems(priceCompanies);
-                            companySelector.getSelectionModel().selectFirst();
-                            profile.setOnAction(DialogBuilder.constructEventHandler("Profile for " + companySelector.getSelectionModel().getSelectedItem(),
-                                    constructProfileGraph(companySelector.getSelectionModel().getSelectedItem())));
-                            addCompanySelectorListener();
-
                             List<Price> prices = priceReader.getCompanyHistory(priceCompanies.get(0));
 
                             //integration with other JARs
-                            if (FileUtils.matches(runner.getStrategyFile(), "aurora.jar")) {
-                                orderReader = new OrderReaderKoK(OUTPUT_FILE_PATH);
-                            } else {
-                                orderReader = new OrderReader(OUTPUT_FILE_PATH);
-                            }
+                            orderReader = IntegrationUtils.selectReader(runner.getStrategyFile());
                             orderReader.readAll();
                             List<Order> orders = orderReader.getCompanyHistory(priceCompanies.get(0));
 
@@ -520,125 +553,6 @@ public class ApplicationFrame extends Application {
                 }.start();
             }
         });
-    }
-
-    private void addFilterSelector() {
-        HBox selector = new HBox();
-        selector.setSpacing(20);
-        selector.setPadding(new javafx.geometry.Insets(15, 15, 0, 15));
-        addFilter("Company", selector);
-        addDateFilters(selector);
-
-        graph.setTop(selector);
-    }
-
-    private void addDateFilters(HBox selector) {
-        HBox startDatePanel = new HBox();
-        startDatePanel.getChildren().add(new Label("Start Date: "));
-        selector.getChildren().add(startDatePanel);
-        HBox endDatePanel = new HBox();
-        endDatePanel.getChildren().add(new Label("End Date: "));
-        selector.getChildren().add(endDatePanel);
-
-        DatePicker startDatePicker = new DatePicker();
-        configureDatePicker(startDatePicker);
-        startDatePanel.getChildren().add(startDatePicker);
-        startDatePicker.setOnAction(new EventHandler() {
-            public void handle(javafx.event.Event t) {
-                LocalDate date = startDatePicker.getValue();
-                if (date == null) return;
-                long startDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                g.updateLowerBound(startDate);
-            }
-        });
-        DatePicker endDatePicker = new DatePicker();
-        configureDatePicker(endDatePicker);
-        endDatePanel.getChildren().add(endDatePicker);
-        endDatePicker.setOnAction(new EventHandler() {
-            public void handle(javafx.event.Event t) {
-                LocalDate date = endDatePicker.getValue();
-                if (date == null) return;
-                long endDate = date.atTime(0, 0, 0).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-                g.updateUpperBound(endDate);
-            }
-        });
-        final Callback<DatePicker, DateCell> endDayCellFactory =
-                new Callback<DatePicker, DateCell>() {
-                    @Override
-                    public DateCell call(final DatePicker datePicker) {
-                        return new DateCell() {
-                            @Override
-                            public void updateItem(LocalDate item, boolean empty) {
-                                super.updateItem(item, empty);
-
-                                if (startDatePicker.getValue() != null && item.isBefore(startDatePicker.getValue())) {
-                                    setDisable(true);
-                                    setStyle("-fx-background-color: #ffc0cb;");
-                                }
-                            }
-                        };
-                    }
-                };
-        endDatePicker.setDayCellFactory(endDayCellFactory);
-        final Callback<DatePicker, DateCell> startDayCellFactory =
-                new Callback<DatePicker, DateCell>() {
-                    @Override
-                    public DateCell call(final DatePicker datePicker) {
-                        return new DateCell() {
-                            @Override
-                            public void updateItem(LocalDate item, boolean empty) {
-                                super.updateItem(item, empty);
-
-                                if (endDatePicker.getValue() != null && item.isAfter(endDatePicker.getValue())) {
-                                    setDisable(true);
-                                    setStyle("-fx-background-color: #ffc0cb;");
-                                }
-                            }
-                        };
-                    }
-                };
-        startDatePicker.setDayCellFactory(startDayCellFactory);
-    }
-
-    private void configureDatePicker(DatePicker datePicker) {
-        datePicker.setMinHeight(20);
-        datePicker.setPromptText("dd/MM/yyyy");
-        datePicker.setConverter(new StringConverter<LocalDate>() {
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-            @Override
-            public String toString(LocalDate date) {
-                if (date != null) {
-                    return dateFormatter.format(date);
-                } else {
-                    return "";
-                }
-            }
-
-            @Override
-            public LocalDate fromString(String string) {
-                if (string != null && !string.isEmpty()) {
-                    return LocalDate.parse(string, dateFormatter);
-                } else {
-                    return null;
-                }
-            }
-        });
-    }
-
-    private void addFilter(String name, HBox selector) {
-        HBox filter = new HBox();
-        companySelector = new ComboBox<>();
-        new AutoCompleteComboBoxListener<>(companySelector);
-        filter.getChildren().addAll(new Label(name + ": "), companySelector);
-        selector.getChildren().add(filter);
-        addProfileButton(selector);
-    }
-
-
-    private void addProfileButton(HBox selector) {
-        profile = new Button("Profile");
-        selector.getChildren().add(profile);
     }
 
     private void initParamTable() {
@@ -682,7 +596,7 @@ public class ApplicationFrame extends Application {
         paramTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         paramTable.setMinWidth(300);
         //TODO Remove - only for testing
-        updateParamTable();
+        //updateParamTable();
     }
 
     private void updateParamTable() {
@@ -698,13 +612,10 @@ public class ApplicationFrame extends Application {
 
             while (properties.hasMoreElements()) {
                 String key = (String) properties.nextElement();
-                //if the value of the property is not numerical, it is not a parameter
-                try {
-                    Double.parseDouble(props.getProperty(key));
-                } catch (NumberFormatException e) {
-                    continue;
+                //if the value of the property is not numerical, it is not a parameter we need to record
+                if (FormatChecker.isDouble(props.getProperty(key))) {
+                    manager.put(key, props.getProperty(key));
                 }
-                manager.put(key, props.getProperty(key));
             }
         }
     }

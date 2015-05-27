@@ -1,6 +1,7 @@
 package graph;
 
 import javafx.event.EventHandler;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -24,5 +25,31 @@ public class ChartPanZoomManager {
         });
         panManager.start();
         return JFXChartUtil.setupZooming(chart);
+    }
+
+    public static void addResetZoomFunction(XYChart chart) {
+        //reset zoom if left-clicked twice
+        chart.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+                    chart.getXAxis().setAutoRanging(true);
+                    chart.getYAxis().setAutoRanging(true);
+                }
+            }
+        });
+    }
+
+    public static void updateLowerBound(XYChart chart, long start) {
+        chart.getXAxis().setAutoRanging(false);
+        if (start != 0) {
+            ((ValueAxis) chart.getXAxis()).setLowerBound(start);
+        }
+    }
+    public static void updateUpperBound(XYChart chart, long end) {
+        chart.getXAxis().setAutoRanging(false);
+        if (end != 0) {
+            ((ValueAxis) chart.getXAxis()).setUpperBound(end);
+        }
     }
 }

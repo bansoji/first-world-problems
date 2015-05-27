@@ -1,5 +1,5 @@
 import quickDate.*;
-import main.Reader;
+import core.Reader;
 
 import java.io.*;
 import java.util.List;
@@ -84,15 +84,12 @@ public class OrderManager {
         //startTime = System.currentTimeMillis();
 
         for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
-            // Load the properties file.
-            InputStream input = new BufferedInputStream(new FileInputStream(paramName));
-
             logger.info("Analysing prices for " + company);
             List<Price> companyHistory = tReader.getCompanyHistory(company);
             // PrintUtils.printPrices(companyHistory);
 
             // Initialise the trading strategy.
-            TradingStrategy strategy = new MomentumStrategy(companyHistory, input);
+            TradingStrategy strategy = new MomentumStrategy(companyHistory, prop);
 
             ///////////////////////////////
             // RUNNING.
@@ -103,8 +100,6 @@ public class OrderManager {
             List<Order> ordersGenerated = strategy.getOrders();
             csvOrderWriter.writeOrders(ordersGenerated);
 
-            // Close the input stream.
-            input.close();
         }
 
         ///////////////////////////////
@@ -125,7 +120,6 @@ public class OrderManager {
         } catch (IOException e) {
             logger.severe(e.getMessage());
         }
-
         handler.close();
         // Log successful.
         logger.info("Module successful. No errors encountered.");

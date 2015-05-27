@@ -1,5 +1,12 @@
+import components.AutoCompleteComboBoxListener;
+import components.DateRangeFilterBuilder;
+import components.LabelledSelector;
+import core.*;
 import date.DateUtils;
+import dialog.DialogBuilder;
 import graph.*;
+import image.ImageUtils;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -8,24 +15,18 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Orientation;
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.shape.Path;
 import javafx.util.Callback;
-import main.Order;
-import main.OrderType;
-import main.Price;
 import org.joda.time.DateTime;
 
 import java.util.*;
@@ -35,33 +36,29 @@ import java.util.*;
  */
 public class GraphBuilder {
 
+    private BorderPane graph;
+    private ComboBox<String> companySelector;
+    private Button profile;
+    private ChangeListener companyListener;
+
+    private Reader priceReader;
+    private Reader orderReader;
+
     private CandleStickChart lineChart;
     private XYBarChart barChart;
+    private BorderPane table;
 
-    public void buildGraph(BorderPane graph, List<Price> prices, List<Order> orders, Map<DateTime, OrderType> orderSummary)
+    public void buildGraph(BorderPane graph, List<Price> prices, List<Order> orders,
+                           Reader priceReader, Reader orderReader, Map<DateTime, OrderType> orderSummary)
     {
-        DateValueAxis xAxis = new DateValueAxis();
-        NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Date");
-        xAxis.setMinorTickVisible(false);
-        yAxis.setLabel("Price");
-        lineChart = new CandleStickChart(xAxis, yAxis);
-        lineChart.getStyleClass().add("graph");
-        yAxis.setForceZeroInRange(false);
-        lineChart.setCacheHint(CacheHint.SPEED);
-
-        DateValueAxis xAxisVolume = new DateValueAxis();
-        NumberAxis yAxisVolume = new NumberAxis();
-        xAxisVolume.setLabel("Date");
-        xAxisVolume.setMinorTickVisible(false);
-        yAxisVolume.setLabel("Order Volume");
-        yAxisVolume.setForceZeroInRange(false);
-        barChart = new XYBarChart(xAxisVolume, yAxisVolume);
-        barChart.getStyleClass().add("graph");
-        barChart.setCacheHint(CacheHint.SPEED);
-
+        if (lineChart == null || barChart == null) {
+            init(graph);
+        }
+        this.graph = graph;
         if (prices != null && prices.size() > 0) {
-            //lineChart.setTitle("Price of " + prices.get(0).getCompanyName());
+            if (lineChart.getData() != null) lineChart.getData().clear();
+            if (barChart.getData() != null) barChart.getData().clear();
+
             XYChart.Series<Long, Number> priceChart = new XYChart.Series<>();
             XYChart.Series<Long, Number> volumeChart = new XYChart.Series<>();
 
@@ -72,73 +69,104 @@ public class GraphBuilder {
                 currOrder = orderIterator.next();
             }
 
+            int i = -1;
             // populating the series with data
-            for (int i = 0; i < prices.size(); i++) {
-                ORDER_SEARCH:
-                {
-                    while (true) {
-                        //if an order is placed at this price
-                        if (currOrder != null && currOrder.getOrderDate().equals(prices.get(i).getDate())) {
-                            NodeType type;
-                            XYChart.Data volume;
-                            if (currOrder.getOrderType().equals(OrderType.BUY)) {
-                                type = NodeType.BuyOrder;
-                                volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getMillis(), currOrder.getVolume(),
-                                        new XYBarChart.XYBarExtraValues(type));
-                                changeBarColour(volume, "buy");
-                            } else {
-                                type = NodeType.SellOrder;
-                                volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getMillis(), currOrder.getVolume(),
-                                        new XYBarChart.XYBarExtraValues(type));
-                                changeBarColour(volume, "sell");
-                            }
-                            XYChart.Data price = new XYChart.Data<Long, Number>(prices.get(i).getDate().getMillis(), prices.get(i).getOpen(),
-                                    new CandleStickChart.CandleStickExtraValues(type,
-                                            prices.get(i).getValue(),
-                                            prices.get(i).getHigh(),
-                                            prices.get(i).getLow(),
-                                            prices.get(i).getValue()));
-                            priceChart.getData().add(price);
-                            volumeChart.getData().add(volume);
-                            //if no order is placed at this price
-                        } else if (currOrder == null || currOrder.getOrderDate().isAfter(prices.get(i).getDate())) {
-                            XYChart.Data price = new XYChart.Data<Long, Number>(prices.get(i).getDate().getMillis(), prices.get(i).getOpen(),
-                                    new CandleStickChart.CandleStickExtraValues(NodeType.Price,
-                                            prices.get(i).getValue(),
-                                            prices.get(i).getHigh(),
-                                            prices.get(i).getLow(),
-                                            prices.get(i).getValue()));
-                            priceChart.getData().add(price);
-                            if (i == 0 || i == prices.size() - 1) {
-                                XYChart.Data volume = new XYChart.Data<Long, Number>(prices.get(i).getDate().getMillis(), 0,
-                                        new XYBarChart.XYBarExtraValues(NodeType.Price));
-                                volumeChart.getData().add(volume);
-                            }
-                        } else if (orderIterator != null && orderIterator.hasNext()) {
-                            currOrder = orderIterator.next();
-                            continue;
+            for (Price price: prices) {
+                boolean endSearch = false;
+                while (!endSearch) {
+                    i++;
+                    //if an order is placed at this price
+                    if (currOrder != null && currOrder.getOrderDate().equals(price.getDate())) {
+                        NodeType type;
+                        XYChart.Data volume;
+                        if (currOrder.getOrderType().equals(OrderType.BUY)) {
+                            type = NodeType.BuyOrder;
+                            volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getMillis(), currOrder.getVolume(),
+                                    new XYBarChart.XYBarExtraValues(type));
+                            changeBarColour(volume, "buy");
+                        } else {
+                            type = NodeType.SellOrder;
+                            volume = new XYChart.Data<Long, Number>(currOrder.getOrderDate().getMillis(), currOrder.getVolume(),
+                                    new XYBarChart.XYBarExtraValues(type));
+                            changeBarColour(volume, "sell");
                         }
-                        break ORDER_SEARCH;
+                        XYChart.Data p = new XYChart.Data<Long, Number>(price.getDate().getMillis(), price.getOpen(),
+                                new CandleStickChart.CandleStickExtraValues(type,
+                                        price.getValue(),
+                                        price.getHigh(),
+                                        price.getLow(),
+                                        price.getValue()));
+                        priceChart.getData().add(p);
+                        volumeChart.getData().add(volume);
+                        //if no order is placed at this price
+                    } else if (currOrder == null || currOrder.getOrderDate().isAfter(price.getDate())) {
+                        XYChart.Data p = new XYChart.Data<Long, Number>(price.getDate().getMillis(), price.getOpen(),
+                                new CandleStickChart.CandleStickExtraValues(NodeType.Price,
+                                        price.getValue(),
+                                        price.getHigh(),
+                                        price.getLow(),
+                                        price.getValue()));
+                        priceChart.getData().add(p);
+                        if (i == 0 || i == prices.size() - 1) {
+                            XYChart.Data volume = new XYChart.Data<Long, Number>(price.getDate().getMillis(), 0,
+                                    new XYBarChart.XYBarExtraValues(NodeType.Price));
+                            volumeChart.getData().add(volume);
+                        }
+                    } else if (orderIterator != null && orderIterator.hasNext()) {
+                        currOrder = orderIterator.next();
+                        continue;
                     }
+                    endSearch = true;
                 }
             }
             barChart.getData().add(volumeChart);
-            barChart.setLegendVisible(false);
-            barChart.setPrefHeight(200);
             ObservableList<XYChart.Series<Long, Number>> data = lineChart.getData();
             if (data == null) {
-                data = FXCollections.observableArrayList(priceChart);
-                lineChart.setData(data);
+                lineChart.setData(FXCollections.observableArrayList(priceChart));
+                syncGraphZooming(); //sync graph zooming the first time data is set
             } else {
                 lineChart.getData().add(priceChart);
             }
-            // lineChart.getData().add(priceChart);
-            lineChart.setLegendVisible(false);
-            if (orders == null) {
-                xAxisVolume.setLowerBound(xAxis.getLowerBound());
-                yAxisVolume.setUpperBound(yAxis.getUpperBound());
+            lineChart.getXAxis().setAutoRanging(true);
+            lineChart.getYAxis().setAutoRanging(true);
+            //if different price readers it means the list of companies may differ
+            if (priceReader != this.priceReader || orderReader != this.orderReader) {
+                this.priceReader = priceReader;
+                this.orderReader = orderReader;
+                updateCompanyList();
             }
+            buildTable(prices, orderSummary);
+        } else {
+            this.priceReader = priceReader;
+            this.orderReader = orderReader;
         }
+    }
+
+    private void init(BorderPane graph) {
+        DateValueAxis xAxis = new DateValueAxis();
+        NumberAxis yAxis = new NumberAxis();
+        xAxis.setLabel("Date");
+        xAxis.setMinorTickVisible(false);
+        yAxis.setLabel("Price");
+        lineChart = new CandleStickChart(xAxis, yAxis);
+        lineChart.getStyleClass().add("graph");
+        yAxis.setForceZeroInRange(false);
+        lineChart.setCacheHint(CacheHint.SPEED);
+        lineChart.setLegendVisible(false);
+        lineChart.setAnimated(false);
+
+        DateValueAxis xAxisVolume = new DateValueAxis();
+        NumberAxis yAxisVolume = new NumberAxis();
+        xAxisVolume.setLabel("Date");
+        xAxisVolume.setMinorTickVisible(false);
+        yAxisVolume.setLabel("Order Volume");
+        yAxisVolume.setForceZeroInRange(false);
+        barChart = new XYBarChart(xAxisVolume, yAxisVolume);
+        barChart.getStyleClass().add("graph");
+        barChart.setCacheHint(CacheHint.SPEED);
+        barChart.setLegendVisible(false);
+        barChart.setAnimated(false);
+        barChart.setPrefHeight(200);
 
         BorderPane pane = new BorderPane();
         pane.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -152,19 +180,20 @@ public class GraphBuilder {
                 }
             }
         });
-        if (prices != null && prices.size() > 0) syncGraphZooming();
-        addMenu();
         pane.setCenter(ChartPanZoomManager.setup(lineChart));
         pane.setBottom(ChartPanZoomManager.setup(barChart));
 
-        final VBox table = new VBox();
-        table.setPadding(new javafx.geometry.Insets(0, 30, 30, 30));
-        Pane tableView = buildTable(prices,orderSummary);
-        table.getChildren().add(tableView);
-        VBox.setVgrow(tableView,Priority.ALWAYS);
+        final VBox tableBox = new VBox();
+        tableBox.setPadding(new javafx.geometry.Insets(0, 30, 30, 30));
+        table = new BorderPane();
+        tableBox.getChildren().add(table);
+        VBox.setVgrow(table,Priority.ALWAYS);
 
         graph.setCenter(pane);
-        graph.setRight(table);
+        graph.setRight(tableBox);
+        graph.setTop(buildFilterSelector());
+
+        addMenu();
     }
 
     private void changeBarColour (XYChart.Data data, String type)
@@ -202,21 +231,7 @@ public class GraphBuilder {
         });
     }
 
-    public void updateUpperBound(long end) {
-        lineChart.getXAxis().setAutoRanging(false);
-        if (end != 0) {
-            ((ValueAxis) lineChart.getXAxis()).setUpperBound(end);
-        }
-    }
-    public void updateLowerBound(long start) {
-        lineChart.getXAxis().setAutoRanging(false);
-        if (start != 0) {
-            ((ValueAxis) lineChart.getXAxis()).setLowerBound(start);
-        }
-    }
-
-
-    private Pane buildTable(List<Price> prices, Map<DateTime,OrderType> orders) {
+    private void buildTable(List<Price> prices, Map<DateTime,OrderType> orders) {
         TableView tableView = new TableView();
 
         TableColumn dateCol = new TableColumn("Date");
@@ -293,17 +308,15 @@ public class GraphBuilder {
         //ensures extra space to given to existing columns
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        BorderPane pane = new BorderPane();
-        pane.setCenter(tableView);
-        pane.setTop(createToolBar(filterableData, orders));
-        return pane;
+        table.setCenter(tableView);
+        table.setTop(createToolBar(filterableData, orders));
     }
 
     private ToolBar createToolBar(FilteredList<Price> filterableData, Map<DateTime,OrderType> orders) {
         ToolBar toolbar = new ToolBar();
         toolbar.setId("prices-table-filters");
         final ToggleGroup group = new ToggleGroup();
-        ToggleButton filterBuys = new ToggleButton("Buy", new ImageView(getClass().getResource("icons/buy.png").toExternalForm()));
+        ToggleButton filterBuys = new ToggleButton("Buy", ImageUtils.getImage("icons/buy.png"));
         filterBuys.getStyleClass().add("table-filter");
         filterBuys.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -313,7 +326,7 @@ public class GraphBuilder {
             }
         });
 
-        ToggleButton filterSells = new ToggleButton("Sell", new ImageView(getClass().getResource("icons/sell.png").toExternalForm()));
+        ToggleButton filterSells = new ToggleButton("Sell", ImageUtils.getImage("icons/sell.png"));
         filterSells.getStyleClass().add("table-filter");
         filterSells.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -323,7 +336,7 @@ public class GraphBuilder {
             }
         });
 
-        ToggleButton showAll = new ToggleButton("All", new ImageView(getClass().getResource("icons/all.png").toExternalForm()));
+        ToggleButton showAll = new ToggleButton("All", ImageUtils.getImage("icons/all.png"));
         showAll.getStyleClass().add("table-filter");
         showAll.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -341,7 +354,7 @@ public class GraphBuilder {
     }
 
     private void addMenu() {
-        final MenuItem resetZoomItem = new MenuItem("Reset zoom", new ImageView(getClass().getResource("icons/reset_zoom.png").toExternalForm()));
+        final MenuItem resetZoomItem = new MenuItem("Reset zoom", ImageUtils.getImage("icons/reset_zoom.png"));
         resetZoomItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
                 lineChart.getXAxis().setAutoRanging(true);
@@ -349,7 +362,7 @@ public class GraphBuilder {
             }
         });
 
-        final MenuItem hideShowLineItem = new MenuItem("Hide Line", new ImageView(getClass().getResource("icons/line_chart_hide.png").toExternalForm()));
+        final MenuItem hideShowLineItem = new MenuItem("Hide Line", ImageUtils.getImage("icons/line_chart_hide.png"));
         hideShowLineItem.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent event) {
                 for (int seriesIndex=0; seriesIndex < lineChart.getData().size(); seriesIndex++) {
@@ -358,11 +371,11 @@ public class GraphBuilder {
                         if (path.getOpacity() == 1) {
                             path.setOpacity(0);
                             hideShowLineItem.setText("Show Line");
-                            hideShowLineItem.setGraphic(new ImageView(getClass().getResource("icons/line_chart_show.png").toExternalForm()));
+                            hideShowLineItem.setGraphic(ImageUtils.getImage("icons/line_chart_show.png"));
                         } else if (path.getOpacity() == 0) {
                             path.setOpacity(1);
                             hideShowLineItem.setText("Hide Line");
-                            hideShowLineItem.setGraphic(new ImageView(getClass().getResource("icons/line_chart_hide.png").toExternalForm()));
+                            hideShowLineItem.setGraphic(ImageUtils.getImage("icons/line_chart_hide.png"));
                         }
                     }
                 }
@@ -386,5 +399,81 @@ public class GraphBuilder {
                 }
             }
         });
+    }
+
+    private HBox buildFilterSelector() {
+        HBox selector = new HBox();
+        selector.getStyleClass().add("selector-panel");
+        addFilter("Company", selector);
+        addProfileButton(selector);
+        DateRangeFilterBuilder.addDateFilters(selector, lineChart);
+
+        return selector;
+    }
+
+    private void addFilter(String name, HBox selector) {
+        companySelector = new ComboBox<>();
+        LabelledSelector filter = new LabelledSelector(name + ":", companySelector);
+        new AutoCompleteComboBoxListener<>(companySelector);
+        selector.getChildren().add(filter);
+    }
+
+    private void addProfileButton(HBox selector) {
+        profile = new Button("Profile", ImageUtils.getImage("icons/profile.png"));
+        profile.setGraphicTextGap(5);
+        selector.getChildren().add(profile);
+    }
+
+    private void addCompanySelectorListener() {
+        new AutoCompleteComboBoxListener<>(companySelector);
+        if (companyListener == null) {
+            companyListener = new ChangeListener<String>() {
+                @Override
+                public void changed(ObservableValue v, String old, String companyName) {
+                    //user may type in invalid company name so we have to check whether or not
+                    //a valid company name has been selected. Also, don't reload if the selected company
+                    //is the same as the previously selected one.
+                    if (companyName != null && !companyName.equals(old) && priceReader.getCompanyHistory(companyName) != null) {
+                        List<Price> prices = priceReader.getCompanyHistory(companyName);
+                        List<Order> orders = orderReader.getCompanyHistory(companyName);
+                        profile.setOnAction(DialogBuilder.constructExportableDialog("Profile of " + companyName,
+                                constructProfileGraph(companyName)));
+                        Map<DateTime, OrderType> orderSummary = new HashMap<>();
+                        if (orders != null) {
+                            for (Order order : orders) {
+                                orderSummary.put(order.getOrderDate(), order.getOrderType());
+                            }
+                        }
+                        Platform.runLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                buildGraph(graph, prices, orders, priceReader, orderReader, orderSummary);
+                            }
+                        });
+                    }
+                }
+            };
+        }
+        companySelector.valueProperty().addListener(companyListener);
+    }
+
+    private void updateCompanyList() {
+        //update list of companies in the selector
+        if (companyListener != null) {
+            companySelector.valueProperty().removeListener(companyListener);
+        }
+        companySelector.getSelectionModel().clearSelection();
+        companySelector.setItems(FXCollections.observableArrayList(priceReader.getHistory().getAllCompanies()));
+        companySelector.getSelectionModel().selectFirst();
+        profile.setOnAction(DialogBuilder.constructExportableDialog("Profile for " + companySelector.getSelectionModel().getSelectedItem(),
+                constructProfileGraph(companySelector.getSelectionModel().getSelectedItem())));
+        addCompanySelectorListener();
+    }
+
+    private List<Node> constructProfileGraph(String company) {
+        List<Node> content = new ArrayList<>();
+        ProfileBuilder profileBuilder = new ProfileBuilder();
+        content.add(profileBuilder.buildProfile(new Profile(priceReader.getCompanyHistory(company)), Orientation.HORIZONTAL));
+        return content;
     }
 }

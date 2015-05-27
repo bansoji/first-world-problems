@@ -1,8 +1,6 @@
 package quickDate;
 
-import date.DateUtils;
-import main.OrderType;
-import org.joda.time.DateTime;
+import core.OrderType;
 
 import java.util.logging.Logger;
 

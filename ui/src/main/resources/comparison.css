@@ -7,6 +7,10 @@
     -fx-opacity: 1.0;
 }
 
+#company-profile {
+    -fx-padding: 10px 0px 0px 0px;
+}
+
 #comparison-charts {
     -fx-padding: 10px 20px 10px 10px;
 }

@@ -1,8 +1,6 @@
 package quickDate;
 
-import date.DateUtils;
-import main.Parser;
-import org.joda.time.DateTime;
+import core.Parser;
 
 import java.io.IOException;
 
@@ -32,17 +30,10 @@ public class PriceParser extends Parser<Price> {
                 String companyName = nextLine[COMPANY_NAME];
                 double value, open_price, high_price, low_price;
                 int volume;
-
                 //get the next line with a price
                 while (nextLine[PRICE].equals("")) {
                     numberOfFileLines += 1;
                     nextLine = reader.readNext();
-                    if (nextLine == null) return null;
-                    if (nextLine.length < PRICE) {
-                        for (int i = 0; i < nextLine.length; i++){
-                            System.out.println(nextLine[i]);
-                        }
-                    }
                     if (nextLine == null) return null;
                 }
                 numberOfFileLines += 1;

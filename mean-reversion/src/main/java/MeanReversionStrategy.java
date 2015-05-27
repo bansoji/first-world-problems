@@ -1,5 +1,5 @@
 import date.DateUtils;
-import main.OrderType;
+import core.OrderType;
 import quickDate.Price;
 import quickDate.Order;
 
@@ -24,18 +24,10 @@ public class MeanReversionStrategy implements TradingStrategy {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public MeanReversionStrategy(List<Price> historicalPrices, InputStream config) {
+
+    public MeanReversionStrategy(List<Price> historicalPrices, Properties prop) {
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
-
-        // Initialise the config according to the parameters.
-        Properties prop = new Properties();
-        try {
-            prop.load(config);
-        } catch (IOException e) {
-            logger.severe("Invalid Parameters File.");
-            e.printStackTrace();
-        }
 
         configureStrategy(prop);
 

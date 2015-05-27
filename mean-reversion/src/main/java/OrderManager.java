@@ -1,5 +1,5 @@
 import quickDate.*;
-import main.Reader;
+import core.Reader;
 
 import java.io.*;
 import java.util.List;
@@ -92,7 +92,7 @@ public class OrderManager {
             // PrintUtils.printPrices(companyHistory);
 
             // Initialise the trading strategy.
-            TradingStrategy strategy = new MeanReversionStrategy(companyHistory, input);
+            TradingStrategy strategy = new MeanReversionStrategy(companyHistory, prop);
 
             ///////////////////////////////
             // RUNNING.

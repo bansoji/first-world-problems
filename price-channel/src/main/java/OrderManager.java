@@ -1,4 +1,4 @@
-import main.Reader;
+import core.Reader;
 import quickDate.Order;
 import quickDate.Price;
 import quickDate.PriceReader;
@@ -86,14 +86,12 @@ public class OrderManager {
         //startTime = System.currentTimeMillis();
 
         for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
-            // Load the properties file.
-            InputStream input = new BufferedInputStream(new FileInputStream(paramName));
             logger.info("Analysing prices for " + company);
             List<Price> companyHistory = tReader.getCompanyHistory(company);
             // PrintUtils.printPrices(companyHistory);
 
             // Initialise the trading strategy.
-            TradingStrategy strategy = new PriceChannelStrategy(companyHistory, input);
+            TradingStrategy strategy = new PriceChannelStrategy(companyHistory, prop);
 
             ///////////////////////////////
             // RUNNING.
@@ -104,8 +102,6 @@ public class OrderManager {
             List<Order> ordersGenerated = strategy.getOrders();
             csvOrderWriter.writeOrders(ordersGenerated);
 
-            // Close the input stream.
-            input.close();
         }
 
         ///////////////////////////////

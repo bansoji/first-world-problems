@@ -34,12 +34,6 @@ public class PriceParser extends Parser<Price> {
                 while (nextLine[PRICE].equals("")) {
                     numberOfFileLines += 1;
                     nextLine = reader.readNext();
-                    if (nextLine.length < PRICE) {
-                        for (int i = 0; i < nextLine.length; i++)
-                        {
-                            System.out.println(nextLine[i]);
-                        }
-                    }
                     if (nextLine == null) return null;
                 }
                 numberOfFileLines += 1;

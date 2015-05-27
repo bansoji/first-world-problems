@@ -1,3 +1,4 @@
+#RIC,Date[L],Time[L],Type,Qualifiers,Open,High,Low,Last,Volume,Open Interest,Settle,Data Source
 .DJI,02-DEC-1999,,End Of Day,,10995.02,11070.72,10988.6,11039.07,132556500,,,Verified
 .DJI,03-DEC-1999,,End Of Day,,11046.1,11341.23,11045.79,11286.18,,,,Verified
 .DJI,04-DEC-1999,,End Of Day,No Trades,,,,,,,,Verified

@@ -95,7 +95,6 @@ public class OptimalProfit {
 
     }
 
-
     /**
      * Helper function to 'buy' a Price.
      * @param prev

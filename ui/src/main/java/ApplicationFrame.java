@@ -349,9 +349,12 @@ public class ApplicationFrame extends Application {
         settings.setAlignment(Pos.CENTER);
         settings.setSpacing(50);
 
+        HBox container = new HBox();
+        container.setId("change-parameters");
         Button settingsButton = new Button("CHANGE\nPARAMETERS", ImageUtils.getImage("app-icons/change-settings.png"));
         settingsButton.getStyleClass().addAll("icon-button");
-        settings.getChildren().add(settingsButton);
+        container.getChildren().add(settingsButton);
+        settings.getChildren().add(container);
         initParamTable();
         settingsButton.setOnAction(DialogBuilder.constructSimpleDialog("Parameters", paramTable));
 

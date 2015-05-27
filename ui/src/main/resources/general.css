@@ -108,3 +108,7 @@
     -fx-padding: 15px 15px 5px 15px;
     -fx-spacing: 20px
 }
+
+#change-parameters {
+    -fx-padding: 0px 0px 12px 0px;  /* align change parameters button with the file choosers */
+}

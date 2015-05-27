@@ -83,7 +83,6 @@ public class DateUtils {
         return parseYearFirst(string, "Error parsing date.");
     }
 
-
     //compare two date strings
     public static Boolean before(String s1, String s2) {
         //if one of the strings is not in the required date formats

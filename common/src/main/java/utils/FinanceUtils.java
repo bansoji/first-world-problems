@@ -13,12 +13,12 @@ import java.util.List;
  */
 
 public class FinanceUtils {
-    private static double calcReturns(double currPrice, double prevPrice)
+    public static double calcReturns(double currPrice, double prevPrice)
     {
         return (currPrice - prevPrice)/prevPrice;
     }
 
-    private static List<Double> calcAllReturns (List<Double> prices)
+    public static List<Double> calcAllReturns (List<Double> prices)
     {
         List<Double> returns = new ArrayList<Double>();
         // return at t = 0 is always 0.
@@ -30,7 +30,7 @@ public class FinanceUtils {
         return returns;
     }
 
-    private static double calcSimpleMovingAvg(List<Double> returns, int n, int t)
+    public static double calcSimpleMovingAvg(List<Double> returns, int n, int t)
     {
         double returnSum = 0;
         for (int i = t-n+1; i <= t; i++)
@@ -67,7 +67,7 @@ public class FinanceUtils {
         // startDate and endDate required to calculate appropriate risk free rate for different time periods other than yearly.
         int totalNumOfDays = Days.daysBetween(startDate.toLocalDate(), endDate.toLocalDate()).getDays();
         List<Double> returnPercents = calcAllReturns(returns);
-        double averageReturnPeriod = totalNumOfDays / returnPercents.size();
+        double averageReturnPeriod = totalNumOfDays / (double)returnPercents.size();
         double adjustedRiskFreeRate = Math.pow(1.05, (averageReturnPeriod / 365)) - 1;
 
         //Calculate necessary statistics

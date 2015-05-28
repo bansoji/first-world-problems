@@ -8,12 +8,12 @@ import format.FormatUtils;
 import graph.ChartPanZoomManager;
 import graph.DateValueAxis;
 import image.ImageUtils;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Orientation;
 import javafx.geometry.Side;
@@ -25,12 +25,11 @@ import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
 import javafx.util.Callback;
 import profit.OptimalProfit;
 import table.ExportableTable;
 import table.TableUtils;
+import utils.FinanceUtils;
 import website.ReutersLoader;
 
 import java.util.*;
@@ -39,6 +38,8 @@ import java.util.*;
  * Created by gavintam on 14/05/15.
  */
 public class ComparisonBuilder {
+
+    private final int MAX_NODES = 200;
 
     private TabPane tabPane;
 
@@ -66,6 +67,8 @@ public class ComparisonBuilder {
     private Map<String,XYChart.Series> companiesSeries = new HashMap<>();
     private ComboBox<String> modeSelector = new ComboBox<>();
 
+    private BarChart riskBarChart;
+
     private String dataFile;
     private String strategyFile;
     private String paramFile;
@@ -74,7 +77,7 @@ public class ComparisonBuilder {
 
     private static final int NUM_RESULTS = 5;
 
-    public void buildComparison(StrategyRunner runner, BorderPane comparison, Portfolio portfolio, List<Price> prices, Reader priceReader, Map<String,?> params) {
+    public void buildComparison(StrategyRunner runner, BorderPane comparison, Portfolio portfolio, Reader priceReader, Map<String,?> params) {
         if (tabPane == null) init();
         this.portfolio = portfolio;
         if (strategiesLines.containsValue(portfolio.getProfitList())) return;
@@ -105,6 +108,7 @@ public class ComparisonBuilder {
                 addStrategyComparison(runner.getStrategyFile(), params, priceReader);
                 updateCompanyComparison();
                 buildProfileChart(priceReader);
+                updateRiskChart(priceReader);
             } else if (!runner.getStrategyFile().equals(strategyFile) || differentParams) {
                 clearCompaniesGraph();
                 addStrategyComparison(runner.getStrategyFile(), params, priceReader);
@@ -122,6 +126,7 @@ public class ComparisonBuilder {
     private void init() {
         constructStrategyTabContent();
         constructCompanyTabContent();
+        constructRiskTabContent();
 
         tabPane = new TabPane();
         BorderPane strategiesContent = new BorderPane();
@@ -165,7 +170,13 @@ public class ComparisonBuilder {
         companiesTab.setContent(companiesContent);
         companiesTab.setClosable(false);
 
-        tabPane.getTabs().addAll(strategiesTab,companiesTab);
+        Tab riskTab = new Tab("Risk");
+        BorderPane risk = new BorderPane();
+        risk.setCenter(riskBarChart);
+        riskTab.setContent(risk);
+        riskTab.setClosable(false);
+
+        tabPane.getTabs().addAll(strategiesTab,companiesTab, riskTab);
         tabPane.setSide(Side.LEFT);
     }
 
@@ -237,6 +248,16 @@ public class ComparisonBuilder {
         companiesLineChart.setAnimated(false);  //JAVAFX BUG with clearing series data with create symbols set to false
         companiesLineChart.setCreateSymbols(false);
         ChartPanZoomManager.addResetZoomFunction(companiesLineChart);
+    }
+
+    private void constructRiskTabContent() {
+        CategoryAxis xAxisBarChart = new CategoryAxis();
+        NumberAxis yAxisBarChart = new NumberAxis();
+        xAxisBarChart.setLabel("Company");
+        yAxisBarChart.setLabel("Sharpe ratio");
+        yAxisBarChart.setForceZeroInRange(false);
+        riskBarChart = new BarChart(xAxisBarChart, yAxisBarChart);
+        riskBarChart.setLegendVisible(false);
     }
 
     private void addModeAction() {
@@ -316,29 +337,21 @@ public class ComparisonBuilder {
 
     private void addStrategyComparison(String strategyFile, Map<String, ?> params, Reader priceReader) {
         XYChart.Series<Long,Double> series = new XYChart.Series<>();
-        for (Profit p: portfolio.getProfitList()) {
-            XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
-            series.getData().add(data);
+        int j = 0;
+        Iterator<Profit> i = portfolio.getProfitList().iterator();
+        int step = Math.max(portfolio.getProfitList().size()/MAX_NODES,1);
+        while (i.hasNext()) {
+            Profit p = i.next();
+            //add node if it's every (step)th node or if last node
+            if (j % step == 0 || !i.hasNext()) {
+                XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
+                series.getData().add(data);
+            }
+            j++;
         }
         String strategyName = FileUtils.extractFilename(strategyFile);
         series.setName(strategyName);
-        if (!optimalPlotted) {
-            List<Price> priceList = new ArrayList<>();
-            for (String company: (Set<String>)priceReader.getHistory().getAllCompanies()) {
-                priceList.addAll(priceReader.getCompanyHistory(company));
-            }
-            OptimalProfit optimalProfit = new OptimalProfit(priceList);
-            XYChart.Series<Long, Double> optimal = new XYChart.Series<>();
-            for (Profit p : optimalProfit.getProfitList()) {
-                XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
-                optimal.getData().add(data);
-            }
-            optimalReturn = optimalProfit.getProfitList().get(optimalProfit.getProfitList().size()-1).getProfitValue();
-            strategiesLineChart.getData().add(optimal);
-            Tooltip tooltip = new Tooltip("OPTIMAL");
-            Tooltip.install(optimal.getNode(), tooltip);
-            optimalPlotted = true;
-        }
+        plotOptimal(priceReader);
         //only add line for strategy if parameters result in better profit or if we haven't run 5 strategies yet
         if (bestStrategies.size() < NUM_RESULTS || portfolio.getTotalReturnValue() > strategyProfits.get(bestStrategies.get(NUM_RESULTS - 1))) {
             if (this.strategiesSeries.containsKey(strategyName)) {
@@ -361,6 +374,34 @@ public class ComparisonBuilder {
             }
 
             updateStrategyRankings(strategyName, copy, portfolio);
+        }
+    }
+
+    private void plotOptimal(Reader priceReader) {
+        if (!optimalPlotted) {
+            List<Price> priceList = new ArrayList<>();
+            for (String company: (Set<String>)priceReader.getHistory().getAllCompanies()) {
+                priceList.addAll(priceReader.getCompanyHistory(company));
+            }
+            OptimalProfit optimalProfit = new OptimalProfit(priceList);
+            XYChart.Series<Long, Double> optimal = new XYChart.Series<>();
+            Iterator<Profit> i = optimalProfit.getProfitList().iterator();
+            int step = Math.max(optimalProfit.getProfitList().size()/MAX_NODES,1);
+            int j = 0;
+            while (i.hasNext()) {
+                Profit p = i.next();
+                //add node if it's every (step)th node or if last node
+                if (j % step == 0 || !i.hasNext()) {
+                    XYChart.Data data = new XYChart.Data<>(p.getProfitDate().getMillis(), p.getProfitValue());
+                    optimal.getData().add(data);
+                }
+                j++;
+            }
+            optimalReturn = optimalProfit.getProfitList().get(optimalProfit.getProfitList().size()-1).getProfitValue();
+            strategiesLineChart.getData().add(optimal);
+            Tooltip tooltip = new Tooltip("OPTIMAL");
+            Tooltip.install(optimal.getNode(), tooltip);
+            optimalPlotted = true;
         }
     }
 
@@ -422,7 +463,7 @@ public class ComparisonBuilder {
                 String company = observable.getValue();
                 ProfileBuilder profileBuilder = new ProfileBuilder();
                 profile.setCenter(profileBuilder.buildProfile(new Profile(priceReader.getCompanyHistory(company)), Orientation.VERTICAL));
-                moreInfo.setOnAction(DialogBuilder.constructSimpleDialog(company, ReutersLoader.buildWebsiteDialog(company)));
+                moreInfo.setOnAction(DialogBuilder.constructWebDialog(company, ReutersLoader.buildWebView()));
             }
         });
         profileCompanySelector.getSelectionModel().selectFirst();
@@ -461,6 +502,30 @@ public class ComparisonBuilder {
         strategiesTableRows.put(strategy, row);
     }
 
+    private void updateRiskChart(Reader priceReader) {
+        XYChart.Series series = new XYChart.Series();
+        for (String company: (Set<String>)priceReader.getHistory().getAllCompanies()) {
+            List<Double> doubles = new ArrayList<>();
+            List<Price> prices = priceReader.getCompanyHistory(company);
+            for (Price p: prices) {
+                doubles.add(p.getValue());
+            }
+            double sharpeRatio = FinanceUtils.calcSharpeRatio(doubles, prices.get(0).getDate(), prices.get(prices.size()-1).getDate());
+            XYChart.Data data = new XYChart.Data(company, sharpeRatio);
+            series.getData().add(data);
+        }
+        riskBarChart.getData().add(series);
+        for (XYChart.Data data: (ObservableList<XYChart.Data>)series.getData()) {
+            Tooltip tooltip = new Tooltip((String)data.getXValue());
+            Tooltip.install(data.getNode(), tooltip);
+            if ((double)data.getYValue() > 0) {
+                data.getNode().getStyleClass().add("bar-profit");
+            } else {
+                data.getNode().getStyleClass().add("bar-loss");
+            }
+        }
+    }
+
     private void clearAllData() {
         strategiesLineChart.getData().clear();
         strategiesLines.clear();
@@ -476,6 +541,7 @@ public class ComparisonBuilder {
         optimalPlotted = false;
         optimalReturn = 0;
         companiesLineChart.getData().clear();
+        riskBarChart.getData().clear();
     }
 
     private void clearCompaniesGraph() {

@@ -58,6 +58,7 @@ public class ApplicationFrame extends Application {
 
     private Stage stage;
     private BorderPane main;
+    private GridPane now;
     private BorderPane graph;
     private GridPane stats;
     private BorderPane analysis;
@@ -72,6 +73,7 @@ public class ApplicationFrame extends Application {
 
     private Portfolio portfolio = new Portfolio(new History<>(),null,null);
 
+    private NowBuilder n = new NowBuilder();
     private GraphBuilder g = new GraphBuilder();
     private AnalysisBuilder a = new AnalysisBuilder();
     private StatsBuilder s = new StatsBuilder();
@@ -149,12 +151,14 @@ public class ApplicationFrame extends Application {
     private void initBody()
     {
         final VBox body = new VBox();
+        now = new GridPane();
         graph = new BorderPane();
         stats = new GridPane();
         analysis = new BorderPane();
         comparison = new BorderPane();
 
         tabPane = new TabPane();
+//        Tab nowTab = constructTab("Now", null, now);
         Tab dataTab = constructTab("Data", ImageUtils.getImage("app-icons/tab-data-icon.png"), graph);
         addHelpModal(dataTab,ImageUtils.getImage("images/mouse-graph.jpeg"));
 
@@ -281,6 +285,11 @@ public class ApplicationFrame extends Application {
                 }
                 loader.setText("Refreshing content...");
                 loader.setProgress(0);
+//                if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Now") && !loaded) || force) {
+//                    now.setVisible(false);
+//                    n.buildCurrentStats(now);
+//                    now.setVisible(true);
+//                }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Data") && !loaded) || force) {
                     graph.setVisible(false);
                     Map<DateTime, OrderType> orderRecord = new HashMap<>();
@@ -304,7 +313,7 @@ public class ApplicationFrame extends Application {
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Comparison") && !loaded) || force) {
                     comparison.setVisible(false);
-                    c.buildComparison(runner, comparison, portfolio, prices, priceReader, manager.getParams());
+                    c.buildComparison(runner, comparison, portfolio, priceReader, manager.getParams());
                     comparison.setVisible(true);
                 }
                 if (!portfolio.isEmpty()) {

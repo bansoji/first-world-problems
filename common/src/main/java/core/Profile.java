@@ -16,6 +16,7 @@ public class Profile {
     private double dailyDifference;
     private double interDayVariance;
     private String company;
+    public static final List<String> metrics = new ArrayList<>(Arrays.asList("Volume","Trend","Daily Variance","Daily Difference", "Inter-day variance"));
 
     /**
      * Build the profile for a company.

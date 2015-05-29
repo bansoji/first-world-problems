@@ -6,10 +6,7 @@ import utils.Line;
 import utils.Point;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -90,62 +87,39 @@ public class OrderManager {
         // Initialise the timer.
         //startTime = System.currentTimeMillis();
 
+        //Create a ParameterManager for the strategy constructor.
+        ParameterManager pManager = new ParameterManager<Number>();
+        pManager.updateParams(paramName);
+        Properties props = pManager.getProperties(paramName);
+        Enumeration properties = props.propertyNames();
 
-        ///////////////////////////////
-        // RUNNING.
-        ///////////////////////////////
+        while (properties.hasMoreElements()){
+            String key = (String)properties.nextElement();
+            //if the value of the property is not numerical, it is not a parameter
+            String value = props.getProperty(key);
+            if (!format.FormatChecker.isDouble(value)) continue;
+            boolean isInteger = FormatChecker.isInteger(value);
+            if (isInteger) {
+                pManager.put(key, value);
+            }
+        }
 
         for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
             logger.info("Analysing prices for " + company);
             List<Price> companyHistory = tReader.getCompanyHistory(company);
+            // PrintUtils.printPrices(companyHistory);
 
-            int i = 0;
-            List<Price> strategyInput;
-            TradingStrategy strategy;
+            // Initialise the trading strategy.
+            TradingStrategy strategy = new CombinationStrategy(companyHistory, pManager, paramName);
 
-            while (i < companyHistory.size()){
-                InputStream input = new BufferedInputStream(new FileInputStream(paramName));
-                if (i+combinationWindow < companyHistory.size()){
-                    strategyInput = companyHistory.subList(i, i+combinationWindow);
-                } else {
-                    strategyInput = companyHistory.subList(i, companyHistory.size());
-                }
+            ///////////////////////////////
+            // RUNNING.
+            ///////////////////////////////
 
-                //Make prices into points
-                List<Point> priceInput = new ArrayList<>();
-                for (Price p : strategyInput) {
-                    priceInput.add(new Point((double) DateUtils.parseMonthAbbr(p.getDate()).getMillis(), p.getValue()));       // TODO: This could potentially be optimised.
-                }
-                Line line = GeometryUtils.createLine(priceInput);
-
-                if (line.getSlope() < -1){
-                    strategy = new NullStrategy(strategyInput, input);
-                    strategy.generateOrders();
-                    List<Order> ordersGenerated = strategy.getOrders();
-                    csvOrderWriter.writeOrders(ordersGenerated);
-                } else if (line.getSlope() <  0){
-                    strategy = new BuyHard(strategyInput, input);
-                    strategy.generateOrders();
-                    List<Order> ordersGenerated = strategy.getOrders();
-                    csvOrderWriter.writeOrders(ordersGenerated);
-                } else if (line.getSlope() <  1){
-                    strategy = new BuyHardVengeance(strategyInput, input);
-                    strategy.generateOrders();
-                    List<Order> ordersGenerated = strategy.getOrders();
-                    csvOrderWriter.writeOrders(ordersGenerated);
-                } else {
-                    strategy = new PriceChannelStrategy(strategyInput, input);
-                    strategy.generateOrders();
-                    List<Order> ordersGenerated = strategy.getOrders();
-                    csvOrderWriter.writeOrders(ordersGenerated);
-                }
-                input.close();
-                i += combinationWindow;
-            }
-
-
-
-
+            // Run the strategy module.
+            strategy.generateOrders();
+            List<Order> ordersGenerated = strategy.getOrders();
+            csvOrderWriter.writeOrders(ordersGenerated);
         }
 
         ///////////////////////////////

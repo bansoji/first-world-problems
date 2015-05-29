@@ -24,20 +24,12 @@ public class BuyHardVengeance implements TradingStrategy {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public BuyHardVengeance(List<Price> historicalPrices, InputStream config) {
+    public BuyHardVengeance(List<Price> historicalPrices, ParameterManager<Number> config, String configFileName) {
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
 
         // Initialise the config according to the parameters.
-        Properties prop = new Properties();
-        try {
-            prop.load(config);
-        } catch (IOException e) {
-            logger.severe("Invalid Parameters File.");
-            e.printStackTrace();
-        }
-
-        configureStrategy(prop);
+        configureStrategy(config.getProperties(configFileName));
 
         String parameters = "Parameters Used:\n" + "\n" +
                 "Threshold: " + this.threshold + "\n" +

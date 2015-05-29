@@ -17,8 +17,9 @@
 
         <dependency>
             <groupId>SENG3011</groupId>
-            <artifactId>priceChannel</artifactId>
+            <artifactId>ui</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
     </dependencies>
 </project>

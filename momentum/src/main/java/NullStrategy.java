@@ -20,20 +20,12 @@ public class NullStrategy implements TradingStrategy {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public NullStrategy(List<Price> historicalPrices, InputStream config) {
+    public NullStrategy(List<Price> historicalPrices, ParameterManager<Number> config, String configFileName) {
        
         // Initialise the config according to the parameters.
 		// For consistency with the other strategies, still take in a config file.
-		// Here it does not matter what you pass in. 
-        Properties prop = new Properties();
-        try {
-            prop.load(config);
-        } catch (IOException e) {
-            logger.severe("Invalid Parameters File.");
-            e.printStackTrace();
-        }
-
-        configureStrategy(prop);
+		// Here it does not matter what you pass in.
+        configureStrategy(config.getProperties(configFileName));
 
         String parameters = "Parameters Used:\n" +
                 "N/A For this strategy.\n";

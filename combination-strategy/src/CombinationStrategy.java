@@ -3,7 +3,12 @@ import utils.FinanceUtils;
 import quickDate.Order;
 import main.OrderType;
 import quickDate.Price;
+import utils.GeometryUtils;
+import utils.Line;
+import utils.Point;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -17,6 +22,8 @@ import java.util.logging.Logger;
 public class CombinationStrategy implements TradingStrategy {
     private List<Price> prices;
     private List<Order> ordersGenerated;
+    ParameterManager<Number> config;
+    String configFileName;
 
     private int combinationWindow;
 
@@ -38,20 +45,14 @@ public class CombinationStrategy implements TradingStrategy {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public CombinationStrategy(List<Price> historicalPrices, InputStream config) {
+    public CombinationStrategy(List<Price> historicalPrices, ParameterManager<Number> config, String configFileName) {
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
+        this.config = config;
+        this.configFileName = configFileName;
 
         // Initialise the config according to the parameters.
-        Properties prop = new Properties();
-        try {
-            prop.load(config);
-        } catch (IOException e) {
-            logger.severe("Invalid Parameters File.");
-            e.printStackTrace();
-        }
-
-        configureStrategy(prop);
+        configureStrategy(config.getProperties(configFileName));
 
         String parameters = "Parameters Used:\n" +
                 "Combination Window: " + this.combinationWindow + "\n" +
@@ -105,29 +106,45 @@ public class CombinationStrategy implements TradingStrategy {
         this.channelThreshold = Double.parseDouble(prop.getProperty("threshold", "0.00"));
         this.channelVolume = Integer.parseInt(prop.getProperty("volume", "100"));
 
-        // Null strategy parameters.
-
         startDate = prop.getProperty("startDate");
         endDate = prop.getProperty("endDate");
     }
 
     @Override
     public void generateOrders() {
-        //grab the first combinationWindow number of prices, put into a cut arrayList.
-        //use linear regression, find line of best fit
-        //if gradient < something, then use null strat
-        //if gradient = something, then use strategyA
-            //if class has not been constructed, construct it, giving it sub-arraylist + config? (this might not work)..
-            //if class has been constructed, Strategy.setPrices(subarraylist)
-            //strategy.generateOrders()
-            //strategy.getOrders() and add it to Combination's strategy order list.
-        //if gradient = something, then use strategyB
+        int i = 0;
+        List<Price> strategyInput;
+        TradingStrategy strategy;
 
-        //if gradient > something, then use strategyC
+        while (i < prices.size()) {
+            if (i + combinationWindow < prices.size()) {
+                strategyInput = prices.subList(i, i + combinationWindow);
+            } else {
+                strategyInput = prices.subList(i, prices.size());
+            }
 
+            //Make prices into points
+            List<Point> priceInput = new ArrayList<>();
+            for (Price p : strategyInput) {
+                priceInput.add(new Point((double) DateUtils.parseMonthAbbr(p.getDate()).getMillis(), p.getValue()));       // TODO: This could potentially be optimised.
+            }
+            Line line = GeometryUtils.createLine(priceInput);
 
+            if (line.getSlope() < -1) {
+                strategy = new NullStrategy(strategyInput, config, configFileName);
+            } else if (line.getSlope() < 0) {
+                strategy = new BuyHard(strategyInput, config, configFileName);
+            } else if (line.getSlope() < 1) {
+                strategy = new BuyHardVengeance(strategyInput, config, configFileName);
+            } else {
+                strategy = new PriceChannelStrategy(strategyInput, config, configFileName);
+            }
+            strategy.generateOrders();
+            List<Order> subOrdersGenerated = strategy.getOrders();
+            ordersGenerated.addAll(subOrdersGenerated);
 
-
+            i += combinationWindow;
+        }
     }
 
     @Override

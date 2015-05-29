@@ -4,6 +4,7 @@ import quickDate.Price;
 import quickDate.PriceReader;
 
 import java.io.*;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -85,15 +86,30 @@ public class OrderManager {
         // Initialise the timer.
         //startTime = System.currentTimeMillis();
 
+        //Create a ParameterManager for the strategy constructor.
+        ParameterManager pManager = new ParameterManager<Number>();
+        pManager.updateParams(paramName);
+        Properties props = pManager.getProperties(paramName);
+        Enumeration properties = props.propertyNames();
+
+        while (properties.hasMoreElements()){
+            String key = (String)properties.nextElement();
+            //if the value of the property is not numerical, it is not a parameter
+            String value = props.getProperty(key);
+            if (!format.FormatChecker.isDouble(value)) continue;
+            boolean isInteger = FormatChecker.isInteger(value);
+            if (isInteger) {
+                pManager.put(key, value);
+            }
+        }
+
         for (String company: (Set<String>)tReader.getHistory().getAllCompanies()) {
-            // Load the properties file.
-            InputStream input = new BufferedInputStream(new FileInputStream(paramName));
             logger.info("Analysing prices for " + company);
             List<Price> companyHistory = tReader.getCompanyHistory(company);
             // PrintUtils.printPrices(companyHistory);
 
             // Initialise the trading strategy.
-            TradingStrategy strategy = new PriceChannelStrategy(companyHistory, input);
+            TradingStrategy strategy = new PriceChannelStrategy(companyHistory, pManager, paramName);
 
             ///////////////////////////////
             // RUNNING.
@@ -105,7 +121,6 @@ public class OrderManager {
             csvOrderWriter.writeOrders(ordersGenerated);
 
             // Close the input stream.
-            input.close();
         }
 
         ///////////////////////////////

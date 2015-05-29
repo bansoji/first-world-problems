@@ -1,0 +1,48 @@
+#index-summary {
+    -fx-background-color: white;
+    -fx-padding: 30px;
+    -fx-hgap: 20px;
+}
+
+#indices {
+    -fx-spacing: 20px;
+    -fx-padding: 0px 50px 0px 0px;
+}
+
+.index-price {
+    -fx-alignment: center;
+}
+
+.news-box {
+    -fx-background-color: white;
+    -fx-spacing: 5px;
+    -fx-padding: 10px;
+}
+
+.news {
+    -fx-spacing: 20px;
+}
+
+.news-date {
+    -fx-text-fill: #555555;
+}
+
+.negative-percent {
+    -fx-text-fill: red;
+}
+
+.positive-percent {
+    -fx-text-fill: green;
+}
+
+.percent-label {
+    -fx-padding: 0px 0px 0px 5px;
+}
+
+.now-selector {
+    -fx-padding: 0px 0px 10px 0px;
+}
+
+.heading {
+    -fx-padding: 0px 0px 10px 0px;
+}

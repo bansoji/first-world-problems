@@ -117,3 +117,19 @@
 .bar-metrics:hover {
     -fx-bar-fill: #990000;
 }
+
+.xsm-label {
+    -fx-font-size: 10px;
+}
+
+.sm-label {
+    -fx-font-size: 14px;
+}
+
+.md-label {
+    -fx-font-size: 18px;
+}
+
+.lg-label {
+    -fx-font-size: 30px;
+}

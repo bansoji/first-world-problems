@@ -71,7 +71,6 @@ public class ComparisonBuilder {
 
     private String dataFile;
     private String strategyFile;
-    private String paramFile;
 
     private Map<String,Object> prevParams;
 
@@ -119,7 +118,6 @@ public class ComparisonBuilder {
         //update prev files
         dataFile = runner.getDataFile();
         strategyFile = runner.getStrategyFile();
-        paramFile = runner.getParamFile();
         comparison.setCenter(tabPane);
     }
 

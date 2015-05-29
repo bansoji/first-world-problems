@@ -58,7 +58,7 @@ public class ApplicationFrame extends Application {
 
     private Stage stage;
     private BorderPane main;
-    private GridPane now;
+    private BorderPane now;
     private BorderPane graph;
     private GridPane stats;
     private BorderPane analysis;
@@ -89,7 +89,7 @@ public class ApplicationFrame extends Application {
         primaryStage.setTitle("BuyHard Platform");
         main = new BorderPane();
         Scene scene = new Scene(main);
-        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css", "analysis.css", "comparison.css");
+        scene.getStylesheets().addAll("general.css", "now.css", "graph.css", "stats.css", "analysis.css", "comparison.css");
         primaryStage.setScene(scene);
         primaryStage.setMinHeight(768);
         primaryStage.setMinWidth(1024);
@@ -151,14 +151,14 @@ public class ApplicationFrame extends Application {
     private void initBody()
     {
         final VBox body = new VBox();
-        now = new GridPane();
+        now = new BorderPane();
         graph = new BorderPane();
         stats = new GridPane();
         analysis = new BorderPane();
         comparison = new BorderPane();
 
         tabPane = new TabPane();
-//        Tab nowTab = constructTab("Now", null, now);
+        Tab nowTab = constructTab("Now", ImageUtils.getImage("app-icons/tab-now-icon.png"), now);
         Tab dataTab = constructTab("Data", ImageUtils.getImage("app-icons/tab-data-icon.png"), graph);
         addHelpModal(dataTab,ImageUtils.getImage("images/mouse-graph.jpeg"));
 
@@ -166,7 +166,7 @@ public class ApplicationFrame extends Application {
         Tab analysisTab = constructTab("Analysis", ImageUtils.getImage("app-icons/tab-analysis-icon.png"), analysis);
         Tab comparisonTab = constructTab("Comparison", ImageUtils.getImage("app-icons/tab-comparison-icon.png"), comparison);
 
-        tabPane.getTabs().addAll(dataTab, statsTab, analysisTab, comparisonTab);
+        tabPane.getTabs().addAll(nowTab, dataTab, statsTab, analysisTab, comparisonTab);
         addTabLoadingAction(tabPane);
 
         body.getChildren().addAll(tabPane, new Separator());
@@ -285,11 +285,11 @@ public class ApplicationFrame extends Application {
                 }
                 loader.setText("Refreshing content...");
                 loader.setProgress(0);
-//                if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Now") && !loaded) || force) {
-//                    now.setVisible(false);
-//                    n.buildCurrentStats(now);
-//                    now.setVisible(true);
-//                }
+                if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Now") && !loaded) || force) {
+                    now.setVisible(false);
+                    n.buildCurrentStats(now);
+                    now.setVisible(true);
+                }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Data") && !loaded) || force) {
                     graph.setVisible(false);
                     Map<DateTime, OrderType> orderRecord = new HashMap<>();

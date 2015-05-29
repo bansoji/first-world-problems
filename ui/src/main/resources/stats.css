@@ -24,14 +24,6 @@
     -fx-bar-fill: red;
 }
 
-.sm-label {
-    -fx-font-size: 14px;
-}
-
-.lg-label {
-    -fx-font-size: 30px;
-}
-
 #returns {
     -fx-background-color: white;
     -fx-padding: 30px;

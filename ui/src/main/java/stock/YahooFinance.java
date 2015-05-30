@@ -55,7 +55,7 @@ public class YahooFinance {
             CSVReader csvReader = new CSVReader(br);
             String[] values = csvReader.readNext();
             csvReader.close();
-            values[1] = values[1].replace("%","");
+            values[2] = values[2].replace("%","");
             stock = new Stock(values[0],symbol,values[1],values[2]);
 
         } catch (Exception e) {

@@ -133,3 +133,13 @@
 .lg-label {
     -fx-font-size: 30px;
 }
+
+.title-box {
+    -fx-background-color: #005C54;
+    -fx-padding: 10px 10px 10px 15px;
+}
+
+.title-box-label {
+    -fx-font-size: 18px;
+    -fx-text-fill: white;
+}

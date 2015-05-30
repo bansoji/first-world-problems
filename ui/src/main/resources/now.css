@@ -6,6 +6,9 @@
 
 #indices {
     -fx-spacing: 20px;
+}
+
+#indices-box {
     -fx-padding: 0px 50px 0px 0px;
 }
 
@@ -27,6 +30,16 @@
     -fx-text-fill: #555555;
 }
 
+#company-price {
+    -fx-background-color: white;
+    -fx-padding: 5px;
+}
+
+#company-search-box {
+    -fx-padding: 20px 0px 10px 0px;
+    -fx-spacing: 30px;
+}
+
 .negative-percent {
     -fx-text-fill: red;
 }
@@ -45,4 +58,16 @@
 
 .heading {
     -fx-padding: 0px 0px 10px 0px;
+}
+
+.default {
+    -fx-opacity: 0.2;
+}
+
+#default-label {
+    -fx-font-size: 18px;
+}
+
+#default-pane {
+    -fx-alignment: center;
 }

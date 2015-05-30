@@ -1,3 +1,4 @@
+import components.TitleBox;
 import format.FormatUtils;
 import dialog.DialogBuilder;
 import graph.ChartPanZoomManager;
@@ -42,27 +43,30 @@ public class StatsBuilder {
         final VBox vbox = new VBox();
         vbox.setSpacing(15);
         TableView equity = buildEquityTable(portfolio.getAssetValue());
-        vbox.getChildren().addAll(buildPortfolioStats(portfolio),equity);
+        TitleBox equityBox = new TitleBox("Equity", equity);
+        vbox.getChildren().addAll(buildPortfolioStats(portfolio),equityBox);
+        VBox.setVgrow(equityBox, Priority.ALWAYS);
         VBox.setVgrow(equity, Priority.ALWAYS);
 
         stats.setPadding(new Insets(30, 30, 30, 30));
 
         TableView returnTable = buildTable(portfolio.getReturns(),portfolio.getTotalReturnValue());
-        VBox graphs = new VBox();
+        VBox returns = new VBox();
         vbox.setSpacing(30);
-        graphs.getChildren().addAll(buildProfitChart(portfolio.getProfitList()), returnTable);
+        returns.getChildren().addAll(buildProfitChart(portfolio.getProfitList()), returnTable);
+        TitleBox returnBox = new TitleBox("Returns", returns);
 
         stats.setConstraints(vbox, 0, 0);
-        stats.setConstraints(graphs, 1, 0);
+        stats.setConstraints(returnBox, 1, 0);
         stats.setHgap(50);
         GridPane.setVgrow(vbox, Priority.ALWAYS);
-        GridPane.setVgrow(graphs, Priority.ALWAYS);
-        GridPane.setHgrow(graphs, Priority.ALWAYS);
-        stats.getChildren().setAll(vbox,graphs);
+        GridPane.setVgrow(returnBox, Priority.ALWAYS);
+        GridPane.setHgrow(returnBox, Priority.ALWAYS);
+        stats.getChildren().setAll(vbox,returnBox);
 
     }
 
-    private VBox buildPortfolioStats(Portfolio portfolio) {
+    private Pane buildPortfolioStats(Portfolio portfolio) {
 
         CategoryAxis yAxis = new CategoryAxis();
         NumberAxis xAxis = new NumberAxis();
@@ -138,7 +142,7 @@ public class StatsBuilder {
         totalReturns.getChildren().addAll(totalReturnAmountLabel,totalReturnValueLabel,percentReturnAmountLabel,percentReturnValueLabel);
 
         stats.getChildren().addAll(totalReturns, barChart);
-        return stats;
+        return new TitleBox("Summary",stats);
     }
 
     /** places a text label with a bar's value above a bar node for a given XYChart.Data */

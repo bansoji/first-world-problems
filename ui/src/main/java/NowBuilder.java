@@ -1,5 +1,6 @@
 import components.ImageViewPane;
 import components.LabelledSelector;
+import components.TitleBox;
 import image.ImageUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -7,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -23,6 +25,7 @@ import org.jsoup.nodes.Element;
 import stock.Stock;
 import stock.YahooFinance;
 
+import java.net.ConnectException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
@@ -37,6 +40,7 @@ public class NowBuilder {
 
     private static final Logger logger = Logger.getLogger("application_log");
 
+    private BorderPane now;
     private ScrollPane companyNews;
     private ScrollPane topNews;
     private ImageView chartImage;
@@ -48,21 +52,24 @@ public class NowBuilder {
     private VBox news;
 
     public void buildCurrentStats(BorderPane now) {
-        if (companyNews == null) init(now);
+        this.now = now;
+        if (companyNews == null) init();
         now.setPadding(new Insets(30));
 
-        buildSummary();
-        buildTopNews();
-        buildCompanyNews("^AORD");
-        now.setCenter(indices);
-        now.setRight(news);
+        try {
+            buildSummary();
+            buildTopNews();
+            buildCompanyNews("^AORD");
+            now.setCenter(indices);
+            now.setRight(news);
+        } catch (ConnectException e) {
+            showDefaultImage();
+        }
     }
 
-    public void init(BorderPane now) {
-        indices = new VBox();
+    public void init() {
+        VBox indices = new VBox();
         indices.setId("indices");
-        Label indicesTitle = new Label("Indices");
-        indicesTitle.getStyleClass().add("md-label");
         summary = new GridPane();
         summary.setId("index-summary");
         charts = new BorderPane();
@@ -75,13 +82,19 @@ public class NowBuilder {
             public void changed(ObservableValue<? extends String> observable, String oldIndex, String newIndex) {
                 Matcher m = Pattern.compile("\\(([^)]+)\\)").matcher(newIndex);
                 if (m.find()) {
-                    buildIndexChart(m.group(1));
+                    try {
+                        buildIndexChart(m.group(1));
+                    } catch (ConnectException e) {
+                        logger.warning("Could not update index chart");
+                    }
                 }
             }
         });
         indicesChooser.getSelectionModel().selectFirst();
         charts.setTop(labelledSelector);
-        indices.getChildren().addAll(indicesTitle, summary, charts);
+        indices.getChildren().addAll(summary, charts);
+        this.indices = new TitleBox("Indices", indices);
+        this.indices.setId("indices-box");
         HBox.setHgrow(indices, Priority.ALWAYS);
 
         news = new VBox();
@@ -93,30 +106,31 @@ public class NowBuilder {
         companyNews.setFitToWidth(true);
         companyNewsBoxes = new VBox();
         companyNews.setContent(companyNewsBoxes);
-        Pane companySearcher = buildCompanySearcher();
+        HBox companySearcher = buildCompanySearcher();
         companySearcher.getStyleClass().add("now-selector");
         company.setTop(companySearcher);
         company.setCenter(companyNews);
+        TitleBox companyNewsBox = new TitleBox("Company news", company);
 
-        BorderPane top = new BorderPane();
         topNews = new ScrollPane();
         topNews.setPrefHeight(300);
         topNews.setPrefWidth(450);
         topNews.setFitToWidth(true);
         topNewsBoxes = new VBox();
         topNews.setContent(topNewsBoxes);
-        Label topNewsLabel = new Label("Latest news");
-        topNewsLabel.getStyleClass().addAll("md-label", "heading");
-        top.setTop(topNewsLabel);
-        top.setCenter(topNews);
+        TitleBox topNewsBox = new TitleBox("Latest news", topNews);
 
-        news.getChildren().addAll(top, company);
+        news.getChildren().addAll(topNewsBox, companyNewsBox);
         HBox.setHgrow(news,Priority.ALWAYS);
     }
 
-    public void buildSummary() {
+    public void buildSummary() throws ConnectException{
         summary.getChildren().clear();
         List<Stock> stocks = YahooFinance.get(new String[]{"^AORD","^AXJO","^ATOI"});
+        if (stocks == null) {
+            now.setVisible(false);
+            throw new ConnectException();
+        }
         int col = 0;
         for (Stock stock: stocks) {
             Label symbol = new Label(stock.getName());
@@ -143,27 +157,47 @@ public class NowBuilder {
         }
     }
 
-    public Pane buildCompanySearcher() {
-        BorderPane pane = new BorderPane();
-        Label boxTitle = new Label("Company news");
-        boxTitle.getStyleClass().addAll("md-label", "heading");
-        pane.setTop(boxTitle);
+    public HBox buildCompanySearcher() {
+        HBox companySearchBox = new HBox();
+        companySearchBox.setId("company-search-box");
         HBox search = new HBox();
         TextField companySearch = new TextField();
         Button searchButton = new Button("Search");
+        HBox companyPrice = new HBox();
+        companyPrice.setId("company-price");
+        Stock stock = YahooFinance.get("^AORD");
+        Label price = new Label(stock.getPrice() + " (" + stock.getPercent() + "%)");
+        price.getStyleClass().add("xsm-label");
+        if (Double.parseDouble(stock.getPercent()) > 0) {
+            price.setGraphic(ImageUtils.getImage("icons/up.png"));
+        } else {
+            price.setGraphic(ImageUtils.getImage("icons/down.png"));
+        }
+        companyPrice.getChildren().add(price);
         search.getChildren().addAll(companySearch, searchButton);
-        pane.setCenter(search);
+        companySearchBox.getChildren().addAll(search,companyPrice);
         searchButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 String company = companySearch.getText();
-                buildCompanyNews(company);
+                try {
+                    buildCompanyNews(company);
+                    Stock stock = YahooFinance.get(company);
+                    price.setText(stock.getPrice() + " (" + stock.getPercent() + "%)");
+                    if (Double.parseDouble(stock.getPercent()) > 0) {
+                        price.setGraphic(ImageUtils.getImage("icons/up.png"));
+                    } else {
+                        price.setGraphic(ImageUtils.getImage("icons/down.png"));
+                    }
+                } catch (ConnectException e) {
+                    logger.warning("Could not update company news");
+                }
             }
         });
-        return pane;
+        return companySearchBox;
     }
 
-    public void buildCompanyNews(String company) {
+    public void buildCompanyNews(String company) throws ConnectException {
         companyNewsBoxes.getChildren().clear();
         final String url = "http://finance.yahoo.com/rss/headline?s=" + company;
 
@@ -179,10 +213,11 @@ public class NowBuilder {
             }
         } catch (Exception e) {
             logger.severe("Failed to load company news: " + e);
+            throw new ConnectException();
         }
     }
 
-    public void buildTopNews() {
+    public void buildTopNews() throws ConnectException {
         final String url = "http://finance.yahoo.com/rss/topfinstories";
         try {
             Document doc = Jsoup.connect(url).get();
@@ -196,6 +231,7 @@ public class NowBuilder {
             }
         } catch (Exception e) {
             logger.severe("Failed to load latest news: " + e);
+            throw new ConnectException();
         }
     }
 
@@ -223,13 +259,31 @@ public class NowBuilder {
         return newsBox;
     }
 
-    public void buildIndexChart(String index) {
+    public void buildIndexChart(String index) throws ConnectException {
         charts.getChildren().remove(chartImage);
         Image image = new Image("https://chart.finance.yahoo.com/z?s=" + index + "&t=5d&q=l&l=on&z=l&a=v&p=s&lang=en-AU&region=AU");
-        PixelReader reader = image.getPixelReader();
-        //crop white bit at the bottom of the chart
-        WritableImage newImage = new WritableImage(reader, 0, 0, (int)image.getWidth(), 350);
-        chartImage = new ImageView(newImage);
-        charts.setCenter(new ImageViewPane(chartImage));
+        if (!image.isError()) {
+            PixelReader reader = image.getPixelReader();
+            //crop white bit at the bottom of the chart
+            WritableImage newImage = new WritableImage(reader, 0, 0, (int)image.getWidth(), 350);
+            chartImage = new ImageView(newImage);
+            charts.setCenter(new ImageViewPane(chartImage));
+        } else {
+            throw new ConnectException();
+        }
+    }
+
+    private void showDefaultImage() {
+        ImageView imageView = ImageUtils.getImage("buyhard-logov2-indent.png");
+        imageView.getStyleClass().add("default");
+        Label label = new Label("Please check your internet connection.");
+        label.getStyleClass().add("default");
+        label.setId("default-label");
+        BorderPane pane = new BorderPane();
+        pane.setCenter(imageView);
+        pane.setBottom(label);
+        pane.setId("default-pane");
+        pane.setAlignment(label, Pos.CENTER);
+        now.setCenter(pane);
     }
 }

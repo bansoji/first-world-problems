@@ -79,7 +79,7 @@ public class ApplicationFrame extends Application {
     private StatsBuilder s = new StatsBuilder();
     private ComparisonBuilder c = new ComparisonBuilder();
 
-    private static final String VERSION_NUMBER = "1.2.0";
+    private static final String VERSION_NUMBER = "1.3.0";
     private static final String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
     private static final String FOOTER_MESSAGE = "Get the latest release at our website.";
 

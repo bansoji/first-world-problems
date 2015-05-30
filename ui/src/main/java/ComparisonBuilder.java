@@ -397,6 +397,7 @@ public class ComparisonBuilder {
             }
             optimalReturn = optimalProfit.getProfitList().get(optimalProfit.getProfitList().size()-1).getProfitValue();
             strategiesLineChart.getData().add(optimal);
+            optimal.getNode().setId("optimal");
             Tooltip tooltip = new Tooltip("OPTIMAL");
             Tooltip.install(optimal.getNode(), tooltip);
             optimalPlotted = true;
@@ -502,6 +503,7 @@ public class ComparisonBuilder {
 
     private void updateRiskChart(Reader priceReader) {
         XYChart.Series series = new XYChart.Series();
+        Map<String,Double> sharpeRatios = new HashMap<>();
         for (String company: (Set<String>)priceReader.getHistory().getAllCompanies()) {
             List<Double> doubles = new ArrayList<>();
             List<Price> prices = priceReader.getCompanyHistory(company);
@@ -509,12 +511,24 @@ public class ComparisonBuilder {
                 doubles.add(p.getValue());
             }
             double sharpeRatio = FinanceUtils.calcSharpeRatio(doubles, prices.get(0).getDate(), prices.get(prices.size()-1).getDate());
-            XYChart.Data data = new XYChart.Data(company, sharpeRatio);
+            sharpeRatios.put(company,sharpeRatio);
+        }
+        List<String> ratios = new ArrayList<>(sharpeRatios.keySet());
+        Collections.sort(ratios, new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                if (sharpeRatios.get(o1) < sharpeRatios.get(o2)) return 1;
+                if (sharpeRatios.get(o1) > sharpeRatios.get(o2)) return -1;
+                return 0;
+            }
+        });
+        for (String company: ratios) {
+            XYChart.Data data = new XYChart.Data(company, sharpeRatios.get(company));
             series.getData().add(data);
         }
         riskBarChart.getData().add(series);
         for (XYChart.Data data: (ObservableList<XYChart.Data>)series.getData()) {
-            Tooltip tooltip = new Tooltip((String)data.getXValue());
+            Tooltip tooltip = new Tooltip((String)data.getXValue() + ":\n" + FormatUtils.round5dp((double) data.getYValue()));
             Tooltip.install(data.getNode(), tooltip);
             if ((double)data.getYValue() > 0) {
                 data.getNode().getStyleClass().add("bar-profit");

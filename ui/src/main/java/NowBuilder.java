@@ -166,12 +166,18 @@ public class NowBuilder {
         HBox companyPrice = new HBox();
         companyPrice.setId("company-price");
         Stock stock = YahooFinance.get("^AORD");
-        Label price = new Label(stock.getPrice() + " (" + stock.getPercent() + "%)");
-        price.getStyleClass().add("xsm-label");
-        if (Double.parseDouble(stock.getPercent()) > 0) {
-            price.setGraphic(ImageUtils.getImage("icons/up.png"));
+        Label price;
+        if (stock != null) {
+            price = new Label(stock.getPrice() + " (" + stock.getPercent() + "%)");
+            price.getStyleClass().add("xsm-label");
+            if (Double.parseDouble(stock.getPercent()) > 0) {
+                price.setGraphic(ImageUtils.getImage("icons/up.png"));
+            } else {
+                price.setGraphic(ImageUtils.getImage("icons/down.png"));
+            }
         } else {
-            price.setGraphic(ImageUtils.getImage("icons/down.png"));
+            price = new Label();
+            price.getStyleClass().add("xsm-label");
         }
         companyPrice.getChildren().add(price);
         search.getChildren().addAll(companySearch, searchButton);

@@ -29,12 +29,16 @@ public class Portfolio {
     private double totalSellValue;
     private double totalReturnValue;
 
+    private DateTime endDate; // The last date.
+    private List<Order> endDateOrders; // Orders that occurred on the endDate.
+
     /**
      * This is the constructor for Portfolio. This also calls "Fill Portfolio".
      */
     public Portfolio (History<Order> orderHistory, DateTime startDate, DateTime endDate)
     {
         this.orderHistory = orderHistory;
+        this.endDate = endDate;
         boughtOrders = new HashMap<>();
         soldOrders = new HashMap<>();
         returns = new HashMap<>();
@@ -42,6 +46,7 @@ public class Portfolio {
         profitList = new ArrayList<>();
         companyProfitList = new HashMap<>();
         changeInProfit = new HashMap<>();
+        endDateOrders = new ArrayList<>();
         HashSet<Long> dates = new HashSet<>();
         for (String company: orderHistory.getAllCompanies()) {
             List<Order> orders = orderHistory.getCompanyHistory(company);
@@ -102,6 +107,12 @@ public class Portfolio {
                 {
                     valueNumber -= order.getValue();
                 }
+            }
+
+            // If an order exists and it occurs on the last day (endDate)
+
+            if (companyHistory.size() != 0 && companyHistory.get(companyHistory.size()-1).getOrderDate() == endDate){
+                endDateOrders.add(companyHistory.get(companyHistory.size()-1));
             }
 
             assetValue.put(name, valueNumber);
@@ -267,5 +278,17 @@ public class Portfolio {
 
     public boolean isEmpty() {
         return (orderHistory.getAllCompanies().size() == 0);
+    }
+
+    public List<Order> getEndDateOrders() {
+        return endDateOrders;
+    }
+
+    /**
+     * Gets the last date of the portfolio.
+     * @return
+     */
+    public DateTime getEndDate(){
+        return endDate;
     }
 }

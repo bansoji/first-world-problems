@@ -27,4 +27,14 @@ public enum OrderType {
             return "";
         }
     }
+
+    public String toString(){
+        if(this == OrderType.BUY) {
+            return "BUY";
+        } else if (this == OrderType.SELL){
+            return "SELL";
+        } else {
+            return "";
+        }
+    }
 }

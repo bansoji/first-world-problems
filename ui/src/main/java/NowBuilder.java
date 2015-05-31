@@ -1,19 +1,17 @@
 import components.ImageViewPane;
 import components.LabelledSelector;
+import components.SearchBar;
 import components.TitleBox;
+import core.Order;
+import core.Portfolio;
 import image.ImageUtils;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
@@ -24,14 +22,15 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import stock.Stock;
 import stock.YahooFinance;
+import table.ExportableTable;
+import table.TableUtils;
 
 import java.net.ConnectException;
 import java.net.URI;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by gavintam on 28/05/15.
@@ -50,21 +49,26 @@ public class NowBuilder {
     private VBox indices;
     private GridPane summary;
     private VBox news;
+    private TableView ordersTable;
 
-    public void buildCurrentStats(BorderPane now) {
+    //default company for news is CBA
+    private String currCompany = "CBA.AX";
+
+    public void buildCurrentStats(BorderPane now, Portfolio portfolio) {
         this.now = now;
-        if (companyNews == null) init();
-        now.setPadding(new Insets(30));
-
-        try {
-            buildSummary();
-            buildTopNews();
-            buildCompanyNews("^AORD");
-            now.setCenter(indices);
-            now.setRight(news);
-        } catch (ConnectException e) {
-            showDefaultImage();
-        }
+//        if (companyNews == null) init();
+//        now.setPadding(new Insets(30));
+//
+//        try {
+//            buildSummary();
+//            buildTopNews();
+//            buildCompanyNews(currCompany);
+//            buildOrdersInfo(portfolio);
+//            now.setCenter(indices);
+//            now.setRight(news);
+//        } catch (ConnectException e) {
+//            showDefaultImage();
+//        }
     }
 
     public void init() {
@@ -73,32 +77,48 @@ public class NowBuilder {
         summary = new GridPane();
         summary.setId("index-summary");
         charts = new BorderPane();
-        List<String> indicesList = Arrays.asList("All Ords (^AORD)", "S&P/ASX 200 (^AXJO)" , "S&P/ASX 100 (^ATOI)");
-        ComboBox<String> indicesChooser = new ComboBox<>(FXCollections.observableArrayList(indicesList));
-        LabelledSelector labelledSelector = new LabelledSelector("Index:", indicesChooser);
-        labelledSelector.getStyleClass().add("now-selector");
-        indicesChooser.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+        HBox chartHeader = new HBox();
+        chartHeader.setId("chart-header");
+        SearchBar search = new SearchBar();
+        search.setPromptText("e.g. ^AORD");
+        LabelledSelector labelledSelector = new LabelledSelector("Symbol:", search);
+        labelledSelector.setId("market-data-symbol-selector");
+        ToggleGroup periods = new ToggleGroup();
+        HBox chartDatePeriods = new HBox();
+        chartDatePeriods.setId("date-periods");
+        EventHandler<ActionEvent> updateChart = new EventHandler<ActionEvent>() {
             @Override
-            public void changed(ObservableValue<? extends String> observable, String oldIndex, String newIndex) {
-                Matcher m = Pattern.compile("\\(([^)]+)\\)").matcher(newIndex);
-                if (m.find()) {
-                    try {
-                        buildIndexChart(m.group(1));
-                    } catch (ConnectException e) {
-                        logger.warning("Could not update index chart");
-                    }
+            public void handle(ActionEvent event) {
+                String symbol = search.getText();
+                if (symbol.equals("")) symbol = "^AORD";
+                try {
+                    buildIndexChart(symbol, ((ToggleButton)periods.getSelectedToggle()).getText());
+                } catch (ConnectException e) {
+                    logger.warning("Could not update index chart");
                 }
             }
-        });
-        indicesChooser.getSelectionModel().selectFirst();
-        charts.setTop(labelledSelector);
-        indices.getChildren().addAll(summary, charts);
+        };
+        for (String period: new String[] {"1d","5d","1m","3m","6m","1y","2y","5y","max"}) {
+            ToggleButton datePeriod = new ToggleButton(period);
+            datePeriod.getStyleClass().add("toggle");
+            datePeriod.setToggleGroup(periods);
+            datePeriod.setOnAction(updateChart);
+            chartDatePeriods.getChildren().add(datePeriod);
+        }
+        periods.getToggles().get(0).setSelected(true);
+        search.setOnAction(updateChart);
+        chartHeader.getChildren().addAll(labelledSelector, chartDatePeriods);
+        try {
+            buildIndexChart("^AORD", "1d");
+        } catch (ConnectException e) {
+            logger.warning("Could not update index chart");
+        }
+        charts.setTop(chartHeader);
+        indices.getChildren().addAll(summary, new TitleBox("Market data", charts));
         this.indices = new TitleBox("Indices", indices);
         this.indices.setId("indices-box");
         HBox.setHgrow(indices, Priority.ALWAYS);
 
-        news = new VBox();
-        news.getStyleClass().add("news");
         BorderPane company = new BorderPane();
         companyNews = new ScrollPane();
         companyNews.setPrefHeight(300);
@@ -107,10 +127,12 @@ public class NowBuilder {
         companyNewsBoxes = new VBox();
         companyNews.setContent(companyNewsBoxes);
         HBox companySearcher = buildCompanySearcher();
-        companySearcher.getStyleClass().add("now-selector");
         company.setTop(companySearcher);
         company.setCenter(companyNews);
-        TitleBox companyNewsBox = new TitleBox("Company news", company);
+        Tab companyNewsTab = new Tab("Company");
+        companyNewsTab.getStyleClass().add("news-tab");
+        companyNewsTab.setContent(company);
+        companyNewsTab.setClosable(false);
 
         topNews = new ScrollPane();
         topNews.setPrefHeight(300);
@@ -118,10 +140,33 @@ public class NowBuilder {
         topNews.setFitToWidth(true);
         topNewsBoxes = new VBox();
         topNews.setContent(topNewsBoxes);
-        TitleBox topNewsBox = new TitleBox("Latest news", topNews);
+        Tab topNewsTab = new Tab("Latest");
+        topNewsTab.getStyleClass().add("news-tab");
+        topNewsTab.setContent(topNews);
+        topNewsTab.setClosable(false);
 
-        news.getChildren().addAll(topNewsBox, companyNewsBox);
+        TabPane newsTabPane = new TabPane();
+        newsTabPane.setId("news-tabpane");
+        newsTabPane.getTabs().addAll(topNewsTab, companyNewsTab);
+        news = new VBox();
+        news.getStyleClass().add("news");
+        TitleBox newsBox = new TitleBox("News",newsTabPane);
         HBox.setHgrow(news,Priority.ALWAYS);
+
+        initOrdersTable();
+        TitleBox ordersBox = new TitleBox("Suggested orders", ordersTable);
+        news.getChildren().addAll(newsBox, ordersBox);
+    }
+
+    private void initOrdersTable() {
+        ordersTable = new ExportableTable();
+        ordersTable.setPlaceholder(new Label("No suggested orders"));
+        TableColumn company = TableUtils.createMapColumn("Company", TableUtils.ColumnType.String);
+        TableColumn price = TableUtils.createMapColumn("Price", TableUtils.ColumnType.Double);
+        TableColumn type = TableUtils.createMapColumn("Type", TableUtils.ColumnType.String);
+        ordersTable.getColumns().addAll(company, price, type);
+        //ensures extra space to given to existing columns
+        ordersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
 
     public void buildSummary() throws ConnectException{
@@ -159,13 +204,12 @@ public class NowBuilder {
 
     public HBox buildCompanySearcher() {
         HBox companySearchBox = new HBox();
-        companySearchBox.setId("company-search-box");
-        HBox search = new HBox();
-        TextField companySearch = new TextField();
-        Button searchButton = new Button("Search");
+        companySearchBox.setId("company-news-selector");
+        SearchBar search = new SearchBar();
+        search.setPromptText("e.g. CBA.AX");
         HBox companyPrice = new HBox();
         companyPrice.setId("company-price");
-        Stock stock = YahooFinance.get("^AORD");
+        Stock stock = YahooFinance.get(currCompany);
         Label price;
         if (stock != null) {
             price = new Label(stock.getPrice() + " (" + stock.getPercent() + "%)");
@@ -180,13 +224,13 @@ public class NowBuilder {
             price.getStyleClass().add("xsm-label");
         }
         companyPrice.getChildren().add(price);
-        search.getChildren().addAll(companySearch, searchButton);
         companySearchBox.getChildren().addAll(search,companyPrice);
-        searchButton.setOnAction(new EventHandler<ActionEvent>() {
+        search.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                String company = companySearch.getText();
+                String company = search.getText();
                 try {
+                    currCompany = company;
                     buildCompanyNews(company);
                     Stock stock = YahooFinance.get(company);
                     price.setText(stock.getPrice() + " (" + stock.getPercent() + "%)");
@@ -265,17 +309,34 @@ public class NowBuilder {
         return newsBox;
     }
 
-    public void buildIndexChart(String index) throws ConnectException {
+    public void buildIndexChart(String index, String period) throws ConnectException {
         charts.getChildren().remove(chartImage);
-        Image image = new Image("https://chart.finance.yahoo.com/z?s=" + index + "&t=5d&q=l&l=on&z=l&a=v&p=s&lang=en-AU&region=AU");
+        if (period.equals("max")) period = "my";
+        Image image = new Image("https://chart.finance.yahoo.com/z?s=" + index + "&t=" + period + "&q=l&l=on&z=l&a=v&p=s&lang=en-AU&region=AU");
         if (!image.isError()) {
-            PixelReader reader = image.getPixelReader();
-            //crop white bit at the bottom of the chart
-            WritableImage newImage = new WritableImage(reader, 0, 0, (int)image.getWidth(), 350);
-            chartImage = new ImageView(newImage);
+            //no volume chart for 1d and 5d
+            if (period.equals("1d") || period.equals("5d")) {
+                PixelReader reader = image.getPixelReader();
+                //crop white bit at the bottom of the chart
+                WritableImage newImage = new WritableImage(reader, 0, 0, (int) image.getWidth(), 350 + (period.equals("1d")?10:0));
+                chartImage = new ImageView(newImage);
+            } else {
+                chartImage = new ImageView(image);
+            }
             charts.setCenter(new ImageViewPane(chartImage));
         } else {
             throw new ConnectException();
+        }
+    }
+
+    private void buildOrdersInfo(Portfolio portfolio) {
+        ordersTable.getItems().clear();
+        for (Order order: portfolio.getEndDateOrders()) {
+            Map<String,Object> orders = new HashMap<>();
+            orders.put("Company", order.getCompanyName());
+            orders.put("Price", order.getPrice());
+            orders.put("Type", order.getOrderType().toString());
+            ordersTable.getItems().add(orders);
         }
     }
 

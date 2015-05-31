@@ -16,14 +16,30 @@
     -fx-alignment: center;
 }
 
+.news {
+    -fx-spacing: 20px;
+}
+
+#news-tabpane .tab-content-area {
+    -fx-padding: 10px;
+}
+
+.news-tab:selected {
+    -fx-background-color: white;
+}
+
+#news-tabpane {
+    -fx-background-color: white;
+}
+
+#news-tabpane.tab-pane {
+    -fx-tab-min-width: 200px;
+}
+
 .news-box {
     -fx-background-color: white;
     -fx-spacing: 5px;
     -fx-padding: 10px;
-}
-
-.news {
-    -fx-spacing: 20px;
 }
 
 .news-date {
@@ -31,13 +47,7 @@
 }
 
 #company-price {
-    -fx-background-color: white;
     -fx-padding: 5px;
-}
-
-#company-search-box {
-    -fx-padding: 20px 0px 10px 0px;
-    -fx-spacing: 30px;
 }
 
 .negative-percent {
@@ -52,8 +62,18 @@
     -fx-padding: 0px 0px 0px 5px;
 }
 
-.now-selector {
+#company-news-selector {
     -fx-padding: 0px 0px 10px 0px;
+    -fx-spacing: 30px;
+}
+
+#chart-header {
+    -fx-padding: 10px 0px 10px 0px;
+    -fx-spacing: 30px;
+}
+
+#date-periods {
+    -fx-spacing: 4px;
 }
 
 .heading {

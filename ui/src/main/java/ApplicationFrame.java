@@ -287,7 +287,7 @@ public class ApplicationFrame extends Application {
                 loader.setProgress(0);
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Now") && !loaded) || force) {
                     now.setVisible(false);
-                    n.buildCurrentStats(now);
+                    n.buildCurrentStats(now, portfolio);
                     now.setVisible(true);
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Data") && !loaded) || force) {

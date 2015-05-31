@@ -1,6 +1,7 @@
 import components.AutoCompleteComboBoxListener;
 import components.DateRangeFilterBuilder;
 import components.LabelledSelector;
+import components.TitleBox;
 import core.*;
 import date.DateUtils;
 import dialog.DialogBuilder;
@@ -186,8 +187,10 @@ public class GraphBuilder {
         final VBox tableBox = new VBox();
         tableBox.setPadding(new javafx.geometry.Insets(0, 30, 30, 30));
         table = new BorderPane();
-        tableBox.getChildren().add(table);
+        TitleBox pricesBox = new TitleBox("Prices & Orders",table);
+        tableBox.getChildren().add(pricesBox);
         VBox.setVgrow(table,Priority.ALWAYS);
+        VBox.setVgrow(pricesBox,Priority.ALWAYS);
 
         graph.setCenter(pane);
         graph.setRight(tableBox);
@@ -317,7 +320,7 @@ public class GraphBuilder {
         toolbar.setId("prices-table-filters");
         final ToggleGroup group = new ToggleGroup();
         ToggleButton filterBuys = new ToggleButton("Buy", ImageUtils.getImage("icons/buy.png"));
-        filterBuys.getStyleClass().add("table-filter");
+        filterBuys.getStyleClass().add("toggle");
         filterBuys.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -327,7 +330,7 @@ public class GraphBuilder {
         });
 
         ToggleButton filterSells = new ToggleButton("Sell", ImageUtils.getImage("icons/sell.png"));
-        filterSells.getStyleClass().add("table-filter");
+        filterSells.getStyleClass().add("toggle");
         filterSells.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -337,7 +340,7 @@ public class GraphBuilder {
         });
 
         ToggleButton showAll = new ToggleButton("All", ImageUtils.getImage("icons/all.png"));
-        showAll.getStyleClass().add("table-filter");
+        showAll.getStyleClass().add("toggle");
         showAll.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {

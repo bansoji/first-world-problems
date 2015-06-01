@@ -139,7 +139,6 @@ public class CombinationStrategy implements TradingStrategy {
             //Calculate trend.
             Line line = GeometryUtils.createLine(priceInput);
             double slope = line.getSlope()*millisInADay;
-            System.out.println(slope);
 
             //Calculate volatility.
             StandardDeviation stdClass = new StandardDeviation();

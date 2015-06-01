@@ -369,11 +369,9 @@ public class NowBuilder {
         Label label = new Label("Please check your internet connection.");
         label.getStyleClass().add("default");
         label.setId("default-label");
-        BorderPane pane = new BorderPane();
-        pane.setCenter(imageView);
-        pane.setBottom(label);
+        VBox pane = new VBox();
+        pane.getChildren().addAll(imageView,label);
         pane.setId("default-pane");
-        pane.setAlignment(label, Pos.CENTER);
         now.setCenter(pane);
     }
 }

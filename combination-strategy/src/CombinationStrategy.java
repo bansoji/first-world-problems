@@ -1,4 +1,5 @@
 import date.DateUtils;
+import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import utils.FinanceUtils;
 import quickDate.Order;
 import main.OrderType;
@@ -44,6 +45,7 @@ public class CombinationStrategy implements TradingStrategy {
     private String endDate;
 
     private static final Logger logger = Logger.getLogger("log");
+    private static final int millisInADay = 86400000;
 
     public CombinationStrategy(List<Price> historicalPrices, ParameterManager<Number> config, String configFileName) {
         this.prices = historicalPrices;
@@ -123,18 +125,31 @@ public class CombinationStrategy implements TradingStrategy {
                 strategyInput = prices.subList(i, prices.size());
             }
 
-            //Make prices into points
+            // Calculate the trend (slope) and the volatility (standard deviation).
             List<Point> priceInput = new ArrayList<>();
-            for (Price p : strategyInput) {
-                priceInput.add(new Point((double) DateUtils.parseMonthAbbr(p.getDate()).getMillis(), p.getValue()));       // TODO: This could potentially be optimised.
-            }
-            Line line = GeometryUtils.createLine(priceInput);
+            double[] stdArray = new double[strategyInput.size()];
+            Price p;
 
-            if (line.getSlope() < -1) {
+            for (int j=0; j<strategyInput.size(); j++){
+                p = strategyInput.get(j);
+                priceInput.add(new Point((double) DateUtils.parseMonthAbbr(p.getDate()).getMillis(), p.getValue()));       // TODO: This could potentially be optimised.
+                stdArray[j] = p.getValue();
+            }
+
+            //Calculate trend.
+            Line line = GeometryUtils.createLine(priceInput);
+            double slope = line.getSlope()*millisInADay;
+            System.out.println(slope);
+
+            //Calculate volatility.
+            StandardDeviation stdClass = new StandardDeviation();
+            double std = stdClass.evaluate(stdArray);
+
+            if (slope < -2) {
                 strategy = new NullStrategy(strategyInput, config, configFileName);
-            } else if (line.getSlope() < 0) {
+            } else if (slope < 2 && std < 0.3) {
                 strategy = new BuyHard(strategyInput, config, configFileName);
-            } else if (line.getSlope() < 1) {
+            } else if (slope < 2) {
                 strategy = new BuyHardVengeance(strategyInput, config, configFileName);
             } else {
                 strategy = new PriceChannelStrategy(strategyInput, config, configFileName);

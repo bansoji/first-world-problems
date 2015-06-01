@@ -18,3 +18,7 @@
 #optimal {
     -fx-stroke-dash-array: 1 10;
 }
+
+#strategy-table {
+    -fx-padding: 20px;
+}

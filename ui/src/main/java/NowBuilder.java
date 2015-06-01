@@ -17,6 +17,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -56,19 +57,19 @@ public class NowBuilder {
 
     public void buildCurrentStats(BorderPane now, Portfolio portfolio) {
         this.now = now;
-//        if (companyNews == null) init();
-//        now.setPadding(new Insets(30));
-//
-//        try {
-//            buildSummary();
-//            buildTopNews();
-//            buildCompanyNews(currCompany);
-//            buildOrdersInfo(portfolio);
-//            now.setCenter(indices);
-//            now.setRight(news);
-//        } catch (ConnectException e) {
-//            showDefaultImage();
-//        }
+        if (companyNews == null) init();
+        now.setPadding(new Insets(30));
+
+        try {
+            buildSummary();
+            buildTopNews();
+            buildCompanyNews(currCompany);
+            buildOrdersInfo(portfolio);
+            now.setCenter(indices);
+            now.setRight(news);
+        } catch (ConnectException e) {
+            showDefaultImage();
+        }
     }
 
     public void init() {
@@ -164,6 +165,28 @@ public class NowBuilder {
         TableColumn company = TableUtils.createMapColumn("Company", TableUtils.ColumnType.String);
         TableColumn price = TableUtils.createMapColumn("Price", TableUtils.ColumnType.Double);
         TableColumn type = TableUtils.createMapColumn("Type", TableUtils.ColumnType.String);
+        type.setCellFactory(column -> {
+           return new TableCell<Map,String>() {
+                @Override
+                protected void updateItem(String type, boolean empty) {
+                    super.updateItem(type, empty);
+                    setText(type);
+                    if (type != null && !empty) {
+                        if (type.equals("BUY")) {
+                            setStyle("-fx-background-color: green");
+                            //getStyleClass().add("buy-row");
+                        } else if (type.equals("SELL")) {
+                            setStyle("-fx-background-color: red");
+                            //getStyleClass().add("sell-row");
+                        }
+                        setTextFill(Color.WHITE);
+                    } else {
+                        setStyle("");
+                        //getStyleClass().add("normal-row");
+                    }
+                }
+            };
+        });
         ordersTable.getColumns().addAll(company, price, type);
         //ensures extra space to given to existing columns
         ordersTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);

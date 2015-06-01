@@ -119,19 +119,19 @@
 }
 
 .xsm-label {
-    -fx-font-size: 10px;
+    -fx-font-size: 8pt;
 }
 
 .sm-label {
-    -fx-font-size: 14px;
+    -fx-font-size: 12pt;
 }
 
 .md-label {
-    -fx-font-size: 18px;
+    -fx-font-size: 15pt;
 }
 
 .lg-label {
-    -fx-font-size: 30px;
+    -fx-font-size: 23pt;
 }
 
 .title-box {
@@ -140,7 +140,7 @@
 }
 
 .title-box-label {
-    -fx-font-size: 18px;
+    -fx-font-size: 15pt;
     -fx-text-fill: white;
 }
 

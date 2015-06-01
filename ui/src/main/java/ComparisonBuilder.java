@@ -1,5 +1,6 @@
 import components.DateRangeFilterBuilder;
 import components.LabelledSelector;
+import components.TitleBox;
 import core.*;
 import dialog.DialogBuilder;
 import file.FileUtils;
@@ -22,9 +23,7 @@ import javafx.scene.Node;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxListCell;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.*;
 import javafx.util.Callback;
 import profit.OptimalProfit;
 import table.ExportableTable;
@@ -138,10 +137,16 @@ public class ComparisonBuilder {
         charts.setTop(filters);
 
         strategiesContent.setCenter(charts);
-        strategiesContent.setRight(strategiesTableView);
+        VBox table = new VBox();
+        table.setId("strategy-table");
+        TitleBox strategyTable = new TitleBox("Analytics", strategiesTableView);
+        table.getChildren().add(strategyTable);
+        strategiesContent.setRight(table);
         Tab strategiesTab = new Tab("Strategies");
         strategiesTab.setContent(strategiesContent);
         strategiesTab.setClosable(false);
+        VBox.setVgrow(strategiesTableView, Priority.ALWAYS);
+        VBox.setVgrow(strategyTable, Priority.ALWAYS);
 
         Tab companiesTab = new Tab("Companies");
         BorderPane companiesContent = new BorderPane();
@@ -203,7 +208,7 @@ public class ComparisonBuilder {
         strategiesBarChart.setPrefHeight(300);
 
         strategiesTableView = new ExportableTable();
-        strategiesTableView.setMaxWidth(300);   //no more than three columns worth of width
+        strategiesTableView.setPrefWidth(350);   //no more than three columns worth of width
         strategiesTableView.setTableMenuButtonVisible(true);
         strategiesTableView.setPlaceholder(new Label("No strategies run."));
 

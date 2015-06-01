@@ -111,7 +111,7 @@ public class Portfolio {
 
             // If an order exists and it occurs on the last day (endDate)
 
-            if (companyHistory.size() > 0 && companyHistory.get(companyHistory.size()-1).getOrderDate().getMillis() == endDate.getMillis()){
+            if (companyHistory.size() > 0 && companyHistory.get(companyHistory.size()-1).getOrderDate().equals(endDate)){
                 endDateOrders.add(companyHistory.get(companyHistory.size()-1));
             }
 

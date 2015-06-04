@@ -66,8 +66,8 @@
 
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Strategy Modules</a></li>
-            <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Testing Platform</a></li>
+            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-hdd"></span>  Strategy Modules</a></li>
+            <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab"><span class="glyphicon glyphicon-stats"></span>  Testing Platform</a></li>
         </ul>
 
         <!-- Tab panes -->
@@ -80,10 +80,12 @@
                         <div class="span12 centered-pills">
                             <ul id="selectStrat" class="nav nav-pills custom-nav-pills" role="tablist">
                                 <li role="presentation" class="dropdown">
-                                    <a href="#" id="myTabDrop1" class="dropdown-toggle" data-toggle="dropdown" aria-controls="myTabDrop1-contents">Please Select Module to Download<span class="caret"></span></a>
+                                    <a href="#" id="myTabDrop1" class="dropdown-toggle" data-toggle="dropdown" aria-controls="myTabDrop1-contents"><span class="glyphicon glyphicon-download"></span> Please Select Module to Download<span class="caret"></span></a>
                                     <ul class="dropdown-menu" role="menu" aria-labelledby="myTabDrop1" id="myTabDrop1-contents">
                                         <li><a href="#dropdown1" tabindex="-1" role="tab" id="dropdown1-tab" data-toggle="tab" aria-controls="dropdown1">Momentum</a></li>
                                         <li><a href="#dropdown2" tabindex="-1" role="tab" id="dropdown2-tab" data-toggle="tab" aria-controls="dropdown2">BuyHarder</a></li>
+                                        <li><a href="#dropdown3" tabindex="-1" role="tab" id="dropdown3-tab" data-toggle="tab" aria-controls="dropdown3">Vengeance</a></li>
+                                        <li><a href="#dropdown4" tabindex="-1" role="tab" id="dropdown4-tab" data-toggle="tab" aria-controls="dropdown4">A Good Day to Buy Hard</a></li>
                                     </ul>
                                 </li>
                             </ul>
@@ -91,27 +93,53 @@
                                 <div role="tabpanel" class="tab-pane fade" id="dropdown1" aria-labelledBy="dropdown1-tab">
                                     <br>
 
-                                    <form method="get" action="BuyHard-Momentum-1.1.0.jar">
+                                    <form action="https://drive.google.com/file/d/0B4jnGDUJZV1TOUJ0WTM3ZlE1cjQ">
                                         <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">Momentum - Latest Release</button></p>
                                     </form>
                                     <p>
-                                        File Name: <i>BuyHard-Momentum-1.1.0.jar</i><br>
-                                        Version: 1.1.0<br>
-                                        Date Released: 23/04/2015<br>
-                                        Size: 1MB<br>
+                                        File Name: <i>BuyHard-Momentum-1.2.0.jar</i><br>
+                                        Version: 1.2.0<br>
+                                        Date Released: 04/06/2015<br>
+                                        Size: 3MB<br>
                                     </p>
                                 </div>
                                 <div role="tabpanel" class="tab-pane fade" id="dropdown2" aria-labelledBy="dropdown2-tab">
                                     <br>
 
-                                    <form method="get" action="">
+                                    <form action="https://drive.google.com/file/d/0B4jnGDUJZV1TWThkbDhySkJzRlE">
                                         <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">BuyHarder - Latest Release</button></p>
                                     </form>
                                     <p>
-                                        File Name: <i>???.jar</i><br>
-                                        Version: ???<br>
-                                        Date Released: ???<br>
-                                        Size: ??MB<br>
+                                        File Name: <i>BuyHard-BuyHarder-1.0.0.jar</i><br>
+                                        Version: 1.0.0<br>
+                                        Date Released: 04/06/2015<br>
+                                        Size: 3MB<br>
+                                    </p>
+                                </div>
+                                <div role="tabpanel" class="tab-pane fade" id="dropdown3" aria-labelledBy="dropdown3-tab">
+                                    <br>
+
+                                    <form action="https://drive.google.com/file/d/0B4jnGDUJZV1TaGRDNGFqbHlEZkE">
+                                        <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">Vengeance - Latest Release</button></p>
+                                    </form>
+                                    <p>
+                                        File Name: <i>BuyHard-Vengeance-1.1.0.jar</i><br>
+                                        Version: 1.1.0<br>
+                                        Date Released: 04/06/2015<br>
+                                        Size: 21MB<br>
+                                    </p>
+                                </div>
+                                <div role="tabpanel" class="tab-pane fade" id="dropdown4" aria-labelledBy="dropdown4-tab">
+                                    <br>
+
+                                    <form action="https://drive.google.com/file/d/0B4jnGDUJZV1TdFhJbFpnc3lZQ1k">
+                                        <p><button class="btn btn-lg btn-success" type="submit" id="latest-release">A Good Day to Buy Hard - Latest Release</button></p>
+                                    </form>
+                                    <p>
+                                        File Name: <i>BuyHard-GoodDay-1.0.0.jar</i><br>
+                                        Version: 1.0.0<br>
+                                        Date Released: 04/06/2015<br>
+                                        Size: 21MB<br>
                                     </p>
                                 </div>
                             </div>
@@ -177,26 +205,136 @@
                     <h3>Releases</h3>
                     <table class="table table-striped" id="release-list">
                         <tr><th>Module</th><th>Version</th><th>Date</th><th>Changelog</th></tr>
-                        <tr><td>Momentum</td><td>v1.1.0</td><td>23/04/2015</td><td>
 
-                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#release-v1-1-0">
+                        <tr><td>A Good Day to Buy Hard</td><td>v1.0.0</td><td>04/06/2015</td><td>
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#agoodday-v1-0-0">
                                 View
                             </button>
-
+                        </td></tr>
+                        <tr><td>Vengeance</td><td>v1.1.0</td><td>04/06/2015</td><td>
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#vengeance-v1-1-0">
+                                View
+                            </button>
+                        </td></tr>
+                        <tr><td>Vengeance</td><td>v1.0.0</td><td>10/05/2015</td><td>
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#vengeance-v1-0-0">
+                                View
+                            </button>
+                        </td></tr>
+                        <tr><td>BuyHarder</td><td>v1.0.0</td><td>04/06/2015</td><td>
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#buyharder-v1-0-0">
+                                View
+                            </button>
+                        </td></tr>
+                        <tr><td>Momentum</td><td>v1.2.0</td><td>04/06/2015</td><td>
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#momentum-v1-2-0">
+                                View
+                            </button>
+                        </td></tr>
+                        <tr><td>Momentum</td><td>v1.1.0</td><td>23/04/2015</td><td>
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#momentum-v1-1-0">
+                                View
+                            </button>
                         </td></tr>
                         <tr><td>Momentum</td><td>v1.0.0</td><td>02/04/2015</td><td>
-
-                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#release-v1-0-0">
-                                <!--onclick="changeChangelog('1.0.0 changelog');"-->
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#momentum-v1-0-0">
                                 View
                             </button>
-
                         </td></tr>
 
                     </table>
                     <!-- Modals -->
-                    <!--Version 1.1.0-->
-                    <div class="modal fade" id="release-v1-1-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+
+                    <!--A Good Day Version 1.0.0-->
+                    <div class="modal fade" id="agoodday-v1-0-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.0.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+                                    Initial Release
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Vengeance Version 1.1.0-->
+                    <div class="modal fade" id="vengeance-v1-1-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.1.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+                                    Changes to previous release:
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Vengeance Version 1.0.0-->
+                    <div class="modal fade" id="vengeance-v1-0-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.0.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+                                    Initial Release
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--BuyHarder Version 1.0.0-->
+                    <div class="modal fade" id="buyharder-v1-0-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.0.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+                                    Initial Release
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Momentum Version 1.2.0-->
+                    <div class="modal fade" id="momentum-v1-2-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.2.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+                                    Changes to previous release:
+                                    <ul>
+
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Momentum Version 1.1.0-->
+                    <div class="modal fade" id="momentum-v1-1-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -216,8 +354,8 @@
                             </div>
                         </div>
                     </div>
-                    <!--Version 1.0.0-->
-                    <div class="modal fade" id="release-v1-0-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                    <!--Momentum Version 1.0.0-->
+                    <div class="modal fade" id="momentum-v1-0-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -250,14 +388,14 @@
             <div role="tabpanel" class="tab-pane" id="profile">
                 <div class="panel panel-default download-panel" id="internal-panel">
 
-                    <form method="get" action="BuyHardPlatform-1.0.0.jar">
+                    <form action="https://drive.google.com/file/d/0B4jnGDUJZV1TcVZDbGtnSEdmVjQ">
                         <p><button class="btn btn-lg btn-primary" type="submit" id="latest-release">Latest Release</button></p>
                     </form>
                     <p>
-                        File Name: <i>BuyHardPlatform-1.0.0.jar</i><br>
-                        Version: 1.0.0<br>
-                        Date Released: 23/04/2015<br>
-                        Size: 7MB<br>
+                        File Name: <i>BuyHard-Platform-1.3.0.jar</i><br>
+                        Version: 1.3.0<br>
+                        Date Released: 04/06/2015<br>
+                        Size: 35MB<br>
                     </p>
                 </div>
                 <div class="panel panel-default" id="internal-panel">
@@ -315,15 +453,34 @@
                     <table class="table table-striped" id="release-list">
                         <tr><th>Version</th><th>Date</th><th>Changelog</th></tr>
 
+                        <tr><td>v1.3.0</td><td>04/06/2015</td><td>
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#platform-v1-3-0">
+                                View
+                            </button>
+                        </td></tr>
                         <tr><td>v1.0.0</td><td>23/04/2015</td><td>
-
                             <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#platform-v1-0-0">
                                 View
                             </button>
-
                         </td></tr>
                     </table>
                     <!-- Changelog Modals -->
+                    <div class="modal fade" id="platform-v1-3-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.3.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="modal fade" id="platform-v1-0-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">

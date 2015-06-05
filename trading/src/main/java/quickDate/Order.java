@@ -1,6 +1,8 @@
 package quickDate;
 
 import core.OrderType;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 
 import java.util.logging.Logger;
 
@@ -89,9 +91,12 @@ public class Order {
     }
 
     public String[] toStringArray() {
+        String pattern = "dd-MMM-yy";
+
         String[] s = new String[6];
         s[0] = this.companyName;
-        s[1] = this.date;
+        s[1] = DateTime.parse(this.date, DateTimeFormat.forPattern(pattern)).toString("dd-MM-yyyy");
+        //s[1] = this.date;
         s[2] = String.valueOf(this.price);
         s[3] = String.valueOf(this.volume);
         s[4] = String.valueOf(this.getValue());

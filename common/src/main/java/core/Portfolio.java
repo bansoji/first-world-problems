@@ -54,15 +54,15 @@ public class Portfolio {
                 dates.add(order.getOrderDate().getMillis());
             }
         }
-        //profit is always 0 at the start date of prices data
-        if (startDate != null) {
-            for (String company: companyProfitList.keySet()) {
-                companyProfitList.get(company).add(new Profit(0, 0, startDate));
-            }
-        }
         this.dates = new ArrayList<>(dates);
         Collections.sort(this.dates);
         FillPortfolio();
+        //profit is always 0 at the start date of prices data
+        if (startDate != null) {
+            for (String company: companyProfitList.keySet()) {
+                companyProfitList.get(company).add(0, new Profit(0, 0, startDate));
+            }
+        }
         //profit is always the last calculation of the total return value at the end date of prices data
         if (endDate != null) {
             for (String company: companyProfitList.keySet()) {

@@ -23,7 +23,7 @@ public class StrategyRunner {
     //TODO Remove values - only for TESTING
     private String strategyFile = "out/artifacts/momentum_jar/momentum.jar";
     private String dataFile;// = "common/src/main/resources/sampleDataSmall";
-    private String paramFile = "trading/resources/config.properties";
+    private String paramFile = "trading/resources/momentum.properties";
 
     public void setStrategyFile(String strategyFile) {
         this.strategyFile = strategyFile;

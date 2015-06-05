@@ -111,7 +111,7 @@ public class ComparisonBuilder {
                 clearCompaniesGraph();
                 addStrategyComparison(runner.getStrategyFile(), params, priceReader);
                 updateCompanyComparison();
-                buildProfileChart(priceReader);
+                updateRiskChart(priceReader);
             }
         }
         //update prev files
@@ -460,17 +460,23 @@ public class ComparisonBuilder {
     }
 
     private void buildProfileChart(Reader priceReader) {
-        profileCompanySelector.setItems(FXCollections.observableArrayList(portfolio.getCompanies()));
-        profileCompanySelector.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-                String company = observable.getValue();
-                ProfileBuilder profileBuilder = new ProfileBuilder();
-                profile.setCenter(profileBuilder.buildProfile(new Profile(priceReader.getCompanyHistory(company)), Orientation.VERTICAL));
-                moreInfo.setOnAction(DialogBuilder.constructWebDialog(company, ReutersLoader.buildWebView()));
-            }
-        });
-        profileCompanySelector.getSelectionModel().selectFirst();
+        if (portfolio.getCompanies().size() > 0) {
+            profileCompanySelector.setItems(FXCollections.observableArrayList(portfolio.getCompanies()));
+            profileCompanySelector.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+                @Override
+                public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                    String company = observable.getValue();
+                    if (company != null) {
+                        ProfileBuilder profileBuilder = new ProfileBuilder();
+                        profile.setCenter(profileBuilder.buildProfile(new Profile(priceReader.getCompanyHistory(company)), Orientation.VERTICAL));
+                        moreInfo.setOnAction(DialogBuilder.constructWebDialog(company, ReutersLoader.buildWebView()));
+                    }
+                }
+            });
+            profileCompanySelector.getSelectionModel().selectFirst();
+        } else {
+            profileCompanySelector.getItems().clear();
+        }
     }
 
     private void updateStrategyTable(String strategy) {
@@ -507,11 +513,13 @@ public class ComparisonBuilder {
     }
 
     private void updateRiskChart(Reader priceReader) {
+        riskBarChart.getData().clear();
         XYChart.Series series = new XYChart.Series();
         Map<String,Double> sharpeRatios = new HashMap<>();
         for (String company: (Set<String>)priceReader.getHistory().getAllCompanies()) {
             List<Double> doubles = new ArrayList<>();
             List<Price> prices = priceReader.getCompanyHistory(company);
+            //TODO fix - should be returns
             for (Price p: prices) {
                 doubles.add(p.getValue());
             }

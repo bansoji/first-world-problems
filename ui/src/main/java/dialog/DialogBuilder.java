@@ -11,9 +11,11 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import website.ReutersLoader;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -51,6 +53,39 @@ public class DialogBuilder {
         List<Node> content = new ArrayList<>();
         content.add(child);
         return constructSimpleDialog(title, content);
+    }
+
+    public static EventHandler<ActionEvent> constructWebDialog(String title, List<Node> children) {
+        return new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent event) {
+                final Stage dialog = initDialog(title);
+                BorderPane dialogBox = new BorderPane();
+                dialogBox.getStyleClass().add("dialog-content");
+                VBox content = new VBox();
+
+                for (Node child: children) {
+                    content.getChildren().add(child);
+                }
+                content.getStyleClass().add("dialog-inner-content");
+                dialogBox.setBottom(closeButton(dialog));
+                dialogBox.setCenter(content);
+                Scene dialogScene = new Scene(dialogBox);
+                dialogScene.getStylesheets().addAll("general.css", "modal.css");
+                dialog.setScene(dialogScene);
+                dialog.show();
+                for (Node child: children) {
+                    if (child instanceof WebView) {
+                        ReutersLoader.loadWebsite((WebView) child, title);
+                    }
+                }
+            }
+        };
+    }
+
+    public static EventHandler<ActionEvent> constructWebDialog(String title, Node child) {
+        List<Node> content = new ArrayList<>();
+        content.add(child);
+        return constructWebDialog(title, content);
     }
 
     public static EventHandler<ActionEvent> constructExportableDialog(String title, List<Node> children) {

@@ -1,0 +1,94 @@
+#index-summary {
+    -fx-background-color: white;
+    -fx-padding: 30px;
+    -fx-hgap: 20px;
+}
+
+#indices {
+    -fx-spacing: 20px;
+}
+
+#indices-box {
+    -fx-padding: 0px 50px 0px 0px;
+}
+
+.index-price {
+    -fx-alignment: center;
+}
+
+.news {
+    -fx-spacing: 20px;
+}
+
+#news-tabpane .tab-content-area {
+    -fx-padding: 10px;
+}
+
+.news-tab:selected {
+    -fx-background-color: white;
+}
+
+#news-tabpane {
+    -fx-background-color: white;
+}
+
+#news-tabpane.tab-pane {
+    -fx-tab-min-width: 200px;
+}
+
+.news-box {
+    -fx-background-color: white;
+    -fx-spacing: 5px;
+    -fx-padding: 10px;
+}
+
+.news-date {
+    -fx-text-fill: #555555;
+}
+
+#company-price {
+    -fx-padding: 5px;
+}
+
+.negative-percent {
+    -fx-text-fill: red;
+}
+
+.positive-percent {
+    -fx-text-fill: green;
+}
+
+.percent-label {
+    -fx-padding: 0px 0px 0px 5px;
+}
+
+#company-news-selector {
+    -fx-padding: 0px 0px 10px 0px;
+    -fx-spacing: 30px;
+}
+
+#chart-header {
+    -fx-padding: 10px 0px 10px 0px;
+    -fx-spacing: 30px;
+}
+
+#date-periods {
+    -fx-spacing: 4px;
+}
+
+.heading {
+    -fx-padding: 0px 0px 10px 0px;
+}
+
+.default {
+    -fx-opacity: 0.2;
+}
+
+#default-label {
+    -fx-font-size: 15pt;
+}
+
+#default-pane {
+    -fx-alignment: center;
+    -fx-spacing: 20px;
+}

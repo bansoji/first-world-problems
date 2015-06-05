@@ -1,6 +1,9 @@
 import eu.hansolo.enzo.charts.SimpleRadarChart;
 import format.FormatUtils;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
@@ -48,6 +51,7 @@ public class ProfileBuilder {
         XYChart.Series<String,Double> series = new XYChart.Series<>();
         for (String metric: profile.getRatedMetrics().keySet()) {
             XYChart.Data<String,Double> data = new XYChart.Data<>(metric,(double)profile.getRatedMetrics().get(metric));
+            addBarHoverColourChange(data);
             series.getData().add(data);
         }
         barChart.getData().add(series);
@@ -64,6 +68,17 @@ public class ProfileBuilder {
         }
         content.setCenter(buildRadarChart(profile));
         return content;
+    }
+
+    private void addBarHoverColourChange(XYChart.Data data) {
+        data.nodeProperty().addListener(new ChangeListener<Node>() {
+            @Override
+            public void changed(ObservableValue<? extends Node> ov, Node oldNode, Node newNode) {
+                if (newNode != null) {
+                    newNode.getStyleClass().add("bar-metrics");
+                }
+            }
+        });
     }
 
     private SimpleRadarChart buildRadarChart(Profile profile) {

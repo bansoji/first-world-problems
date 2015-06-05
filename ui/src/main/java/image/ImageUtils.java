@@ -16,4 +16,8 @@ public class ImageUtils {
     public static URL getURL(String path) {
         return ImageUtils.class.getClassLoader().getResource(path);
     }
+
+    public static ImageView getImage(URL url) {
+        return new ImageView(url.toExternalForm());
+    }
 }

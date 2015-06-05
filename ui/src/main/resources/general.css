@@ -112,3 +112,42 @@
 #change-parameters {
     -fx-padding: 0px 0px 12px 0px;  /* align change parameters button with the file choosers */
 }
+
+
+.bar-metrics:hover {
+    -fx-bar-fill: #990000;
+}
+
+.xsm-label {
+    -fx-font-size: 8pt;
+}
+
+.sm-label {
+    -fx-font-size: 12pt;
+}
+
+.md-label {
+    -fx-font-size: 15pt;
+}
+
+.lg-label {
+    -fx-font-size: 23pt;
+}
+
+.title-box {
+    -fx-background-color: #005C54;
+    -fx-padding: 10px 10px 10px 15px;
+}
+
+.title-box-label {
+    -fx-font-size: 15pt;
+    -fx-text-fill: white;
+}
+
+.toggle {
+    -fx-background-color: transparent;
+}
+
+.toggle:selected {
+    -fx-background-color: #D0D0D0;
+}

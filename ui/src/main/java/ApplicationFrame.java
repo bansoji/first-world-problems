@@ -59,6 +59,7 @@ public class ApplicationFrame extends Application {
 
     private Stage stage;
     private BorderPane main;
+    private BorderPane now;
     private BorderPane graph;
     private GridPane stats;
     private BorderPane analysis;
@@ -73,12 +74,13 @@ public class ApplicationFrame extends Application {
 
     private Portfolio portfolio = new Portfolio(new History<>(),null,null);
 
+    private NowBuilder n = new NowBuilder();
     private GraphBuilder g = new GraphBuilder();
     private AnalysisBuilder a = new AnalysisBuilder();
     private StatsBuilder s = new StatsBuilder();
     private ComparisonBuilder c = new ComparisonBuilder();
 
-    private static final String VERSION_NUMBER = "1.2.0";
+    private static final String VERSION_NUMBER = "1.3.0";
     private static final String APPLICATION_INFO = "Version " + VERSION_NUMBER + "   \u00a9 Group 1";
     private static final String FOOTER_MESSAGE = "Get the latest release at our website.";
 
@@ -88,7 +90,7 @@ public class ApplicationFrame extends Application {
         primaryStage.setTitle("BuyHard Platform");
         main = new BorderPane();
         Scene scene = new Scene(main);
-        scene.getStylesheets().addAll("general.css", "graph.css", "stats.css", "analysis.css", "comparison.css");
+        scene.getStylesheets().addAll("general.css", "now.css", "graph.css", "stats.css", "analysis.css", "comparison.css");
         primaryStage.setScene(scene);
         primaryStage.setMinHeight(768);
         primaryStage.setMinWidth(1024);
@@ -150,12 +152,14 @@ public class ApplicationFrame extends Application {
     private void initBody()
     {
         final VBox body = new VBox();
+        now = new BorderPane();
         graph = new BorderPane();
         stats = new GridPane();
         analysis = new BorderPane();
         comparison = new BorderPane();
 
         tabPane = new TabPane();
+        Tab nowTab = constructTab("Now", ImageUtils.getImage("app-icons/tab-now-icon.png"), now);
         Tab dataTab = constructTab("Data", ImageUtils.getImage("app-icons/tab-data-icon.png"), graph);
         addHelpModal(dataTab,ImageUtils.getImage("images/mouse-graph.jpeg"));
 
@@ -163,7 +167,7 @@ public class ApplicationFrame extends Application {
         Tab analysisTab = constructTab("Analysis", ImageUtils.getImage("app-icons/tab-analysis-icon.png"), analysis);
         Tab comparisonTab = constructTab("Comparison", ImageUtils.getImage("app-icons/tab-comparison-icon.png"), comparison);
 
-        tabPane.getTabs().addAll(dataTab, statsTab, analysisTab, comparisonTab);
+        tabPane.getTabs().addAll(nowTab, dataTab, statsTab, analysisTab, comparisonTab);
         addTabLoadingAction(tabPane);
 
         body.getChildren().addAll(tabPane, new Separator());
@@ -282,6 +286,11 @@ public class ApplicationFrame extends Application {
                 }
                 loader.setText("Refreshing content...");
                 loader.setProgress(0);
+                if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Now") && !loaded) || force) {
+                    now.setVisible(false);
+                    n.buildCurrentStats(now, portfolio);
+                    now.setVisible(true);
+                }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Data") && !loaded) || force) {
                     graph.setVisible(false);
                     Map<DateTime, OrderType> orderRecord = new HashMap<>();
@@ -305,7 +314,7 @@ public class ApplicationFrame extends Application {
                 }
                 if ((tabPane.getSelectionModel().getSelectedItem().getText().equals("Comparison") && !loaded) || force) {
                     comparison.setVisible(false);
-                    c.buildComparison(runner, comparison, portfolio, prices, priceReader, manager.getParams());
+                    c.buildComparison(runner, comparison, portfolio, priceReader, manager.getParams());
                     comparison.setVisible(true);
                 }
                 if (!portfolio.isEmpty()) {

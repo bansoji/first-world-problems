@@ -18,7 +18,6 @@ public class BuyHardVengeance implements TradingStrategy {
     private int volume;
     private String startDate;
     private String endDate;
-    private double mean;
     private double threshold;
 
     private static final Logger logger = Logger.getLogger("log");
@@ -58,13 +57,15 @@ public class BuyHardVengeance implements TradingStrategy {
 
     @Override
     public void generateOrders() {
-        this.mean = 0;
+        double sum = 0;
         OrderType nextStatus = OrderType.BUY; // The next status to look for.
 
+        int numDays = 0;
         for (Price p : prices){
             // Update the mean
-            mean += p.getValue();
-            mean = mean/2.0;
+            sum += p.getValue();
+            numDays++;
+            double mean = sum/numDays;
 
             //Check if orders need to be generated for today.
             if (startDate != null && DateUtils.before(p.getDate(), startDate)) continue;

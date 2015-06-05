@@ -14,3 +14,11 @@
 #comparison-charts {
     -fx-padding: 10px 20px 10px 10px;
 }
+
+#optimal {
+    -fx-stroke-dash-array: 1 10;
+}
+
+#strategy-table {
+    -fx-padding: 20px;
+}

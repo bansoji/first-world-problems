@@ -1,11 +1,10 @@
 import date.DateUtils;
+import file.ParameterManager;
 import utils.FinanceUtils;
 import quickDate.Order;
 import core.OrderType;
 import quickDate.Price;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -14,7 +13,7 @@ import java.util.logging.Logger;
 /**
  * An implementation of the Momentum Strategy.
  */
-public class MomentumStrategy implements TradingStrategy {
+public class BuyHard implements TradingStrategy {
     private List<Price> prices;
     private List<Order> ordersGenerated;
     private int movingAvgTimeWindow;
@@ -25,11 +24,12 @@ public class MomentumStrategy implements TradingStrategy {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public MomentumStrategy(List<Price> historicalPrices, Properties prop) {
+    public BuyHard(List<Price> historicalPrices, ParameterManager<Number> config, String configFileName) {
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
 
-        configureStrategy(prop);
+        // Initialise the config according to the parameters.
+        configureStrategy(config.getProperties(configFileName));
 
         String parameters = "Parameters Used:\n" +
                 "Moving Average Time Window: " + this.movingAvgTimeWindow + "\n" +

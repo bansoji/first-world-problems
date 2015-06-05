@@ -1,11 +1,10 @@
 import date.DateUtils;
 import core.OrderType;
+import file.ParameterManager;
 import quickDate.Order;
 import quickDate.Price;
 import utils.*;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.Double;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +28,13 @@ public class PriceChannelStrategy implements TradingStrategy {
 
     private static final Logger logger = Logger.getLogger("log");
 
-    public PriceChannelStrategy(List<Price> historicalPrices, Properties prop) {
+    public PriceChannelStrategy(List<Price> historicalPrices, ParameterManager<Number> config, String configFileName) {
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
         this.tradeSignals = new ArrayList<OrderType>();
 
-        configureStrategy(prop);
+        // Initialise the config according to the parameters.
+        configureStrategy(config.getProperties(configFileName));
 
         String parameters = "Parameters Used:\n" +
                 "Minimum Window Size: " + this.minWindowSize + "\n" +
@@ -60,11 +60,11 @@ public class PriceChannelStrategy implements TradingStrategy {
      */
     private void configureStrategy(Properties prop) {
         // Configure the strategy using parameters config properties file.
-        this.minWindowSize = Integer.parseInt(prop.getProperty("minWindowSize", "2"));
+        this.minWindowSize = Integer.parseInt(prop.getProperty("channelMinWindowSize", "2"));
         this.channelSize = Integer.parseInt(prop.getProperty("channelSize", "50"));
-        this.variance = Double.parseDouble(prop.getProperty("variance", "0.001"));
-        this.threshold = Double.parseDouble(prop.getProperty("threshold", "0.00"));
-        this.volume = Integer.parseInt(prop.getProperty("volume", "100"));
+        this.variance = Double.parseDouble(prop.getProperty("channelVariance", "0.001"));
+        this.threshold = Double.parseDouble(prop.getProperty("channelThreshold", "0.00"));
+        this.volume = Integer.parseInt(prop.getProperty("channelVolume", "100"));
 
         this.startDate = prop.getProperty("startDate");
         this.endDate = prop.getProperty("endDate");

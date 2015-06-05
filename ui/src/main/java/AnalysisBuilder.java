@@ -2,6 +2,7 @@
  * Created by Gavin Tam on 1/05/15.
  */
 import dialog.DialogBuilder;
+import file.ParameterManager;
 import file.StrategyRunner;
 import format.FormatChecker;
 import format.FormatUtils;
@@ -16,16 +17,11 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.HPos;
-import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.MapValueFactory;
 import javafx.scene.layout.*;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.util.Callback;
 import core.OrderReader;
 import core.Portfolio;

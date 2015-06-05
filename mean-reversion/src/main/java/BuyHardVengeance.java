@@ -1,10 +1,9 @@
 import date.DateUtils;
 import core.OrderType;
+import file.ParameterManager;
 import quickDate.Price;
 import quickDate.Order;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -13,7 +12,7 @@ import java.util.logging.Logger;
 /**
  * An implementation of the Mean Reversion Strategy.
  */
-public class MeanReversionStrategy implements TradingStrategy {
+public class BuyHardVengeance implements TradingStrategy {
     private List<Price> prices;
     private List<Order> ordersGenerated;
     private int volume;
@@ -24,15 +23,15 @@ public class MeanReversionStrategy implements TradingStrategy {
 
     private static final Logger logger = Logger.getLogger("log");
 
-
-    public MeanReversionStrategy(List<Price> historicalPrices, Properties prop) {
+    public BuyHardVengeance(List<Price> historicalPrices, ParameterManager<Number> config, String configFileName) {
         this.prices = historicalPrices;
         this.ordersGenerated = new ArrayList<Order>();
 
-        configureStrategy(prop);
+        // Initialise the config according to the parameters.
+        configureStrategy(config.getProperties(configFileName));
 
-        String parameters = "Parameters Used:\n" +
-                "Threshold: " + this.threshold +
+        String parameters = "Parameters Used:\n" + "\n" +
+                "Threshold: " + this.threshold + "\n" +
                 "Volume: " + this.volume;
 
         if (startDate != null) {

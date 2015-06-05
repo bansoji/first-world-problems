@@ -1,6 +1,7 @@
 import alert.AlertManager;
 import components.AppFileChooser;
 import dialog.DialogBuilder;
+import file.ParameterManager;
 import file.StrategyRunner;
 import format.FormatChecker;
 import format.FormatUtils;

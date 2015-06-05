@@ -1,15 +1,12 @@
-import core.Reader;
-import file.ParameterManager;
-import format.FormatChecker;
-import quickDate.Order;
-import quickDate.Price;
-import quickDate.PriceReader;
+import date.DateUtils;
+import quickDate.*;
+import main.Reader;
+import utils.GeometryUtils;
+import utils.Line;
+import utils.Point;
 
 import java.io.*;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.FileHandler;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
@@ -21,9 +18,11 @@ import java.util.logging.SimpleFormatter;
 public class OrderManager {
 
     // Some class constants.
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "1.1.0";
 
     public static void main(String[] args) throws IOException {
+        int combinationWindow = 80;
+
         long startTime = System.currentTimeMillis();
         if (args.length != 2){
             System.err.println("Error: Incorrect program usage.");
@@ -64,7 +63,7 @@ public class OrderManager {
 
         logger.info("====== Buy Hard =========\n" +
                 "Developer Team: Group 1\n" +
-                "MODULE NAME: BuyHarder-" + VERSION + ".jar\n" +
+                "MODULE NAME: BuyHard-Combination-" + VERSION + ".jar\n" +
                 "MODULE VERSION: " + VERSION + "\n" +
                 "INPUT FILE: " + fileName + "\n" +
                 "OUTPUT FILE: " + outputFileName + "\n" +
@@ -98,7 +97,7 @@ public class OrderManager {
             String key = (String)properties.nextElement();
             //if the value of the property is not numerical, it is not a parameter
             String value = props.getProperty(key);
-            if (!FormatChecker.isDouble(value)) continue;
+            if (!format.FormatChecker.isDouble(value)) continue;
             boolean isInteger = FormatChecker.isInteger(value);
             if (isInteger) {
                 pManager.put(key, value);
@@ -111,7 +110,7 @@ public class OrderManager {
             // PrintUtils.printPrices(companyHistory);
 
             // Initialise the trading strategy.
-            TradingStrategy strategy = new PriceChannelStrategy(companyHistory, pManager, paramName);
+            TradingStrategy strategy = new CombinationStrategy(companyHistory, pManager, paramName);
 
             ///////////////////////////////
             // RUNNING.
@@ -121,8 +120,6 @@ public class OrderManager {
             strategy.generateOrders();
             List<Order> ordersGenerated = strategy.getOrders();
             csvOrderWriter.writeOrders(ordersGenerated);
-
-            // Close the input stream.
         }
 
         ///////////////////////////////
@@ -143,6 +140,7 @@ public class OrderManager {
         } catch (IOException e) {
             logger.severe(e.getMessage());
         }
+
         handler.close();
         // Log successful.
         logger.info("Module successful. No errors encountered.");

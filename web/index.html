@@ -106,6 +106,10 @@
                                         Date Released: 04/06/2015<br>
                                         Size: 3MB<br>
                                     </p>
+                                    <h3>Sample Parameters File</h3>
+                                    <form action="https://docs.google.com/file/d/0B4jnGDUJZV1TXzRDeWxnSFozNVU">
+                                        <button class="btn btn-default" type="submit">Download</button>
+                                    </form>
                                 </div>
                                 <div role="tabpanel" class="tab-pane fade" id="dropdown2" aria-labelledBy="dropdown2-tab">
                                     <p>
@@ -123,6 +127,10 @@
                                         Date Released: 04/06/2015<br>
                                         Size: 3MB<br>
                                     </p>
+                                    <h3>Sample Parameters File</h3>
+                                    <form action="https://docs.google.com/file/d/0B4jnGDUJZV1TRHRkYXdRNDZEZFE">
+                                        <button class="btn btn-default" type="submit">Download</button>
+                                    </form>
                                 </div>
                                 <div role="tabpanel" class="tab-pane fade" id="dropdown3" aria-labelledBy="dropdown3-tab">
                                     <p>
@@ -140,6 +148,10 @@
                                         Date Released: 04/06/2015<br>
                                         Size: 21MB<br>
                                     </p>
+                                    <h3>Sample Parameters File</h3>
+                                    <form action="https://docs.google.com/file/d/0B4jnGDUJZV1TOFQwd3pWUjFFb1k">
+                                        <button class="btn btn-default" type="submit">Download</button>
+                                    </form>
                                 </div>
                                 <div role="tabpanel" class="tab-pane fade" id="dropdown4" aria-labelledBy="dropdown4-tab">
                                     <p>
@@ -158,6 +170,10 @@
                                         Date Released: 04/06/2015<br>
                                         Size: 21MB<br>
                                     </p>
+                                    <h3>Sample Parameters File</h3>
+                                    <form action="https://docs.google.com/file/d/0B4jnGDUJZV1TMjlnbnk0eFpwQ28">
+                                        <button class="btn btn-default" type="submit">Download</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -272,12 +288,14 @@
                                 </div>
                                 <div class="modal-body" id="changelog-modal">
                                     Initial Release with:
-                                    <li>Reading Sicra file from TRTH.</li>
-                                    <li>Loading parameters to configure the strategy.</li>
-                                    <li>Implementation of an original strategy that generates buys and sells by periodically selecting a new strategy
-                                        (momentum, mean reversion, price channel, null) based on the trend and volatility of historical prices.</li>
-                                    <li>Outputting orders using the strategy.</li>
-                                    <li>Generating a log report with details of input files and execution time.</li>
+                                    <ul>
+                                        <li>Reading Sicra file from TRTH.</li>
+                                        <li>Loading parameters to configure the strategy.</li>
+                                        <li>Implementation of an original strategy that generates buys and sells by periodically selecting a new strategy
+                                            (momentum, mean reversion, price channel, null) based on the trend and volatility of historical prices.</li>
+                                        <li>Outputting orders using the strategy.</li>
+                                        <li>Generating a log report with details of input files and execution time.</li>
+                                    </ul>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
@@ -295,7 +313,9 @@
                                 </div>
                                 <div class="modal-body" id="changelog-modal">
                                     Changes to previous release:
-                                    <li>Improved efficiency of strategy through addition of new parameter 'channelMinWindowSize'.</li>
+                                    <ul>
+                                        <li>Improved efficiency of strategy through addition of new parameter 'channelSize'.</li>
+                                    </ul>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
@@ -313,11 +333,13 @@
                                 </div>
                                 <div class="modal-body" id="changelog-modal">
                                     Initial Release with:
-                                    <li>Reading Sicra file from TRTH.</li>
-                                    <li>Loading parameters to configure the strategy.</li>
-                                    <li>Implementation of price channels by calculation of trends of low historical prices and high historical prices.</li>
-                                    <li>Outputting orders using the strategy.</li>
-                                    <li>Generating a log report with details of input files and execution time.</li>
+                                    <ul>
+                                        <li>Reading Sicra file from TRTH.</li>
+                                        <li>Loading parameters to configure the strategy.</li>
+                                        <li>Implementation of price channels by calculation of trends of low historical prices and high historical prices.</li>
+                                        <li>Outputting orders using the strategy.</li>
+                                        <li>Generating a log report with details of input files and execution time.</li>
+                                    </ul>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
@@ -335,11 +357,13 @@
                                 </div>
                                 <div class="modal-body" id="changelog-modal">
                                     Initial Release with:
-                                    <li>Reading Sicra file from TRTH.</li>
-                                    <li>Loading parameters to configure the strategy.</li>
-                                    <li>Implementation of mean-reversion via the mean of historical prices</li>
-                                    <li>Outputting orders using the strategy.</li>
-                                    <li>Generating a log report with details of input files and execution time.</li>
+                                    <ul>
+                                        <li>Reading Sicra file from TRTH.</li>
+                                        <li>Loading parameters to configure the strategy.</li>
+                                        <li>Implementation of mean-reversion via the mean of historical prices</li>
+                                        <li>Outputting orders using the strategy.</li>
+                                        <li>Generating a log report with details of input files and execution time.</li>
+                                    </ul>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
@@ -486,9 +510,18 @@
                     <h3>Releases</h3>
                     <table class="table table-striped" id="release-list">
                         <tr><th>Version</th><th>Date</th><th>Changelog</th></tr>
-
                         <tr><td>v1.3.0</td><td>04/06/2015</td><td>
                             <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#platform-v1-3-0">
+                                View
+                            </button>
+                        </td></tr>
+                        <tr><td>v1.2.0</td><td>25/05/2015</td><td>
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#platform-v1-2-0">
+                                View
+                            </button>
+                        </td></tr>
+                        <tr><td>v1.1.0</td><td>10/05/2015</td><td>
+                            <button type="button" class="btn btn-default btn-release" data-toggle="modal" data-target="#platform-v1-1-0">
                                 View
                             </button>
                         </td></tr>
@@ -507,6 +540,59 @@
                                     <h3 class="modal-title" id="myModalLabel">v1.3.0 Changelog</h3>
                                 </div>
                                 <div class="modal-body" id="changelog-modal">
+                                    Changes to previous release:
+                                    <ul>
+                                        <li>Added Now tab featuring real time feed for the market - news, market data and indices.</li>
+                                        <li>Added Suggested Order processing into the Now tab that displays orders suggested by the strategy for the last day in the input file.</li>
+                                        <li>Added risk analysis to Comparison tab via use of Sharpe ratio.</li>
+                                        <li>Revamped colors and styling of GUI.</li>
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="platform-v1-2-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.2.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+                                    Changes to previous release:
+                                    <ul>
+                                        <li>Added Comparison tab to allow comparison of profit between multiple strategies run in addition to
+                                            comparisons between companies for each strategy.</li>
+                                        <li>Added report generation for overviews, company reports and table reports - formats include excel, PDF and CSV.</li>
+                                        <li>Added option to screenshot graphs.</li>
+                                        <li>Added profiling for each company featuring radar chart based on volume, trend and variances.</li>
+                                    </ul>
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="custom-buttons" data-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal fade" id="platform-v1-1-0" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h3 class="modal-title" id="myModalLabel">v1.1.0 Changelog</h3>
+                                </div>
+                                <div class="modal-body" id="changelog-modal">
+                                    Changes to previous release:
+                                    <ul>
+                                        <li>Revamped GUI with reworked logo and icons.</li>
+                                        <li>Added Analysis tab allowing analysis and comparison of different parameters for strategy.</li>
+                                        <li>Added loading bar on bottom left.</li>
+                                        <li>Added help modal for graph interaction.</li>
+                                    </ul>
 
                                 </div>
                                 <div class="modal-footer">
@@ -527,6 +613,7 @@
                                     <ul>
                                         <li>Selection of data CSV, strategy module and parameters</li>
                                         <li>Ability to change parameter values</li>
+                                        <li>Multi-threaded graphical processing</li>
                                         <li>Extensive charts including candlestick chart of prices data, bar chart of order volume, and table with date, price and order activity</li>
                                         <li>Extensive performance breakdown including bar chart of portfolio (currently-held stock value + profit)
                                             and equity (currently-held stock) value, table with returns from each security traded and pie chart of

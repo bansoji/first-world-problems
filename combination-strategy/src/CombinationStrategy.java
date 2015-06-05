@@ -144,11 +144,11 @@ public class CombinationStrategy implements TradingStrategy {
             StandardDeviation stdClass = new StandardDeviation();
             double std = stdClass.evaluate(stdArray);
 
-            if (slope < -2) {
+            if (slope < 0) {
                 strategy = new NullStrategy(strategyInput, config, configFileName);
-            } else if (slope < 2 && std < 0.3) {
+            } else if (slope < 0.1 && std < 0.2) {
                 strategy = new BuyHard(strategyInput, config, configFileName);
-            } else if (slope < 2) {
+            } else if (slope < 0.1) {
                 strategy = new BuyHardVengeance(strategyInput, config, configFileName);
             } else {
                 strategy = new PriceChannelStrategy(strategyInput, config, configFileName);
